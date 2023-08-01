@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+part of 'app_theme.dart';
 
 // Generated on https://m3.material.io/theme-builder#/custom using primary 138A36
-const lightColorScheme = ColorScheme(
+const _lightColorScheme = ColorScheme(
   brightness: Brightness.light,
   primary: Color(0xFF006E27),
   onPrimary: Color(0xFFFFFFFF),
@@ -35,7 +35,7 @@ const lightColorScheme = ColorScheme(
   scrim: Color(0xFF000000),
 );
 
-const darkColorScheme = ColorScheme(
+const _darkColorScheme = ColorScheme(
   brightness: Brightness.dark,
   primary: Color(0xFF72DD7D),
   onPrimary: Color(0xFF003910),
