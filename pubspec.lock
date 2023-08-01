@@ -440,6 +440,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.3"
+  r_flutter:
+    dependency: "direct dev"
+    description:
+      name: r_flutter
+      sha256: a6bcde7b8e7c1a29f0709f199e0db6f26c5c9b86ae5d13fd6fa3fd65e366794c
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.0"
   recase:
     dependency: transitive
     description:
