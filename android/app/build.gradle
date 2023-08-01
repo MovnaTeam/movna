@@ -52,6 +52,23 @@ android {
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+
+        multiDexEnabled true
+    }
+
+    flavorDimensions "stage"
+
+    productFlavors {
+        dev {
+            dimension "stage"
+            resValue "string", "app_name", "Dev | Movna"
+            applicationIdSuffix ".dev"
+        }
+
+        prod {
+            dimension "stage"
+            resValue "string", "app_name", "Movna"
+        }
     }
 
     buildTypes {
