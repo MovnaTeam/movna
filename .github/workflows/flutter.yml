@@ -12,7 +12,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  analyze:
     runs-on: ubuntu-latest
     #runs-on: windows-2022
 
@@ -43,3 +43,7 @@ jobs:
 
       - name: Run tests
         run: flutter test
+
+      # Uncomment to build apk.
+      # - name: Build APK
+      #  run: flutter build apk
