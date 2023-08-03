@@ -13,10 +13,10 @@ class PositionRepositoryImpl implements PositionRepository {
       domain.Position(
         latitudeInDegrees: pos.latitude,
         longitudeInDegrees: pos.longitude,
-        accuracyInMeters: pos.accuracy,
+        errorInMeters: pos.accuracy,
         altitudeInMeters: pos.altitude,
         headingInDegrees: pos.heading,
-        speedAccuracyInMetersPerSecond: pos.speedAccuracy,
+        speedErrorInMetersPerSecond: pos.speedAccuracy,
         speedInMetersPerSecond: pos.speed,
         timestamp: pos.timestamp,
       );
