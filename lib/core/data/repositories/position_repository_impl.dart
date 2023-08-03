@@ -28,9 +28,9 @@ class PositionRepositoryImpl implements PositionRepository {
   }
 
   @override
-  Future<Stream<domain.Position>> getPositionStream() async {
+  Stream<domain.Position> getPositionStream() {
     Stream<geolocator.Position> geoPositionStream =
-        await positionSource.getPositionStream();
+        positionSource.getPositionStream();
     return geoPositionStream.map(
       (position) => _positionGeolocatorToDomain(position),
     );

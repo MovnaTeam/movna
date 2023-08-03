@@ -3,7 +3,7 @@ import 'package:injectable/injectable.dart';
 
 abstract class PositionSource {
   Future<Position> getPosition();
-  Future<Stream<Position>> getPositionStream();
+  Stream<Position> getPositionStream();
 }
 
 @Injectable(as: PositionSource)
@@ -14,7 +14,7 @@ class PositionSourceImpl extends PositionSource {
   }
 
   @override
-  Future<Stream<Position>> getPositionStream() async {
+  Stream<Position> getPositionStream() {
     return Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         // Set to best available accuracy.

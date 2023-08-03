@@ -5,5 +5,5 @@ abstract class PositionRepository {
   Future<Position> getPosition();
 
   /// Get stream of locations.
-  Future<Stream<Position>> getPositionStream();
+  Stream<Position> getPositionStream();
 }

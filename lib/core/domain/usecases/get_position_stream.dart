@@ -7,7 +7,7 @@ class GetPositionStream {
   GetPositionStream({required this.repository});
   final PositionRepository repository;
 
-  Future<Stream<Position>> call() {
+  Stream<Position> call() {
     return repository.getPositionStream();
   }
 }
