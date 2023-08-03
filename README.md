@@ -17,7 +17,7 @@ To install all dependencies, run :
 flutter pub get
 ```
 
-This projects uses generated files, to generate these run :
+This project uses generated files, to generate these run :
 ```shell
 flutter pub run build_runner build
 ```
