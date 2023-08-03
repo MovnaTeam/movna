@@ -15,6 +15,7 @@ analyzer:
   # Exclude generated files from warnings
   exclude:
     - lib/assets.dart
+    - lib/jsons.dart
     - lib/injection.config.dart
     - lib/**.g.dart
     - lib/**.freezed.dart

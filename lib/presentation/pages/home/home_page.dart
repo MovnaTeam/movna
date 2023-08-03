@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:movna/jsons.dart';
+import 'package:movna/presentation/locale/locales_helper.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -7,7 +9,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Movna'),
+        title: Text(LocaleKeys.appTitle().translate(context)),
       ),
     );
   }
