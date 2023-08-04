@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 import 'package:movna/core/logger.dart';
 import 'package:movna/data/adapters/location_adapter.dart';
 import 'package:movna/data/datasources/position_source.dart';
+import 'package:movna/data/exceptions.dart';
 import 'package:movna/data/repositories/repository_helper.dart';
 import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/failures.dart';
@@ -67,6 +68,7 @@ class LocationRepositoryImpl
       PermissionRequestInProgressException() =>
         const Failure.locationPermission(),
       LocationServiceDisabledException() => const Failure.locationUnavailable(),
+      ConversionException() => const Failure.adapter(),
       _ => const Failure.location(),
     };
   }

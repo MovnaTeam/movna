@@ -24,7 +24,7 @@ mixin RepositoryHelper {
       StreamTransformer.fromHandlers(
         handleData: (Model data, sink) {
           try {
-            final entity = adapter.modelToEntity(data);
+            final entity = adapter.convertModel(data);
             sink.add(Right(entity));
           } catch (e, s) {
             logger.e(
