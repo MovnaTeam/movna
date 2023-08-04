@@ -12,9 +12,9 @@ class ConversionException<Destination, Source> implements Exception {
 
   @override
   String toString() {
-    return '''Error converting $Source to $Destination
+    return '''
+Error converting $Source to $Destination
 Caused by: ${causedBy.toString()}
-Stack trace: ${causeStackTrace.toString()}
-''';
+Stack trace: ${causeStackTrace.toString()}''';
   }
 }

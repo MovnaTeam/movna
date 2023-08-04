@@ -49,7 +49,7 @@ class LocationRepositoryImpl
         modelStream: geoPositionStream,
         adapter: positionAdapter,
         errorHandler: _convertDataSourceException,
-        errorLoggerMessage: 'Error getting position stream',
+        errorLoggerMessage: 'Error in position stream',
       );
     } catch (e, s) {
       logger.e(
