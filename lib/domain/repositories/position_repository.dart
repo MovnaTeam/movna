@@ -1,4 +1,4 @@
-import 'package:movna/core/domain/entities/position.dart';
+import 'package:movna/domain/entities/position.dart';
 
 abstract class PositionRepository {
   /// Get the current location.

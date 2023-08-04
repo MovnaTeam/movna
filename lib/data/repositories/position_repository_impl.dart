@@ -1,12 +1,13 @@
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:injectable/injectable.dart';
-import 'package:movna/core/data/datasources/position_source.dart';
-import 'package:movna/core/domain/entities/position.dart' as domain;
-import 'package:movna/core/domain/repositories/position_repository.dart';
+import 'package:movna/data/datasources/position_source.dart';
+import 'package:movna/domain/entities/position.dart' as domain;
+import 'package:movna/domain/repositories/position_repository.dart';
 
 @Injectable(as: PositionRepository)
 class PositionRepositoryImpl implements PositionRepository {
   PositionRepositoryImpl({required this.positionSource});
+
   PositionSource positionSource;
 
   static domain.Position _positionGeolocatorToDomain(geolocator.Position pos) =>

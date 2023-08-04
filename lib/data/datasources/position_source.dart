@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 
 abstract class PositionSource {
   Future<Position> getPosition();
+
   Stream<Position> getPositionStream();
 }
 

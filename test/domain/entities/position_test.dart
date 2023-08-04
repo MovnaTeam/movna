@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movna/core/domain/entities/position.dart';
+import 'package:movna/domain/entities/position.dart';
 
 void main() {
   test(
