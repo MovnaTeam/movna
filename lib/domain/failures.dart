@@ -23,4 +23,6 @@ class Failure with _$Failure {
   /// Failure representing an error pertaining to an permission denial trying to
   /// access the location.
   const factory Failure.locationPermission() = _LocationPermission;
+
+  const factory Failure.adapter() = _Adapter;
 }

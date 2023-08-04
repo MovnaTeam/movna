@@ -1,9 +1,11 @@
+import 'package:dartz/dartz.dart';
 import 'package:movna/domain/entities/position.dart';
+import 'package:movna/domain/failures.dart';
 
 abstract class PositionRepository {
   /// Get the current location.
-  Future<Position> getPosition();
+  Future<Either<Failure, Position>> getPosition();
 
   /// Get stream of locations.
-  Stream<Position> getPositionStream();
+  Stream<Either<Failure, Position>> getPositionStream();
 }
