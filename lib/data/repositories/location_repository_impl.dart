@@ -1,32 +1,32 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:geolocator/geolocator.dart' as g;
+import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/core/logger.dart';
-import 'package:movna/data/adapters/position_adapter.dart';
+import 'package:movna/data/adapters/location_adapter.dart';
 import 'package:movna/data/datasources/position_source.dart';
-import 'package:movna/domain/entities/position.dart' as d;
-import 'package:movna/domain/failures.dart';
-import 'package:movna/domain/repositories/position_repository.dart';
 import 'package:movna/data/repositories/repository_helper.dart';
+import 'package:movna/domain/entities/location.dart';
+import 'package:movna/domain/failures.dart';
+import 'package:movna/domain/repositories/location_repository.dart';
 
-@Injectable(as: PositionRepository)
-class PositionRepositoryImpl
+@Injectable(as: LocationRepository)
+class LocationRepositoryImpl
     with RepositoryHelper
-    implements PositionRepository {
-  PositionRepositoryImpl({
+    implements LocationRepository {
+  LocationRepositoryImpl({
     required this.positionSource,
     required this.positionAdapter,
   });
 
   PositionSource positionSource;
-  PositionAdapter positionAdapter;
+  LocationAdapter positionAdapter;
 
   @override
-  Future<Either<Failure, d.Position>> getPosition() async {
+  Future<Either<Failure, Location>> getLocation() async {
     try {
-      g.Position position = await positionSource.getPosition();
+      Position position = await positionSource.getPosition();
       return Right(positionAdapter.modelToEntity(position));
     } catch (e, s) {
       logger.e(
@@ -40,9 +40,9 @@ class PositionRepositoryImpl
   }
 
   @override
-  Stream<Either<Failure, d.Position>> getPositionStream() async* {
+  Stream<Either<Failure, Location>> getLocationStream() async* {
     try {
-      Stream<g.Position> geoPositionStream = positionSource.getPositionStream();
+      Stream<Position> geoPositionStream = positionSource.getPositionStream();
 
       yield* convertStream(
         modelStream: geoPositionStream,
@@ -63,11 +63,10 @@ class PositionRepositoryImpl
 
   Failure _convertDataSourceException(Object e) {
     return switch (e) {
-      g.PermissionDeniedException() ||
-      g.PermissionRequestInProgressException() =>
+      PermissionDeniedException() ||
+      PermissionRequestInProgressException() =>
         const Failure.locationPermission(),
-      g.LocationServiceDisabledException() =>
-        const Failure.locationUnavailable(),
+      LocationServiceDisabledException() => const Failure.locationUnavailable(),
       _ => const Failure.location(),
     };
   }

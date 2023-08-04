@@ -2,14 +2,14 @@ import 'dart:math';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'position.freezed.dart';
+part 'location.freezed.dart';
 
 /// Position of the device on the globe at a moment.
 @freezed
-class Position with _$Position {
-  const Position._();
+class Location with _$Location {
+  const Location._();
 
-  const factory Position({
+  const factory Location({
     /// Latitude of position between -180 (excluded) and 180 (included) degrees
     required double latitudeInDegrees,
 
@@ -34,7 +34,7 @@ class Position with _$Position {
 
     /// The time at which this position was determined.
     DateTime? timestamp,
-  }) = _Position;
+  }) = _Location;
 
   /// Equator radius in meters (WGS84 ellipsoid).
   static const double equatorRadiusInMeters = 6378137.0;
@@ -52,7 +52,7 @@ class Position with _$Position {
 
   /// Computes distance in meters between this position and [other] position,
   /// using Haversine formula.
-  double distanceToInMeters(Position other) {
+  double distanceToInMeters(Location other) {
     final sinDeltaLatitude =
         sin((other.latitudeInRadians - latitudeInRadians) / 2);
     final sinDeltaLongitude =
@@ -67,7 +67,5 @@ class Position with _$Position {
             cos(other.latitudeInRadians);
 
     return earthRadiusInMeters * 2 * atan2(sqrt(a), sqrt(1.0 - a));
-
-    // TODO : take into account altitude if available (pythagorean)
   }
 }
