@@ -7,7 +7,10 @@ import 'package:movna/domain/repositories/position_repository.dart';
 
 @Injectable(as: PositionRepository)
 class PositionRepositoryImpl implements PositionRepository {
-  PositionRepositoryImpl({required this.positionSource, required this.positionAdapter});
+  PositionRepositoryImpl({
+    required this.positionSource,
+    required this.positionAdapter,
+  });
 
   PositionSource positionSource;
   PositionAdapter positionAdapter;
