@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:movna/core/unit_conversion.dart';
 
 part 'gps_coordinates.freezed.dart';
 
@@ -26,9 +27,9 @@ class GpsCoordinates with _$GpsCoordinates {
   static const double earthRadiusInMeters =
       (equatorRadiusInMeters + polarRadiusInMeters) / 2;
 
-  double get latitudeInRadians => latitudeInDegrees * pi / 180;
+  double get latitudeInRadians => degreesToRadians(latitudeInDegrees);
 
-  double get longitudeInRadians => longitudeInDegrees * pi / 180;
+  double get longitudeInRadians => degreesToRadians(longitudeInDegrees);
 
   /// Computes distance in meters between this position and [other] position,
   /// using Haversine formula.
