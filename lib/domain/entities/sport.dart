@@ -5,3 +5,6 @@ enum Sport {
   biking,
   other,
 }
+
+// WARNING : do not modify the names of these fields, this would result in a
+// breaking change as the Sport is stored by name in database.
