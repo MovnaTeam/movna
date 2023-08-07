@@ -1,0 +1,3 @@
+enum LocationServiceStatus {
+  enabled, disabled
+}

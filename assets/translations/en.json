@@ -1,3 +1,7 @@
 {
-  "appTitle": "Movna"
+  "appTitle": "Movna",
+  "foreground_notification": {
+    "text": "Movna keeps track of your location from the background.",
+    "title": "Movna app is running..."
+  }
 }
