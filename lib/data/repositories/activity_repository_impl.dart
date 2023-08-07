@@ -11,16 +11,16 @@ import 'package:movna/domain/repositories/activity_repository.dart';
 class ActivityRepositoryImpl
     with RepositoryHelper
     implements ActivityRepository {
-  ActivityRepositoryImpl(this.source, this.activityAdapter);
+  ActivityRepositoryImpl(this._source, this._activityAdapter);
 
-  IsarDataBaseSource source;
-  ActivityIsarAdapter activityAdapter;
+  final IsarDataBaseSource _source;
+  final ActivityIsarAdapter _activityAdapter;
 
   @override
   Future<Either<Failure, void>> saveActivity(Activity activity) async {
     try {
-      final model = activityAdapter.entityToModel(activity);
-      source.saveActivity(model);
+      final model = _activityAdapter.entityToModel(activity);
+      _source.saveActivity(model);
       return const Right(null);
     } catch (e) {
       return const Left(Failure.databaseNotSaved());
@@ -30,8 +30,8 @@ class ActivityRepositoryImpl
   @override
   Future<Either<Failure, void>> deleteActivity(Activity activity) async {
     try {
-      final model = activityAdapter.entityToModel(activity);
-      source.deleteActivity(model.id);
+      final model = _activityAdapter.entityToModel(activity);
+      _source.deleteActivity(model.id);
       return const Right(null);
     } catch (e) {
       return const Left(Failure.databaseNotSaved());
@@ -41,11 +41,11 @@ class ActivityRepositoryImpl
   @override
   Future<Either<Failure, List<Activity>>> getActivities() async {
     try {
-      final either = await source.getActivities();
+      final either = await _source.getActivities();
       return either.fold((failure) {
         return Left(failure);
       }, (activities) {
-        return Right(activityAdapter.modelsToEntities(activities));
+        return Right(_activityAdapter.modelsToEntities(activities));
       });
     } catch (e) {
       return const Left(Failure.database());

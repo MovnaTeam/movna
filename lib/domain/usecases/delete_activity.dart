@@ -10,12 +10,12 @@ import 'package:movna/domain/usecases/base_usecases.dart';
 /// See [ActivityRepository.deleteActivity] for more information.
 @injectable
 class DeleteActivity implements UseCaseAsync<void, Activity> {
-  DeleteActivity({required this.repository});
+  DeleteActivity(this._repository);
 
-  final ActivityRepository repository;
+  final ActivityRepository _repository;
 
   @override
   Future<Either<Failure, void>> call(Activity activity) {
-    return repository.deleteActivity(activity);
+    return _repository.deleteActivity(activity);
   }
 }

@@ -10,12 +10,12 @@ import 'package:movna/domain/usecases/base_usecases.dart';
 /// See [ActivityRepository.getActivities] for more information.
 @injectable
 class GetActivities implements UseCaseAsync<List<Activity>, void> {
-  GetActivities({required this.repository});
+  GetActivities(this._repository);
 
-  final ActivityRepository repository;
+  final ActivityRepository _repository;
 
   @override
   Future<Either<Failure, List<Activity>>> call([void p]) {
-    return repository.getActivities();
+    return _repository.getActivities();
   }
 }
