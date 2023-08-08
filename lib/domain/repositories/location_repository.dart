@@ -1,11 +1,11 @@
-import 'package:dartz/dartz.dart';
 import 'package:movna/domain/entities/location.dart';
-import 'package:movna/domain/failures.dart';
+import 'package:movna/domain/faults.dart';
+import 'package:result_type/result_type.dart';
 
 abstract class LocationRepository {
   /// Get the current device location.
-  Future<Either<Failure, Location>> getLocation();
+  Future<Result<Location, Fault>> getLocation();
 
   /// Get stream of device locations.
-  Stream<Either<Failure, Location>> getLocationStream();
+  Stream<Result<Location, Fault>> getLocationStream();
 }
