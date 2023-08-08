@@ -16,9 +16,9 @@ import 'package:movna/domain/usecases/permission_usecases/request_location_permi
 /// granted status to some degree, this usecase only returns the status and does
 /// nothing else.
 @injectable
-class HandleLocationPermission
+class SafeRequestLocationPermission
     implements UseCaseAsync<SystemPermissionStatus, void> {
-  HandleLocationPermission(
+  SafeRequestLocationPermission(
     this._getLocationPermission,
     this._requestLocationPermission,
   );

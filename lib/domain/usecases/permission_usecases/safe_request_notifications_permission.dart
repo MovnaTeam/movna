@@ -16,9 +16,9 @@ import 'package:movna/domain/usecases/permission_usecases/request_notification_p
 /// granted status to some degree, this usecase only returns the status and does
 /// nothing else.
 @injectable
-class HandleNotificationsPermission
+class SafeRequestNotificationsPermission
     implements UseCaseAsync<SystemPermissionStatus, void> {
-  HandleNotificationsPermission(
+  SafeRequestNotificationsPermission(
     this._getNotificationPermission,
     this._requestNotificationPermission,
   );

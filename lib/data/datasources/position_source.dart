@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
@@ -25,6 +27,7 @@ abstract class PositionSource {
 class PositionSourceImpl extends PositionSource {
   static const _channel = MethodChannel('dev.movna.app/location');
   static const _enableLocationServiceMethod = 'enable_service';
+  static const _positionRefreshInterval = Duration(seconds: 1);
 
   @override
   Future<Position> getPosition() async {
@@ -36,12 +39,16 @@ class PositionSourceImpl extends PositionSource {
     ForegroundNotificationConfig notificationConfig,
   ) {
     return Geolocator.getPositionStream(
-      locationSettings: AndroidSettings(
-        // Set to best available accuracy.
-        accuracy: LocationAccuracy.best,
-        intervalDuration: const Duration(milliseconds: 500),
-        foregroundNotificationConfig: notificationConfig,
-      ),
+      locationSettings: Platform.isAndroid
+          ? AndroidSettings(
+              // Set to best available accuracy.
+              accuracy: LocationAccuracy.best,
+              intervalDuration: _positionRefreshInterval,
+              foregroundNotificationConfig: notificationConfig,
+            )
+          : const LocationSettings(
+              accuracy: LocationAccuracy.best,
+            ),
     );
   }
 
