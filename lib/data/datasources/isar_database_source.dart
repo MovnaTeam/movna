@@ -2,15 +2,23 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:isar/isar.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/core/modules/isar_module.dart';
 import 'package:movna/data/models/activity_model.dart';
 import 'package:movna/domain/failures.dart';
 
-@Injectable()
+@injectable
 class IsarDataBaseSource {
+  IsarDataBaseSource(@baseIsar this._isar);
+
+  final Isar _isar;
   /// Returns global isar instance registered at app startup.
   Future<Either<Failure, Isar>> _getIsar() async {
     return injector.getAsync<Either<Failure, Isar>>();
   }
+
+/*  Future<List<ActivityModel>> getActivities() async {
+    return _isar.activityModels.where().sortByStartTimeDesc().findAll();
+  }*/
 
   /// Returns activity models sorted by start time.
   Future<Either<Failure, List<ActivityModel>>> getActivities() async {

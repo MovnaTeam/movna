@@ -12,8 +12,8 @@ import 'package:path_provider/path_provider.dart';
 final injector = GetIt.instance;
 
 @InjectableInit()
-void configureDependencies() {
-  injector.init();
+Future<void> configureDependencies() async {
+  await injector.init();
   injector.registerLazySingletonAsync<Either<Failure, Isar>>(
     () async => await _openIsar(),
     dispose: (isar) => _closeIsar(isar),
