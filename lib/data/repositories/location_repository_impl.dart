@@ -33,15 +33,15 @@ class LocationRepositoryImpl
   Future<Result<Location, Fault>> getLocation() async {
     try {
       Position position = await _positionSource.getPosition();
-      return Success(_positionAdapter.modelToEntity(position));
+      return _positionAdapter.modelToEntity(position).toSuccess();
     } catch (e, s) {
       logger.e(
         'Error getting position',
         error: e,
         stackTrace: s,
       );
-      final failure = _convertDataSourceException(e);
-      return Failure(failure);
+      final fault = _convertDataSourceException(e);
+      return fault.toFailure();
     }
   }
 
@@ -66,8 +66,8 @@ class LocationRepositoryImpl
         error: e,
         stackTrace: s,
       );
-      final failure = _convertDataSourceException(e);
-      yield Failure(failure);
+      final fault = _convertDataSourceException(e);
+      yield fault.toFailure();
     }
   }
 
@@ -86,18 +86,17 @@ class LocationRepositoryImpl
   Future<Result<LocationServiceStatus, Fault>>
       getLocationServiceStatus() async {
     try {
-      final res = await _positionSource.isLocationServiceEnabled();
-
-      return Success(
-        res ? LocationServiceStatus.enabled : LocationServiceStatus.disabled,
-      );
+      final res = await _positionSource.isLocationServiceEnabled()
+          ? LocationServiceStatus.enabled
+          : LocationServiceStatus.disabled;
+      return res.toSuccess();
     } catch (e, s) {
       logger.e(
         'Error getting location service status',
         error: e,
         stackTrace: s,
       );
-      return const Failure(Fault.unknown());
+      return const Fault.unknown().toFailure();
     }
   }
 
@@ -105,14 +104,14 @@ class LocationRepositoryImpl
   Future<Result<Unit, Fault>> requestLocationService() async {
     try {
       await _positionSource.requestLocationService();
-      return const Success(unit);
+      return unit.toSuccess();
     } catch (e, s) {
       logger.e(
         'Error requesting location service',
         error: e,
         stackTrace: s,
       );
-      return const Failure(Fault.unknown());
+      return const Fault.unknown().toFailure();
     }
   }
 }

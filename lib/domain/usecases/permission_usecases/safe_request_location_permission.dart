@@ -35,9 +35,9 @@ class SafeRequestLocationPermission
           final newPermission = await _requestLocationPermission();
           return newPermission;
         }
-        return Success(permission);
+        return permission.toSuccess();
       },
-      (f) => Failure(f),
+      (f) => f.toFailure(),
     );
   }
 }

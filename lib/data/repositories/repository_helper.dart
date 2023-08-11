@@ -25,18 +25,14 @@ mixin RepositoryHelper {
         handleData: (Model data, sink) {
           try {
             final entity = adapter.convertModel(data);
-            sink.add(Success(entity));
+            sink.add(entity.toSuccess());
           } catch (e, s) {
             logger.e(
               'Error converting $Model to $Entity',
               error: e,
               stackTrace: s,
             );
-            sink.add(
-              const Failure(
-                Fault.adapter(),
-              ),
-            );
+            sink.add(const Fault.adapter().toFailure());
           }
         },
         handleError: (error, stack, sink) {

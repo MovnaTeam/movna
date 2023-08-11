@@ -23,14 +23,14 @@ class PermissionRepositoryImpl implements PermissionRepository {
       final permission = await _permissionSource.getLocationPermission();
       final permissionEntity =
           _permissionStatusAdapter.modelToEntity(permission);
-      return Success(permissionEntity);
+      return permissionEntity.toSuccess();
     } catch (e, s) {
       logger.e(
         'Error getting location permission',
         error: e,
         stackTrace: s,
       );
-      return const Failure(Fault.unknown());
+      return const Fault.unknown().toFailure();
     }
   }
 
@@ -41,14 +41,14 @@ class PermissionRepositoryImpl implements PermissionRepository {
       final permission = await _permissionSource.getNotificationPermission();
       final permissionEntity =
           _permissionStatusAdapter.modelToEntity(permission);
-      return Success(permissionEntity);
+      return permissionEntity.toSuccess();
     } catch (e, s) {
       logger.e(
         'Error getting notification permission',
         error: e,
         stackTrace: s,
       );
-      return const Failure(Fault.unknown());
+      return const Fault.unknown().toFailure();
     }
   }
 
@@ -60,14 +60,14 @@ class PermissionRepositoryImpl implements PermissionRepository {
           await _permissionSource.getBackgroundLocationPermission();
       final permissionEntity =
           _permissionStatusAdapter.modelToEntity(permission);
-      return Success(permissionEntity);
+      return permissionEntity.toSuccess();
     } catch (e, s) {
       logger.e(
         'Error requesting background location permission',
         error: e,
         stackTrace: s,
       );
-      return const Failure(Fault.unknown());
+      return const Fault.unknown().toFailure();
     }
   }
 
@@ -78,14 +78,14 @@ class PermissionRepositoryImpl implements PermissionRepository {
       final permission = await _permissionSource.requestLocationPermission();
       final permissionEntity =
           _permissionStatusAdapter.modelToEntity(permission);
-      return Success(permissionEntity);
+      return permissionEntity.toSuccess();
     } catch (e, s) {
       logger.e(
         'Error requesting location permission',
         error: e,
         stackTrace: s,
       );
-      return const Failure(Fault.unknown());
+      return const Fault.unknown().toFailure();
     }
   }
 
@@ -97,14 +97,14 @@ class PermissionRepositoryImpl implements PermissionRepository {
           await _permissionSource.requestNotificationPermission();
       final permissionEntity =
           _permissionStatusAdapter.modelToEntity(permission);
-      return Success(permissionEntity);
+      return permissionEntity.toSuccess();
     } catch (e, s) {
       logger.e(
         'Error requesting notification permission',
         error: e,
         stackTrace: s,
       );
-      return const Failure(Fault.unknown());
+      return const Fault.unknown().toFailure();
     }
   }
 }

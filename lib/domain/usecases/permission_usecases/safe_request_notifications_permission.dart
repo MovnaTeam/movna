@@ -35,9 +35,9 @@ class SafeRequestNotificationsPermission
           final newPermission = await _requestNotificationPermission();
           return newPermission;
         }
-        return Success(permission);
+        return permission.toSuccess();
       },
-      (f) async => Failure(f),
+      (f) async => f.toFailure(),
     );
   }
 }
