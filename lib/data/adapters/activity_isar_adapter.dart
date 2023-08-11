@@ -18,11 +18,13 @@ class ActivityIsarAdapter extends BaseAdapter<Activity, ActivityModel> {
     return Activity(
       name: m.name,
       sport: m.sport,
-      // TODO : convert startTime and stopTime back to their original timezone
       startTime: m.startTime,
+      // TODO : handle timezone using startTimeZoneOffsetMinutes and Name
       stopTime: m.stopTime,
       distanceInMeters: m.distanceInMeters,
-      duration: Duration(microseconds: m.durationInMicroSeconds),
+      duration: m.durationInMicroSeconds != null
+          ? Duration(microseconds: m.durationInMicroSeconds!)
+          : null,
       averageSpeedInMetersPerSecond: m.averageSpeedInMetersPerSecond,
       maxSpeedInMetersPerSecond: m.maxSpeedInMetersPerSecond,
       averageHeartBeatPerMinute: m.averageHeartBeatPerMinute,
@@ -36,10 +38,12 @@ class ActivityIsarAdapter extends BaseAdapter<Activity, ActivityModel> {
     final m = ActivityModel()
       ..name = e.name
       ..sport = e.sport
-      ..startTime = e.startTime
-      ..stopTime = e.stopTime
+      ..startTime = e.startTime.toUtc() // UTC conversion is done by isar anyway
+      ..startTimeZoneName = e.startTime.timeZoneName
+      ..startTimeZoneOffsetMinutes = e.startTime.timeZoneOffset.inMinutes
+      ..stopTime = e.stopTime?.toUtc() // UTC conversion is done by isar anyway
       ..distanceInMeters = e.distanceInMeters
-      ..durationInMicroSeconds = e.duration.inMicroseconds
+      ..durationInMicroSeconds = e.duration?.inMicroseconds
       ..averageSpeedInMetersPerSecond = e.averageSpeedInMetersPerSecond
       ..maxSpeedInMetersPerSecond = e.maxSpeedInMetersPerSecond
       ..averageHeartBeatPerMinute = e.averageHeartBeatPerMinute

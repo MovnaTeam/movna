@@ -10,28 +10,33 @@ class ActivityModel {
 
   DateTime startTime = DateTime.fromMillisecondsSinceEpoch(0);
 
+  /// The time zone offset from UTC at the start of activity, in minutes.
+  /// Should be between -12 hours (Baker Island) and +14 hours (Kiribati).
+  int startTimeZoneOffsetMinutes = 0;
+
+  /// The name of the timezone at the start of the activity, as returned from
+  /// [startTime.timeZoneName]
+  String? startTimeZoneName;
+
   DateTime? stopTime;
 
-  // TODO : add field timezoneOffset or timezone to store localTime as well,
-  // In order to be able to restore the original date times, which were
-  // converted to UTC when stored in database.
-
+  /// The sport practiced during activity, stored as a string.
   @Enumerated(EnumType.name)
   Sport? sport;
 
   String? name;
 
-  double distanceInMeters = 0;
+  double? distanceInMeters = 0;
 
-  int durationInMicroSeconds = 0;
+  int? durationInMicroSeconds = 0;
 
-  double maxSpeedInMetersPerSecond = 0;
+  double? maxSpeedInMetersPerSecond = 0;
 
-  double averageSpeedInMetersPerSecond = 0;
+  double? averageSpeedInMetersPerSecond = 0;
 
   double? averageHeartBeatPerMinute;
 
-  String notes = '';
+  String? notes;
 
   List<TrackSegmentModel> trackSegments = [];
 }

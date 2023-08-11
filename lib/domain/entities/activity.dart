@@ -15,34 +15,40 @@ class Activity with _$Activity {
     required DateTime startTime,
 
     /// The time at which this activity ended.
-    /// Null when activity is not ended yet.
+    /// Null while activity has not ended.
     DateTime? stopTime,
 
-    /// The sport practiced during this activity. Can be unspecified.
+    /// The sport practiced during this activity.
+    /// Null when not specified by user.
     Sport? sport,
 
-    /// The name of this activity. Can be unspecified.
+    /// The name of this activity.
+    /// Null when not specified by user.
     String? name,
 
     /// The total distance traveled during this activity in meters.
-    @Default(0) double distanceInMeters,
+    /// Null when info is not available.
+    double? distanceInMeters,
 
-    /// The total duration of this activity, accounting for pauses.
-    @Default(Duration.zero) Duration duration,
+    /// The total duration of this activity, removed pauses durations.
+    /// Null when info is not available.
+    ///
+    /// If an activity starts at 15h, is paused between 15h30 and 15h45 and
+    /// stopped at 16h, the [duration] is 45 minutes.
+    Duration? duration,
 
     /// The maximum speed reached during this activity in meters per second.
-    @Default(0) double maxSpeedInMetersPerSecond,
+    double? maxSpeedInMetersPerSecond,
 
     /// The average speed during this activity in meters per second.
-    @Default(0) double averageSpeedInMetersPerSecond,
+    double? averageSpeedInMetersPerSecond,
 
     /// The average heart beat during this activity in Beats Per Minute.
-    /// Can be unspecified.
+    /// Null when not specified by user.
     double? averageHeartBeatPerMinute,
 
     /// Additional user notes about this activity.
-    /// Can be empty.
-    @Default('') String notes,
+    String? notes,
 
     /// The activity continuous track segments,
     /// with a pause between each segment.
