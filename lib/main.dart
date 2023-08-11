@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:movna/app.dart';
 import 'package:movna/core/injection.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   configureDependencies();

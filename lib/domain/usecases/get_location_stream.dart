@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:movna/domain/entities/location.dart';
+import 'package:movna/domain/entities/notification_config.dart';
 import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/repositories/location_repository.dart';
 import 'package:movna/domain/usecases/base_usecases.dart';
@@ -10,13 +11,13 @@ import 'package:result_dart/result_dart.dart';
 ///
 /// See [LocationRepository.getLocationStream] for more details.
 @injectable
-class GetLocationStream implements UseCaseStream<Location, void> {
+class GetLocationStream implements UseCaseStream<Location, NotificationConfig> {
   GetLocationStream({required this.repository});
 
   final LocationRepository repository;
 
   @override
-  Stream<Result<Location, Fault>> call([void p]) {
-    return repository.getLocationStream();
+  Stream<Result<Location, Fault>> call(NotificationConfig config) {
+    return repository.getLocationStream(config);
   }
 }

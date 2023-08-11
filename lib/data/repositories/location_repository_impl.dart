@@ -4,10 +4,13 @@ import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/core/logger.dart';
 import 'package:movna/data/adapters/location_adapter.dart';
+import 'package:movna/data/adapters/notification_config_adapter.dart';
 import 'package:movna/data/datasources/position_source.dart';
 import 'package:movna/data/exceptions.dart';
 import 'package:movna/data/repositories/repository_helper.dart';
 import 'package:movna/domain/entities/location.dart';
+import 'package:movna/domain/entities/location_service_status.dart';
+import 'package:movna/domain/entities/notification_config.dart';
 import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/repositories/location_repository.dart';
 import 'package:result_dart/result_dart.dart';
@@ -16,19 +19,21 @@ import 'package:result_dart/result_dart.dart';
 class LocationRepositoryImpl
     with RepositoryHelper
     implements LocationRepository {
-  LocationRepositoryImpl({
-    required this.positionSource,
-    required this.positionAdapter,
-  });
+  LocationRepositoryImpl(
+    this._positionSource,
+    this._positionAdapter,
+    this._notificationConfigAdapter,
+  );
 
-  PositionSource positionSource;
-  LocationAdapter positionAdapter;
+  final PositionSource _positionSource;
+  final LocationAdapter _positionAdapter;
+  final NotificationConfigAdapter _notificationConfigAdapter;
 
   @override
   Future<Result<Location, Fault>> getLocation() async {
     try {
-      Position position = await positionSource.getPosition();
-      return Success(positionAdapter.modelToEntity(position));
+      Position position = await _positionSource.getPosition();
+      return Success(_positionAdapter.modelToEntity(position));
     } catch (e, s) {
       logger.e(
         'Error getting position',
@@ -41,13 +46,17 @@ class LocationRepositoryImpl
   }
 
   @override
-  Stream<Result<Location, Fault>> getLocationStream() async* {
+  Stream<Result<Location, Fault>> getLocationStream(
+    NotificationConfig notificationConfig,
+  ) async* {
     try {
-      Stream<Position> geoPositionStream = positionSource.getPositionStream();
+      Stream<Position> geoPositionStream = _positionSource.getPositionStream(
+        _notificationConfigAdapter.entityToModel(notificationConfig),
+      );
 
       yield* convertStream(
         modelStream: geoPositionStream,
-        adapter: positionAdapter,
+        adapter: _positionAdapter,
         errorHandler: _convertDataSourceException,
         errorLoggerMessage: 'Error in position stream',
       );
@@ -71,5 +80,39 @@ class LocationRepositoryImpl
       ConversionException() => const Fault.adapter(),
       _ => const Fault.location(),
     };
+  }
+
+  @override
+  Future<Result<LocationServiceStatus, Fault>>
+      getLocationServiceStatus() async {
+    try {
+      final res = await _positionSource.isLocationServiceEnabled();
+
+      return Success(
+        res ? LocationServiceStatus.enabled : LocationServiceStatus.disabled,
+      );
+    } catch (e, s) {
+      logger.e(
+        'Error getting location service status',
+        error: e,
+        stackTrace: s,
+      );
+      return const Failure(Fault.unknown());
+    }
+  }
+
+  @override
+  Future<Result<Unit, Fault>> requestLocationService() async {
+    try {
+      await _positionSource.requestLocationService();
+      return const Success(Unit());
+    } catch (e, s) {
+      logger.e(
+        'Error requesting location service',
+        error: e,
+        stackTrace: s,
+      );
+      return const Failure(Fault.unknown());
+    }
   }
 }
