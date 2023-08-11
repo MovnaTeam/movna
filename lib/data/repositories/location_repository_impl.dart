@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dartz/dartz.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/core/logger.dart';
@@ -12,8 +11,9 @@ import 'package:movna/data/repositories/repository_helper.dart';
 import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/entities/location_service_status.dart';
 import 'package:movna/domain/entities/notification_config.dart';
-import 'package:movna/domain/failures.dart';
+import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/repositories/location_repository.dart';
+import 'package:result_dart/result_dart.dart';
 
 @Injectable(as: LocationRepository)
 class LocationRepositoryImpl
@@ -30,23 +30,23 @@ class LocationRepositoryImpl
   final NotificationConfigAdapter _notificationConfigAdapter;
 
   @override
-  Future<Either<Failure, Location>> getLocation() async {
+  Future<Result<Location, Fault>> getLocation() async {
     try {
       Position position = await _positionSource.getPosition();
-      return Right(_positionAdapter.modelToEntity(position));
+      return _positionAdapter.modelToEntity(position).toSuccess();
     } catch (e, s) {
       logger.e(
         'Error getting position',
         error: e,
         stackTrace: s,
       );
-      final failure = _convertDataSourceException(e);
-      return Left(failure);
+      final fault = _convertDataSourceException(e);
+      return fault.toFailure();
     }
   }
 
   @override
-  Stream<Either<Failure, Location>> getLocationStream(
+  Stream<Result<Location, Fault>> getLocationStream(
     NotificationConfig notificationConfig,
   ) async* {
     try {
@@ -66,53 +66,52 @@ class LocationRepositoryImpl
         error: e,
         stackTrace: s,
       );
-      final failure = _convertDataSourceException(e);
-      yield Left(failure);
+      final fault = _convertDataSourceException(e);
+      yield fault.toFailure();
     }
   }
 
-  Failure _convertDataSourceException(Object e) {
+  Fault _convertDataSourceException(Object e) {
     return switch (e) {
       PermissionDeniedException() ||
       PermissionRequestInProgressException() =>
-        const Failure.locationPermission(),
-      LocationServiceDisabledException() => const Failure.locationUnavailable(),
-      ConversionException() => const Failure.adapter(),
-      _ => const Failure.location(),
+        const Fault.locationPermission(),
+      LocationServiceDisabledException() => const Fault.locationUnavailable(),
+      ConversionException() => const Fault.adapter(),
+      _ => const Fault.location(),
     };
   }
 
   @override
-  Future<Either<Failure, LocationServiceStatus>>
+  Future<Result<LocationServiceStatus, Fault>>
       getLocationServiceStatus() async {
     try {
-      final res = await _positionSource.isLocationServiceEnabled();
-
-      return Right(
-        res ? LocationServiceStatus.enabled : LocationServiceStatus.disabled,
-      );
+      final res = await _positionSource.isLocationServiceEnabled()
+          ? LocationServiceStatus.enabled
+          : LocationServiceStatus.disabled;
+      return res.toSuccess();
     } catch (e, s) {
       logger.e(
         'Error getting location service status',
         error: e,
         stackTrace: s,
       );
-      return const Left(Failure.unknown());
+      return const Fault.unknown().toFailure();
     }
   }
 
   @override
-  Future<Either<Failure, void>> requestLocationService() async {
+  Future<Result<Unit, Fault>> requestLocationService() async {
     try {
       await _positionSource.requestLocationService();
-      return const Right(null);
+      return unit.toSuccess();
     } catch (e, s) {
       logger.e(
         'Error requesting location service',
         error: e,
         stackTrace: s,
       );
-      return const Left(Failure.unknown());
+      return const Fault.unknown().toFailure();
     }
   }
 }

@@ -1,10 +1,10 @@
-import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/domain/entities/system_permission.dart';
-import 'package:movna/domain/failures.dart';
+import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/usecases/base_usecases.dart';
 import 'package:movna/domain/usecases/permission_usecases/get_notification_permission.dart';
 import 'package:movna/domain/usecases/permission_usecases/request_notification_permission.dart';
+import 'package:result_dart/result_dart.dart';
 
 /// Retrieves the [SystemPermissionStatus] of the notification permission.
 ///
@@ -27,17 +27,17 @@ class SafeRequestNotificationsPermission
   final RequestNotificationPermission _requestNotificationPermission;
 
   @override
-  Future<Either<Failure, SystemPermissionStatus>> call([void params]) async {
+  Future<Result<SystemPermissionStatus, Fault>> call([void params]) async {
     final notificationPermission = await _getNotificationPermission();
     return await notificationPermission.fold(
-      (l) async => Left(l),
       (permission) async {
         if (permission == SystemPermissionStatus.denied) {
           final newPermission = await _requestNotificationPermission();
           return newPermission;
         }
-        return Right(permission);
+        return permission.toSuccess();
       },
+      (f) async => f.toFailure(),
     );
   }
 }

@@ -1,12 +1,12 @@
-import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/entities/notification_config.dart';
-import 'package:movna/domain/failures.dart';
+import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/repositories/location_repository.dart';
 import 'package:movna/domain/usecases/base_usecases.dart';
+import 'package:result_dart/result_dart.dart';
 
-/// Returns a stream of device current [Location] or a [Failure] if an error
+/// Returns a stream of device current [Location] or a [Fault] if an error
 /// occurs while the stream is active.
 ///
 /// See [LocationRepository.getLocationStream] for more details.
@@ -17,7 +17,7 @@ class GetLocationStream implements UseCaseStream<Location, NotificationConfig> {
   final LocationRepository repository;
 
   @override
-  Stream<Either<Failure, Location>> call(NotificationConfig config) {
+  Stream<Result<Location, Fault>> call(NotificationConfig config) {
     return repository.getLocationStream(config);
   }
 }

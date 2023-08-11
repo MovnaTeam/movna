@@ -1,21 +1,20 @@
-import 'package:dartz/dartz.dart';
 import 'package:movna/domain/entities/system_permission.dart';
-import 'package:movna/domain/failures.dart';
+import 'package:movna/domain/faults.dart';
+import 'package:result_dart/result_dart.dart';
 
 abstract interface class PermissionRepository {
-  Future<Either<Failure, SystemPermissionStatus>> getLocationPermission();
+  Future<Result<SystemPermissionStatus, Fault>> getLocationPermission();
 
   /// Request the location permission and returns the [SystemPermissionStatus]
   /// this request results in.
-  Future<Either<Failure, SystemPermissionStatus>> requestLocationPermission();
+  Future<Result<SystemPermissionStatus, Fault>> requestLocationPermission();
 
-  Future<Either<Failure, SystemPermissionStatus>>
+  Future<Result<SystemPermissionStatus, Fault>>
       getBackgroundLocationPermission();
 
   /// Request the notification permission and returns the
   /// [SystemPermissionStatus] this request results in.
-  Future<Either<Failure, SystemPermissionStatus>>
-      requestNotificationPermission();
+  Future<Result<SystemPermissionStatus, Fault>> requestNotificationPermission();
 
-  Future<Either<Failure, SystemPermissionStatus>> getNotificationPermission();
+  Future<Result<SystemPermissionStatus, Fault>> getNotificationPermission();
 }

@@ -1,11 +1,11 @@
-import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/domain/entities/location.dart';
-import 'package:movna/domain/failures.dart';
+import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/repositories/location_repository.dart';
 import 'package:movna/domain/usecases/base_usecases.dart';
+import 'package:result_dart/result_dart.dart';
 
-/// Returns the device current [Location] or a [Failure] if the location could
+/// Returns the device current [Location] or a [Fault] if the location could
 /// not be retrieved.
 ///
 /// See [LocationRepository.getLocation] for more details.
@@ -16,7 +16,7 @@ class GetLocation implements UseCaseAsync<Location, void> {
   final LocationRepository repository;
 
   @override
-  Future<Either<Failure, Location>> call([void p]) {
+  Future<Result<Location, Fault>> call([void p]) {
     return repository.getLocation();
   }
 }
