@@ -22,9 +22,7 @@ class ActivityIsarAdapter extends BaseAdapter<Activity, ActivityModel> {
       // TODO : handle timezone using startTimeZoneOffsetMinutes and Name
       stopTime: m.stopTime,
       distanceInMeters: m.distanceInMeters,
-      duration: m.durationInMicroSeconds != null
-          ? Duration(microseconds: m.durationInMicroSeconds!)
-          : null,
+      duration: Duration(microseconds: m.durationInMicroSeconds),
       averageSpeedInMetersPerSecond: m.averageSpeedInMetersPerSecond,
       maxSpeedInMetersPerSecond: m.maxSpeedInMetersPerSecond,
       averageHeartBeatPerMinute: m.averageHeartBeatPerMinute,
@@ -43,7 +41,7 @@ class ActivityIsarAdapter extends BaseAdapter<Activity, ActivityModel> {
       ..startTimeZoneOffsetMinutes = e.startTime.timeZoneOffset.inMinutes
       ..stopTime = e.stopTime?.toUtc() // UTC conversion is done by isar anyway
       ..distanceInMeters = e.distanceInMeters
-      ..durationInMicroSeconds = e.duration?.inMicroseconds
+      ..durationInMicroSeconds = e.duration.inMicroseconds
       ..averageSpeedInMetersPerSecond = e.averageSpeedInMetersPerSecond
       ..maxSpeedInMetersPerSecond = e.maxSpeedInMetersPerSecond
       ..averageHeartBeatPerMinute = e.averageHeartBeatPerMinute

@@ -28,7 +28,7 @@ class ActivityModel {
 
   double? distanceInMeters = 0;
 
-  int? durationInMicroSeconds = 0;
+  int durationInMicroSeconds = 0;
 
   double? maxSpeedInMetersPerSecond = 0;
 

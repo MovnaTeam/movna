@@ -31,11 +31,10 @@ class Activity with _$Activity {
     double? distanceInMeters,
 
     /// The total duration of this activity, removed pauses durations.
-    /// Null when info is not available.
     ///
     /// If an activity starts at 15h, is paused between 15h30 and 15h45 and
     /// stopped at 16h, the [duration] is 45 minutes.
-    Duration? duration,
+    @Default(Duration.zero) Duration duration,
 
     /// The maximum speed reached during this activity in meters per second.
     double? maxSpeedInMetersPerSecond,
