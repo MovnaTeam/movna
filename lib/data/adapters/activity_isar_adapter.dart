@@ -48,8 +48,9 @@ class ActivityIsarAdapter extends BaseAdapter<Activity, ActivityModel> {
       ..maxSpeedInMetersPerSecond = e.maxSpeedInMetersPerSecond
       ..averageHeartBeatPerMinute = e.averageHeartBeatPerMinute
       ..notes = e.notes
-      ..trackSegments =
-          trackSegmentIsarAdapter.entitiesToModels(e.trackSegments);
+      ..trackSegments = trackSegmentIsarAdapter.entitiesToModels(
+        e.trackSegments,
+      );
     return m;
   }
 }
@@ -126,8 +127,9 @@ class LocationIsarAdapter extends BaseAdapter<Location, LocationModel> {
   @override
   LocationModel entityToModel(Location e) {
     final m = LocationModel()
-      ..gpsCoordinates =
-          gpsCoordinatesIsarAdapter.entityToModel(e.gpsCoordinates)
+      ..gpsCoordinates = gpsCoordinatesIsarAdapter.entityToModel(
+        e.gpsCoordinates,
+      )
       ..altitudeInMeters = e.altitudeInMeters
       ..errorInMeters = e.errorInMeters
       ..headingInDegrees = e.headingInDegrees

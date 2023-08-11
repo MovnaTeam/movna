@@ -12,4 +12,14 @@ class TrackSegment with _$TrackSegment {
     /// All track points followed by user.
     @Default([]) List<TrackPoint> trackPoints,
   }) = _TrackSegment;
+
+  /// Starting time of this segment, null if empty.
+  DateTime? get startTime {
+    return trackPoints.firstOrNull?.timestamp;
+  }
+
+  /// Ending time of this segment, null if empty.
+  DateTime? get stopTime {
+    return trackPoints.lastOrNull?.timestamp;
+  }
 }
