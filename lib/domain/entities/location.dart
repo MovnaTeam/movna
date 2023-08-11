@@ -3,7 +3,7 @@ import 'package:movna/domain/entities/gps_coordinates.dart';
 
 part 'location.freezed.dart';
 
-/// Position of the device on the globe at a moment.
+/// Position and movement of the device on the globe.
 @freezed
 class Location with _$Location {
   const Location._();
@@ -27,8 +27,5 @@ class Location with _$Location {
 
     /// The estimated speed error of this position, in meters per second.
     @Default(0) double speedErrorInMetersPerSecond,
-
-    /// The time at which this position was determined.
-    DateTime? timestamp,
   }) = _Location;
 }

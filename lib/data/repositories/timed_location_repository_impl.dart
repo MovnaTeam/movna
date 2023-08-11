@@ -3,37 +3,37 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/core/logger.dart';
-import 'package:movna/data/adapters/location_adapter.dart';
 import 'package:movna/data/adapters/notification_config_adapter.dart';
+import 'package:movna/data/adapters/timed_location_adapter.dart';
 import 'package:movna/data/datasources/position_source.dart';
 import 'package:movna/data/exceptions.dart';
 import 'package:movna/data/repositories/repository_helper.dart';
-import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/entities/location_service_status.dart';
 import 'package:movna/domain/entities/notification_config.dart';
+import 'package:movna/domain/entities/timed_location.dart';
 import 'package:movna/domain/faults.dart';
-import 'package:movna/domain/repositories/location_repository.dart';
+import 'package:movna/domain/repositories/timed_location_repository.dart';
 import 'package:result_dart/result_dart.dart';
 
-@Injectable(as: LocationRepository)
-class LocationRepositoryImpl
+@Injectable(as: TimedLocationRepository)
+class TimedLocationRepositoryImpl
     with RepositoryHelper
-    implements LocationRepository {
-  LocationRepositoryImpl(
+    implements TimedLocationRepository {
+  TimedLocationRepositoryImpl(
     this._positionSource,
-    this._positionAdapter,
+    this._timedLocationAdapter,
     this._notificationConfigAdapter,
   );
 
   final PositionSource _positionSource;
-  final LocationAdapter _positionAdapter;
+  final TimedLocationAdapter _timedLocationAdapter;
   final NotificationConfigAdapter _notificationConfigAdapter;
 
   @override
-  Future<Result<Location, Fault>> getLocation() async {
+  Future<Result<TimedLocation, Fault>> getTimedLocation() async {
     try {
       Position position = await _positionSource.getPosition();
-      return _positionAdapter.modelToEntity(position).toSuccess();
+      return _timedLocationAdapter.modelToEntity(position).toSuccess();
     } catch (e, s) {
       logger.e(
         'Error getting position',
@@ -46,7 +46,7 @@ class LocationRepositoryImpl
   }
 
   @override
-  Stream<Result<Location, Fault>> getLocationStream(
+  Stream<Result<TimedLocation, Fault>> getTimedLocationStream(
     NotificationConfig notificationConfig,
   ) async* {
     try {
@@ -56,7 +56,7 @@ class LocationRepositoryImpl
 
       yield* convertStream(
         modelStream: geoPositionStream,
-        adapter: _positionAdapter,
+        adapter: _timedLocationAdapter,
         errorHandler: _convertDataSourceException,
         errorLoggerMessage: 'Error in position stream',
       );

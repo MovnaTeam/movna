@@ -49,6 +49,7 @@ class TrackSegmentModel {
 @embedded
 class TrackPointModel {
   LocationModel? location;
+  DateTime? timestamp;
   double? heartBeatPerMinute;
 }
 

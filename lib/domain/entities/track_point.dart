@@ -9,7 +9,10 @@ class TrackPoint with _$TrackPoint {
   const TrackPoint._();
 
   const factory TrackPoint({
-    /// Location with movement data and timestamp.
+    /// Timestamp of trackpoint.
+    DateTime? timestamp,
+
+    /// Location with movement data.
     Location? location,
 
     /// User's Heart Beat in Beats Per Minute.

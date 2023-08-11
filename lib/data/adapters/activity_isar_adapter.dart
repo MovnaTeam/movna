@@ -88,6 +88,7 @@ class TrackPointIsarAdapter extends BaseAdapter<TrackPoint, TrackPointModel> {
       location: m.location == null
           ? null
           : locationIsarAdapter.modelToEntity(m.location!),
+      timestamp: m.timestamp?.toUtc(), // Isar stores dates in UTC anyway
       heartBeatPerMinute: m.heartBeatPerMinute,
     );
   }
@@ -98,6 +99,7 @@ class TrackPointIsarAdapter extends BaseAdapter<TrackPoint, TrackPointModel> {
       ..location = (e.location == null
           ? null
           : locationIsarAdapter.entityToModel(e.location!))
+      ..timestamp = e.timestamp
       ..heartBeatPerMinute = e.heartBeatPerMinute;
     return m;
   }
@@ -118,7 +120,6 @@ class LocationIsarAdapter extends BaseAdapter<Location, LocationModel> {
       headingInDegrees: m.headingInDegrees,
       speedInMetersPerSecond: m.speedInMetersPerSecond,
       speedErrorInMetersPerSecond: m.speedErrorInMetersPerSecond,
-      timestamp: m.timestamp,
     );
   }
 
@@ -131,8 +132,7 @@ class LocationIsarAdapter extends BaseAdapter<Location, LocationModel> {
       ..errorInMeters = e.errorInMeters
       ..headingInDegrees = e.headingInDegrees
       ..speedErrorInMetersPerSecond = e.speedErrorInMetersPerSecond
-      ..speedInMetersPerSecond = e.speedInMetersPerSecond
-      ..timestamp = e.timestamp;
+      ..speedInMetersPerSecond = e.speedInMetersPerSecond;
     return m;
   }
 }
