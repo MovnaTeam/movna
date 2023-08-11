@@ -10,7 +10,7 @@ import 'package:movna/data/repositories/repository_helper.dart';
 import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/repositories/location_repository.dart';
-import 'package:result_type/result_type.dart';
+import 'package:result_dart/result_dart.dart';
 
 @Injectable(as: LocationRepository)
 class LocationRepositoryImpl

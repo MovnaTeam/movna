@@ -3,7 +3,7 @@ import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/repositories/location_repository.dart';
 import 'package:movna/domain/usecases/base_usecases.dart';
-import 'package:result_type/result_type.dart';
+import 'package:result_dart/result_dart.dart';
 
 /// Returns the device current [Location] or a [Fault] if the location could
 /// not be retrieved.

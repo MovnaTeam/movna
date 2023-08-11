@@ -1,5 +1,5 @@
 import 'package:movna/domain/faults.dart';
-import 'package:result_type/result_type.dart';
+import 'package:result_dart/result_dart.dart';
 
 /// Interface that defines the behavior of a synchronous use-case.
 ///
@@ -7,7 +7,7 @@ import 'package:result_type/result_type.dart';
 ///
 /// [R] is the return type of the use-case.
 /// [P] is the type of the use-case's arguments.
-abstract interface class UseCaseSync<R, P> {
+abstract interface class UseCaseSync<R extends Object, P> {
   Result<R, Fault> call(P params);
 }
 
@@ -18,7 +18,7 @@ abstract interface class UseCaseSync<R, P> {
 ///
 /// [R] is the return type of the use-case.
 /// [P] is the type of the use-case's arguments.
-abstract interface class UseCaseAsync<R, P> {
+abstract interface class UseCaseAsync<R extends Object, P> {
   Future<Result<R, Fault>> call(P params);
 }
 
@@ -29,6 +29,6 @@ abstract interface class UseCaseAsync<R, P> {
 ///
 /// [R] is the return type of the use-case.
 /// [P] is the type of the use-case's arguments.
-abstract interface class UseCaseStream<R, P> {
+abstract interface class UseCaseStream<R extends Object, P> {
   Stream<Result<R, Fault>> call(P params);
 }

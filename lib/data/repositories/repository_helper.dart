@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:movna/core/logger.dart';
 import 'package:movna/data/adapters/base_adapter.dart';
 import 'package:movna/domain/faults.dart';
-import 'package:result_type/result_type.dart';
+import 'package:result_dart/result_dart.dart';
 
 /// A mixin containing helper methods for repositories
 mixin RepositoryHelper {
@@ -14,7 +14,7 @@ mixin RepositoryHelper {
   /// will be emitted if the [modelStream] emits an error.
   /// When such an error is emitted by [modelStream] this method will log the
   /// error and stackTrace along with the [errorLoggerMessage].
-  Stream<Result<Entity, Fault>> convertStream<Entity, Model>({
+  Stream<Result<Entity, Fault>> convertStream<Entity extends Object, Model>({
     required Stream<Model> modelStream,
     required BaseAdapter<Entity, Model> adapter,
     required Fault Function(Object) errorHandler,
@@ -33,8 +33,8 @@ mixin RepositoryHelper {
               stackTrace: s,
             );
             sink.add(
-              Failure(
-                const Fault.adapter(),
+              const Failure(
+                Fault.adapter(),
               ),
             );
           }
