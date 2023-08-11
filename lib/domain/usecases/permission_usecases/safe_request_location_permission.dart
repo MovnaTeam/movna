@@ -1,10 +1,10 @@
-import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/domain/entities/system_permission.dart';
-import 'package:movna/domain/failures.dart';
+import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/usecases/base_usecases.dart';
 import 'package:movna/domain/usecases/permission_usecases/get_location_permission.dart';
 import 'package:movna/domain/usecases/permission_usecases/request_location_permission.dart';
+import 'package:result_dart/result_dart.dart';
 
 /// Retrieves the [SystemPermissionStatus] of the location permission.
 ///
@@ -27,17 +27,17 @@ class SafeRequestLocationPermission
   final RequestLocationPermission _requestLocationPermission;
 
   @override
-  Future<Either<Failure, SystemPermissionStatus>> call([void params]) async {
+  Future<Result<SystemPermissionStatus, Fault>> call([void params]) async {
     final locationPermission = await _getLocationPermission();
     return await locationPermission.fold(
-      (l) => Left(l),
       (permission) async {
         if (permission == SystemPermissionStatus.denied) {
           final newPermission = await _requestLocationPermission();
           return newPermission;
         }
-        return Right(permission);
+        return Success(permission);
       },
+      (f) => Failure(f),
     );
   }
 }

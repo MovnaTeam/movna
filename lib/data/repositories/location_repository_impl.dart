@@ -105,7 +105,7 @@ class LocationRepositoryImpl
   Future<Result<Unit, Fault>> requestLocationService() async {
     try {
       await _positionSource.requestLocationService();
-      return const Success(Unit());
+      return const Success(unit);
     } catch (e, s) {
       logger.e(
         'Error requesting location service',
