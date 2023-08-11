@@ -41,12 +41,8 @@ class ActivityRepositoryImpl
   @override
   Future<Either<Failure, List<Activity>>> getActivities() async {
     try {
-      final either = await _source.getActivities();
-      return either.fold((failure) {
-        return Left(failure);
-      }, (activities) {
-        return Right(_activityAdapter.modelsToEntities(activities));
-      });
+      final activities = await _source.getActivities();
+      return Right(_activityAdapter.modelsToEntities(activities));
     } catch (e) {
       return const Left(Failure.database());
     }

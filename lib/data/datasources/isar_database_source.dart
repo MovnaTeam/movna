@@ -1,69 +1,35 @@
-import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:isar/isar.dart';
-import 'package:movna/core/injection.dart';
 import 'package:movna/core/modules/isar_module.dart';
 import 'package:movna/data/models/activity_model.dart';
-import 'package:movna/domain/failures.dart';
 
 @injectable
 class IsarDataBaseSource {
   IsarDataBaseSource(@baseIsar this._isar);
 
   final Isar _isar;
-  /// Returns global isar instance registered at app startup.
-  Future<Either<Failure, Isar>> _getIsar() async {
-    return injector.getAsync<Either<Failure, Isar>>();
-  }
-
-/*  Future<List<ActivityModel>> getActivities() async {
-    return _isar.activityModels.where().sortByStartTimeDesc().findAll();
-  }*/
 
   /// Returns activity models sorted by start time.
-  Future<Either<Failure, List<ActivityModel>>> getActivities() async {
-    final either = await _getIsar();
-    return either.fold((failure) {
-      return const Left(Failure.databaseNotOpened());
-    }, (isar) async {
-      return Right(
-        await isar.activityModels.where().sortByStartTimeDesc().findAll(),
-      );
-    });
+  Future<List<ActivityModel>> getActivities() async {
+    return await _isar.activityModels.where().sortByStartTimeDesc().findAll();
   }
 
-  /// Save activity to database.
-  Future<Either<Failure, void>> saveActivity(ActivityModel model) async {
-    final either = await _getIsar();
-    return either.fold((failure) {
-      return Left(failure);
-    }, (isar) async {
-      final id = await isar.writeTxn(() async {
-        return await isar.activityModels.put(model);
-      });
-      if (id != model.id) {
-        return const Left(Failure.databaseNotSaved());
-      } else {
-        return const Right(null);
-      }
+  /// Save activity to database. Returns the unique ID of the saved object.
+  /// This returned Id should match the one of the given object.
+  Future<Id> saveActivity(ActivityModel model) async {
+    final id = await _isar.writeTxn(() async {
+      return await _isar.activityModels.put(model);
     });
+    return id;
   }
 
   /// Delete activity with ID [id] from database.
-  Future<Either<Failure, void>> deleteActivity(Id id) async {
-    final either = await _getIsar();
-
-    return either.fold((failure) {
-      return Left(failure);
-    }, (isar) async {
-      final deleted = await isar.writeTxn(() async {
-        return await isar.activityModels.delete(id);
-      });
-      if (!deleted) {
-        return const Left(Failure.databaseNotDeleted());
-      } else {
-        return const Right(null);
-      }
+  /// Returns whether the activity was successfully deleted or not :
+  /// true when deleted.
+  Future<bool> deleteActivity(Id id) async {
+    final deleted = await _isar.writeTxn(() async {
+      return await _isar.activityModels.delete(id);
     });
+    return deleted;
   }
 }
