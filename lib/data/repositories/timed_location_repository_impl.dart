@@ -77,7 +77,7 @@ class TimedLocationRepositoryImpl
       PermissionRequestInProgressException() =>
         const Fault.locationPermission(),
       LocationServiceDisabledException() => const Fault.locationUnavailable(),
-      ConversionException() => const Fault.adapter(),
+      ConversionException() => const Fault.entityNotSourced(),
       _ => const Fault.location(),
     };
   }

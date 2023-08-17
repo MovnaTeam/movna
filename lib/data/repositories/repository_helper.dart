@@ -32,7 +32,7 @@ mixin RepositoryHelper {
               error: e,
               stackTrace: s,
             );
-            sink.add(const Fault.adapter().toFailure());
+            sink.add(const Fault.entityNotSourced().toFailure());
           }
         },
         handleError: (error, stack, sink) {

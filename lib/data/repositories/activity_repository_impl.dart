@@ -23,7 +23,7 @@ class ActivityRepositoryImpl
       _source.saveActivity(model);
       return unit.toSuccess();
     } catch (e) {
-      return const Fault.databaseNotSaved().toFailure();
+      return const Fault.entityNotSaved().toFailure();
     }
   }
 
@@ -34,7 +34,7 @@ class ActivityRepositoryImpl
       _source.deleteActivity(model.id);
       return unit.toSuccess();
     } catch (e) {
-      return const Fault.databaseNotSaved().toFailure();
+      return const Fault.entityNotDeleted().toFailure();
     }
   }
 
@@ -44,7 +44,7 @@ class ActivityRepositoryImpl
       final activities = await _source.getActivities();
       return _activityAdapter.modelsToEntities(activities).toSuccess();
     } catch (e) {
-      return const Fault.database().toFailure();
+      return const Fault.entityNotSourced().toFailure();
     }
   }
 }

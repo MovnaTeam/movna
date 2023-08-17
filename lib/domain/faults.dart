@@ -24,27 +24,12 @@ class Fault with _$Fault {
   /// access the location.
   const factory Fault.locationPermission() = _LocationPermission;
 
-  const factory Fault.adapter() = _Adapter;
+  /// Failure occurring when an entity could not be recovered from its source.
+  const factory Fault.entityNotSourced() = _DatabaseNotSaved;
 
-  /// Failure occurring when the application's document directory could not
-  /// be located.
-  const factory Fault.documentDirectoryUnavailable() =
-      _DocumentDirectoryUnavailable;
+  /// Failure occurring when an entity was not successfully saved.
+  const factory Fault.entityNotSaved() = _DatabaseNotSaved;
 
-  /// Failure representing some databse error, consider using another failure
-  /// whenever possible.
-  const factory Fault.database() = _Database;
-
-  /// Failure occurring when the database could not be opened.
-  const factory Fault.databaseNotOpened() = _DatabaseNotOpened;
-
-  /// Failure occurring when the database could not be closed.
-  const factory Fault.databaseNotClosed() = _DatabaseNotClosed;
-
-  /// Failure occurring when something was not successfully saved to database.
-  const factory Fault.databaseNotSaved() = _DatabaseNotSaved;
-
-  /// Failure occurring when something was not successfully deleted
-  /// from database.
-  const factory Fault.databaseNotDeleted() = _DatabaseNotDeleted;
+  /// Failure occurring when an entity was not successfully deleted.
+  const factory Fault.entityNotDeleted() = _DatabaseNotDeleted;
 }
