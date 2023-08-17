@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:isar/isar.dart';
 import 'package:movna/core/modules/isar_module.dart';
+import 'package:movna/data/exceptions.dart';
 import 'package:movna/data/models/activity_model.dart';
 
 @injectable
@@ -14,22 +15,27 @@ class IsarDataBaseSource {
     return await _isar.activityModels.where().sortByStartTimeDesc().findAll();
   }
 
-  /// Save activity to database. Returns the unique ID of the saved object.
-  /// This returned Id should match the one of the given object.
-  Future<Id> saveActivity(ActivityModel model) async {
+  /// Save activity to database.
+  /// Throws a [DatabaseAccessException] if something goes wrong.
+  void saveActivity(ActivityModel model) async {
     final id = await _isar.writeTxn(() async {
       return await _isar.activityModels.put(model);
     });
-    return id;
+    // Throw if saved activity's id is different from provided one.
+    if (id != model.id) {
+      throw DatabaseAccessException();
+    }
   }
 
   /// Delete activity with ID [id] from database.
-  /// Returns whether the activity was successfully deleted or not :
-  /// true when deleted.
-  Future<bool> deleteActivity(Id id) async {
+  /// Throws a [DatabaseAccessException] if something goes wrong
+  /// during deletion.
+  void deleteActivity(Id id) async {
     final deleted = await _isar.writeTxn(() async {
       return await _isar.activityModels.delete(id);
     });
-    return deleted;
+    if (!deleted) {
+      throw DatabaseAccessException();
+    }
   }
 }
