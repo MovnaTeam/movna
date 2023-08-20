@@ -10,9 +10,9 @@ class TimedLocation with _$TimedLocation {
 
   const factory TimedLocation({
     /// The location and movement of the device.
-    @Default(Location()) Location location,
+    required Location location,
 
     /// The time at which this position was determined.
-    DateTime? timestamp,
+    required DateTime timestamp,
   }) = _TimedLocation;
 }

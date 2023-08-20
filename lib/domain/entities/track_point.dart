@@ -9,8 +9,8 @@ class TrackPoint with _$TrackPoint {
   const TrackPoint._();
 
   const factory TrackPoint({
-    /// Timestamp of trackpoint.
-    DateTime? timestamp,
+    /// Time at which this data was captured.
+    required DateTime timestamp,
 
     /// Location with movement data.
     Location? location,

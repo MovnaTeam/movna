@@ -87,7 +87,7 @@ class TrackPointIsarAdapter extends BaseAdapter<TrackPoint, TrackPointModel> {
       location: m.location == null
           ? null
           : locationIsarAdapter.modelToEntity(m.location!),
-      timestamp: m.timestamp?.toUtc(), // Isar stores dates in UTC anyway
+      timestamp: m.timestamp.toUtc(), // Isar stores dates in UTC anyway
       heartBeatPerMinute: m.heartBeatPerMinute,
     );
   }

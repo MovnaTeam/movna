@@ -18,7 +18,7 @@ class TimedLocationAdapter extends BaseAdapter<TimedLocation, Position> {
         speedErrorInMetersPerSecond: m.speedAccuracy,
         speedInMetersPerSecond: m.speed,
       ),
-      timestamp: m.timestamp,
+      timestamp: m.timestamp ?? DateTime.now(),
     );
   }
 }

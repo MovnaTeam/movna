@@ -14,12 +14,8 @@ class TrackSegment with _$TrackSegment {
   }) = _TrackSegment;
 
   /// Starting time of this segment, null if empty.
-  DateTime? get startTime {
-    return trackPoints.firstOrNull?.timestamp;
-  }
+  DateTime? get startTime => trackPoints.firstOrNull?.timestamp;
 
   /// Ending time of this segment, null if empty.
-  DateTime? get stopTime {
-    return trackPoints.lastOrNull?.timestamp;
-  }
+  DateTime? get stopTime => trackPoints.lastOrNull?.timestamp;
 }

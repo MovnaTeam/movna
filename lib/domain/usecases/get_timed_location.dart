@@ -5,8 +5,8 @@ import 'package:movna/domain/repositories/timed_location_repository.dart';
 import 'package:movna/domain/usecases/base_usecases.dart';
 import 'package:result_dart/result_dart.dart';
 
-/// Returns the device current [TimedLocation] or a [Fault] if the location could
-/// not be retrieved.
+/// Returns the device current [TimedLocation] or a [Fault] if the location
+/// could not be retrieved.
 ///
 /// See [LocationRepository.getLocation] for more details.
 @injectable

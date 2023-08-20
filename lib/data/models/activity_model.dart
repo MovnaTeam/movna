@@ -8,11 +8,11 @@ class ActivityModel {
   /// Use startTime as unique identifier.
   Id get id => startTime.microsecondsSinceEpoch;
 
-  DateTime startTime = DateTime.fromMillisecondsSinceEpoch(0);
+  late DateTime startTime;
 
   /// The time zone offset from UTC at the start of activity, in minutes.
   /// Should be between -12 hours (Baker Island) and +14 hours (Kiribati).
-  int startTimeZoneOffsetMinutes = 0;
+  late int startTimeZoneOffsetMinutes;
 
   /// The name of the timezone at the start of the activity, as returned from
   /// [startTime.timeZoneName]
@@ -26,13 +26,13 @@ class ActivityModel {
 
   String? name;
 
-  double? distanceInMeters = 0;
+  double? distanceInMeters;
 
-  int durationInMicroSeconds = 0;
+  late int durationInMicroSeconds;
 
-  double? maxSpeedInMetersPerSecond = 0;
+  double? maxSpeedInMetersPerSecond;
 
-  double? averageSpeedInMetersPerSecond = 0;
+  double? averageSpeedInMetersPerSecond;
 
   double? averageHeartBeatPerMinute;
 
@@ -49,23 +49,22 @@ class TrackSegmentModel {
 @embedded
 class TrackPointModel {
   LocationModel? location;
-  DateTime? timestamp;
+  late DateTime timestamp;
   double? heartBeatPerMinute;
 }
 
 @embedded
 class LocationModel {
-  GpsCoordinatesModel gpsCoordinates = GpsCoordinatesModel();
-  double altitudeInMeters = 0;
-  double errorInMeters = 0;
-  double headingInDegrees = 0;
-  double speedInMetersPerSecond = 0;
-  double speedErrorInMetersPerSecond = 0;
-  DateTime? timestamp;
+  late GpsCoordinatesModel gpsCoordinates;
+  late double altitudeInMeters;
+  late double errorInMeters;
+  late double headingInDegrees;
+  late double speedInMetersPerSecond;
+  late double speedErrorInMetersPerSecond;
 }
 
 @embedded
 class GpsCoordinatesModel {
-  double latitudeInDegrees = 0;
-  double longitudeInDegrees = 0;
+  late double latitudeInDegrees;
+  late double longitudeInDegrees;
 }
