@@ -24,5 +24,12 @@ class Fault with _$Fault {
   /// access the location.
   const factory Fault.locationPermission() = _LocationPermission;
 
-  const factory Fault.adapter() = _Adapter;
+  /// Failure occurring when an entity could not be recovered from its source.
+  const factory Fault.entityNotSourced() = _DatabaseNotSaved;
+
+  /// Failure occurring when an entity was not successfully saved.
+  const factory Fault.entityNotSaved() = _DatabaseNotSaved;
+
+  /// Failure occurring when an entity was not successfully deleted.
+  const factory Fault.entityNotDeleted() = _DatabaseNotDeleted;
 }

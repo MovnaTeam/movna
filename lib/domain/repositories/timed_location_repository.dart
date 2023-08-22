@@ -1,17 +1,17 @@
-import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/entities/location_service_status.dart';
 import 'package:movna/domain/entities/notification_config.dart';
+import 'package:movna/domain/entities/timed_location.dart';
 import 'package:movna/domain/faults.dart';
 import 'package:result_dart/result_dart.dart';
 
-abstract class LocationRepository {
+abstract class TimedLocationRepository {
   /// Get the current device location.
-  Future<Result<Location, Fault>> getLocation();
+  Future<Result<TimedLocation, Fault>> getTimedLocation();
 
   /// Get stream of device locations.
   ///
   /// Specify the foreground notification text using [NotificationConfig]
-  Stream<Result<Location, Fault>> getLocationStream(
+  Stream<Result<TimedLocation, Fault>> getTimedLocationStream(
     NotificationConfig notificationConfig,
   );
 

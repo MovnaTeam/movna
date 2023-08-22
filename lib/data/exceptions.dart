@@ -1,4 +1,4 @@
-/// A [Exception] related to data conversion, such as model to entity.
+/// An [Exception] related to data conversion, such as model to entity.
 ///
 /// As this exception is intended to be used as a wrapper around raised
 /// exceptions raised during conversion it takes in a [causedBy] object that
@@ -17,4 +17,10 @@ Error converting $Source to $Destination
 Caused by: ${causedBy.toString()}
 Stack trace: ${causeStackTrace.toString()}''';
   }
+}
+
+/// An [Exception] related to database accesses, such as read, write, delete.
+class DatabaseAccessException implements Exception {
+  @override
+  String toString() => 'Error accessing database.';
 }
