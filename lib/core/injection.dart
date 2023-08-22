@@ -5,6 +5,4 @@ import 'package:movna/core/injection.config.dart';
 final injector = GetIt.instance;
 
 @InjectableInit()
-Future<void> configureDependencies() async {
-  await injector.init();
-}
+Future configureDependencies() => injector.init();

@@ -6,7 +6,7 @@ import 'package:movna/core/injection.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  configureDependencies();
+  await configureDependencies();
 
   //Setting SystemUIOverlay
   SystemChrome.setSystemUIOverlayStyle(

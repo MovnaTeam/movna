@@ -3,5 +3,20 @@
   "foreground_notification": {
     "text": "Movna keeps track of your location from the background.",
     "title": "Movna app is running..."
+  },
+  "permissions": {
+    "grant": "Grant permission",
+    "location": {
+      "notification": {
+        "body": "This application needs location permissions to keep track of your activity",
+        "title": "Please allow app to access location"
+      }
+    },
+    "notifications": {
+      "notification": {
+        "body": "This application needs notification permissions to keep track of your location while in the background",
+        "title": "Please allow notifications"
+      }
+    }
   }
 }

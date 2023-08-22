@@ -3,5 +3,20 @@
   "foreground_notification": {
     "text": "Cette notification permet à Movna de suivre votre position en arrière plan.",
     "title": "L'application Movna est en cours..."
+  },
+  "permissions": {
+    "grant": "Autoriser",
+    "location": {
+      "notification": {
+        "body": "Cette appliction à besoin d'accéder à votre localisation pour fonctionner.",
+        "title": "Impossible d'accéder à la localisation"
+      }
+    },
+    "notifications": {
+      "notification": {
+        "body": "Cette application a besoin d'afficher des notifications pour suivre votre position en arrière plan",
+        "title": "Autoriser l'affichage de notifications"
+      }
+    }
   }
 }

@@ -14,7 +14,10 @@ class GpsCoordinates with _$GpsCoordinates {
     /// Longitude of position between -90 (included) and 90 (included) degrees
     double longitudeInDegrees,
   ) = _GpsCoordinates;
+
   const GpsCoordinates._();
+
+  factory GpsCoordinates.paris() => const GpsCoordinates(48.864716, 2.349014);
 
   /// Equator radius in meters (WGS84 ellipsoid).
   static const double equatorRadiusInMeters = 6378137.0;

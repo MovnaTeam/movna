@@ -107,4 +107,34 @@ class PermissionRepositoryImpl implements PermissionRepository {
       return const Fault.unknown().toFailure();
     }
   }
+
+  @override
+  Future<Result<bool, Fault>> shouldRequestLocation() async {
+    try {
+      final res = await _permissionSource.shouldRequestLocation();
+      return res.toSuccess();
+    } catch (e, s) {
+      logger.e(
+        'Error on shouldRequestLocation',
+        stackTrace: s,
+        error: e,
+      );
+      return const Fault.unknown().toFailure();
+    }
+  }
+
+  @override
+  Future<Result<bool, Fault>> shouldRequestNotification() async {
+    try {
+      final res = await _permissionSource.shouldRequestNotifications();
+      return res.toSuccess();
+    } catch (e, s) {
+      logger.e(
+        'Error on shouldRequestNotifications',
+        stackTrace: s,
+        error: e,
+      );
+      return const Fault.unknown().toFailure();
+    }
+  }
 }
