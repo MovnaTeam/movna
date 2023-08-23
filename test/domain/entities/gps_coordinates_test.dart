@@ -9,7 +9,9 @@ void main() {
       GpsCoordinates p2 = const GpsCoordinates(90.0, 0.0);
       double distance = p1.distanceToInMeters(p2);
       // With 10m of uncertainty
-      expect(distance, closeTo(10001965.72931165, 10));
+      // Expected value computed here :
+      // https://gps-coordinates.org/distance-between-coordinates.php
+      expect(distance, closeTo(10007543.40, 10));
     },
   );
 }

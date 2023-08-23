@@ -26,9 +26,10 @@ class GpsCoordinates with _$GpsCoordinates {
   /// Polar radius in meters (WGS84 ellipsoid).
   static const double polarRadiusInMeters = 6356752.314245;
 
-  /// Earth approximate radius in meters.
+  /// Earth approximate radius in meters (WGS84 ellipsoid)
+  /// see https://en.wikipedia.org/wiki/World_Geodetic_System.
   static const double earthRadiusInMeters =
-      (equatorRadiusInMeters + polarRadiusInMeters) / 2;
+      (2 * equatorRadiusInMeters + polarRadiusInMeters) / 3;
 
   double get latitudeInRadians => latitudeInDegrees * pi / 180;
 
