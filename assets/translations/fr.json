@@ -8,13 +8,13 @@
     "grant": "Autoriser",
     "location": {
       "notification": {
-        "body": "Cette appliction à besoin d'accéder à votre localisation pour fonctionner.",
+        "body": "Cette application a besoin d'accéder à la localisation de l'appareil pour enregistrer une activité.",
         "title": "Impossible d'accéder à la localisation"
       }
     },
     "notifications": {
       "notification": {
-        "body": "Cette application a besoin d'afficher des notifications pour suivre votre position en arrière plan",
+        "body": "Cette application a besoin d'afficher des notifications pour suivre la position en arrière plan",
         "title": "Autoriser l'affichage de notifications"
       }
     }

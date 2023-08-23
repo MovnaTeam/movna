@@ -17,7 +17,8 @@ class GpsCoordinates with _$GpsCoordinates {
 
   const GpsCoordinates._();
 
-  factory GpsCoordinates.paris() => const GpsCoordinates(48.864716, 2.349014);
+  /// The kilometer 0 of french roads (point zero des routes de France)
+  static const GpsCoordinates paris = GpsCoordinates(48.85341, 2.3488);
 
   /// Equator radius in meters (WGS84 ellipsoid).
   static const double equatorRadiusInMeters = 6378137.0;

@@ -41,13 +41,13 @@ class _ActivityMapViewState extends State<ActivityMapView>
         value.fold(
           (lastCoords) {
             _controller.move(
-              lastCoords.latLng,
+              lastCoords.toLatLng(),
               16,
             );
           },
           (f) {
             _controller.move(
-              GpsCoordinates.paris().latLng,
+              GpsCoordinates.paris.toLatLng(),
               6,
             );
           },
@@ -73,14 +73,14 @@ class _ActivityMapViewState extends State<ActivityMapView>
             state.mapOrNull(loaded: (loaded) => loaded.currentLocation);
         if (location != null) {
           _controller.animateTo(
-            dest: location.gpsCoordinates.latLng,
+            dest: location.gpsCoordinates.toLatLng(),
           );
         }
       },
       child: FlutterMap(
         mapController: _controller,
         options: MapOptions(
-          center: GpsCoordinates.paris().latLng,
+          center: GpsCoordinates.paris.toLatLng(),
           zoom: 6,
           maxZoom: MapConstants.maxZoom,
         ),

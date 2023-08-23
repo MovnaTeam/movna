@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/domain/entities/system_permission.dart';
+import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/usecases/permission_usecases/get_location_permission.dart';
 import 'package:movna/domain/usecases/permission_usecases/get_notification_permission.dart';
 import 'package:movna/domain/usecases/permission_usecases/request_location_permission.dart';
@@ -9,6 +10,7 @@ import 'package:movna/domain/usecases/permission_usecases/request_notification_p
 import 'package:movna/domain/usecases/permission_usecases/should_request_location_permission.dart';
 import 'package:movna/domain/usecases/permission_usecases/should_request_notifications_permission.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:result_dart/result_dart.dart';
 
 part 'permissions_cubit.freezed.dart';
 
@@ -69,42 +71,14 @@ class PermissionsCubit extends Cubit<PermissionsState> {
     }
     final paramsToUse = overrideParams ?? _params;
 
-    SystemPermissionStatusHolder? notificationPermission;
-    SystemPermissionStatusHolder? locationPermission;
+    Result<SystemPermissionStatus, Fault>? notificationPermission;
+    Result<SystemPermissionStatus, Fault>? locationPermission;
 
     if (paramsToUse.requestNotifications) {
-      final notificationStatusResult = await _getNotificationPermission();
-      notificationStatusResult.fold(
-        (status) {
-          notificationPermission = SystemPermissionStatusHolder(
-            demanded: true,
-            status: status,
-          );
-        },
-        (fault) {
-          notificationPermission = SystemPermissionStatusHolder(
-            demanded: true,
-            fault: fault,
-          );
-        },
-      );
+      notificationPermission = await _getNotificationPermission();
     }
     if (paramsToUse.requestLocation) {
-      final locationStatusResult = await _getLocationPermission();
-      locationStatusResult.fold(
-        (status) {
-          locationPermission = SystemPermissionStatusHolder(
-            demanded: true,
-            status: status,
-          );
-        },
-        (fault) {
-          locationPermission = SystemPermissionStatusHolder(
-            demanded: true,
-            fault: fault,
-          );
-        },
-      );
+      locationPermission = await _getLocationPermission();
     }
     // Permission request might depend on user input so check cubit is not
     // closed before emitting.
@@ -134,43 +108,15 @@ class PermissionsCubit extends Cubit<PermissionsState> {
     if (!silent) {
       emit(const PermissionsState.loading());
     }
-    SystemPermissionStatusHolder? notificationPermission;
-    SystemPermissionStatusHolder? locationPermission;
+    Result<SystemPermissionStatus, Fault>? notificationPermission;
+    Result<SystemPermissionStatus, Fault>? locationPermission;
     final paramsToUse = overrideParams ?? _params;
 
     if (paramsToUse.requestNotifications) {
-      final notificationStatusResult = await _requestNotificationPermission();
-      notificationStatusResult.fold(
-        (status) {
-          notificationPermission = SystemPermissionStatusHolder(
-            demanded: true,
-            status: status,
-          );
-        },
-        (fault) {
-          notificationPermission = SystemPermissionStatusHolder(
-            demanded: true,
-            fault: fault,
-          );
-        },
-      );
+      notificationPermission = await _requestNotificationPermission();
     }
     if (paramsToUse.requestLocation) {
-      final locationStatusResult = await _requestLocationPermission();
-      locationStatusResult.fold(
-        (status) {
-          locationPermission = SystemPermissionStatusHolder(
-            demanded: true,
-            status: status,
-          );
-        },
-        (fault) {
-          locationPermission = SystemPermissionStatusHolder(
-            demanded: true,
-            fault: fault,
-          );
-        },
-      );
+      locationPermission = await _requestLocationPermission();
     }
     // Permission request might depend on user input so check cubit is not
     // closed before emitting.
@@ -228,8 +174,8 @@ class PermissionsCubit extends Cubit<PermissionsState> {
   /// used or [SystemPermissionStatusHolder.notDemanded] if no current
   /// holder exists.
   void emitState(
-    SystemPermissionStatusHolder? notification,
-    SystemPermissionStatusHolder? location,
+    Result<SystemPermissionStatus, Fault>? notification,
+    Result<SystemPermissionStatus, Fault>? location,
   ) async {
     state.maybeMap(
       loaded: (loaded) {
@@ -244,10 +190,8 @@ class PermissionsCubit extends Cubit<PermissionsState> {
       orElse: () {
         emit(
           PermissionsState.loaded(
-            notificationPermission:
-                notification ?? SystemPermissionStatusHolder.notDemanded,
-            locationPermission:
-                location ?? SystemPermissionStatusHolder.notDemanded,
+            notificationPermission: notification,
+            locationPermission: location,
           ),
         );
       },
@@ -269,8 +213,8 @@ class PermissionsState with _$PermissionsState {
   /// On failure [SystemPermissionStatusHolder.failure] contains
   /// the failure's reason.
   const factory PermissionsState.loaded({
-    required SystemPermissionStatusHolder notificationPermission,
-    required SystemPermissionStatusHolder locationPermission,
+    required Result<SystemPermissionStatus, Fault>? notificationPermission,
+    required Result<SystemPermissionStatus, Fault>? locationPermission,
   }) = _Loaded;
 
   const factory PermissionsState.loading() = _Loading;

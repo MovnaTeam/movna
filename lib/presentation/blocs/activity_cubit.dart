@@ -69,7 +69,7 @@ class ActivityCubit extends Cubit<ActivityState> {
         permissionsState.mapOrNull(
           loaded: (loadedPermissions) {
             // Location permission is granted
-            if (loadedPermissions.locationPermission.status?.isGranted ??
+            if (loadedPermissions.locationPermission?.getOrNull()?.isGranted ??
                 false) {
               // Current state is error, retry to get location as the cause for
               // error has gone

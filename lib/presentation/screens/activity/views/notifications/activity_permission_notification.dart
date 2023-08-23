@@ -63,8 +63,9 @@ class ActivityPermissionNotificationWidget extends StatelessWidget {
             loaded: (notifications, location) {
               final bool isPermissionGranted = switch (permissionType) {
                 PermissionType.notifications =>
-                  notifications.status?.isGranted ?? false,
-                PermissionType.location => location.status?.isGranted ?? false,
+                  notifications?.getOrNull()?.isGranted ?? false,
+                PermissionType.location =>
+                  location?.getOrNull()?.isGranted ?? false,
               };
               if (isPermissionGranted) {
                 return const NoneWidget();
