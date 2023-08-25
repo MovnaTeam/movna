@@ -7,6 +7,10 @@ import 'package:injectable/injectable.dart';
 /// Datasource that interfaces with a location provider to retrieve the device's
 /// location (or position)
 abstract class PositionSource {
+  /// Returns the device last known position. Null when no known position
+  /// is available.
+  Future<Position?> getLastKnownPosition();
+
   /// Returns the current device location.
   Future<Position> getPosition();
 
@@ -28,6 +32,11 @@ class PositionSourceImpl extends PositionSource {
   static const _channel = MethodChannel('dev.movna.app/location');
   static const _enableLocationServiceMethod = 'enable_service';
   static const _positionRefreshInterval = Duration(seconds: 1);
+
+  @override
+  Future<Position?> getLastKnownPosition() async {
+    return Geolocator.getLastKnownPosition();
+  }
 
   @override
   Future<Position> getPosition() async {

@@ -30,6 +30,25 @@ class TimedLocationRepositoryImpl
   final NotificationConfigAdapter _notificationConfigAdapter;
 
   @override
+  Future<Result<TimedLocation, Fault>> getLastKnownLocation() async {
+    try {
+      final position = await _positionSource.getLastKnownPosition();
+      final location = _timedLocationAdapter.modelToEntityOrNull(position);
+      return location == null
+          ? const Fault.location().toFailure()
+          : location.toSuccess();
+    } catch (e, s) {
+      logger.e(
+        'Error getting position',
+        error: e,
+        stackTrace: s,
+      );
+      final fault = _convertDataSourceException(e);
+      return fault.toFailure();
+    }
+  }
+
+  @override
   Future<Result<TimedLocation, Fault>> getTimedLocation() async {
     try {
       Position position = await _positionSource.getPosition();

@@ -1,15 +1,19 @@
 import 'package:injectable/injectable.dart';
-import 'package:movna/domain/entities/gps_coordinates.dart';
+import 'package:movna/domain/entities/timed_location.dart';
 import 'package:movna/domain/faults.dart';
+import 'package:movna/domain/repositories/timed_location_repository.dart';
 import 'package:movna/domain/usecases/base_usecases.dart';
 import 'package:result_dart/result_dart.dart';
 
-/// A usecase that returns the last known coordinates of the device
+/// A usecase that returns the last known location of the device.
 @injectable
-class GetLastCoords implements UseCaseAsync<GpsCoordinates, void> {
+class GetLastKnownLocation implements UseCaseAsync<TimedLocation, void> {
+  GetLastKnownLocation({required this.repository});
+
+  final TimedLocationRepository repository;
+
   @override
-  Future<Result<GpsCoordinates, Fault>> call([void params]) async {
-    // TODO https://github.com/MovnaTeam/movna/issues/20
-    return const Fault.unknown().toFailure();
+  Future<Result<TimedLocation, Fault>> call([void params]) async {
+    return repository.getLastKnownLocation();
   }
 }
