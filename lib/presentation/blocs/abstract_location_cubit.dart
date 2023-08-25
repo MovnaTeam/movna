@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:movna/domain/entities/gps_coordinates.dart';
 import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/faults.dart';
 
@@ -13,12 +12,11 @@ abstract class AbstractLocationCubit<T extends AbstractLocationState>
 }
 
 abstract interface class AbstractLocationState {
-  GpsCoordinates? get coordinates;
   Location? get location;
+
   LocationStateType get type;
+
   Fault? get fault;
 }
 
-enum LocationStateType {
-  initial, loading, error, loaded
-}
+enum LocationStateType { initial, loading, error, loaded }
