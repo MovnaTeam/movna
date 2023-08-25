@@ -30,7 +30,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
     }
   }
 
@@ -48,7 +48,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
     }
   }
 
@@ -67,7 +67,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
     }
   }
 
@@ -85,7 +85,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
     }
   }
 
@@ -104,7 +104,37 @@ class PermissionRepositoryImpl implements PermissionRepository {
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
+    }
+  }
+
+  @override
+  Future<Result<bool, Fault>> shouldRequestLocation() async {
+    try {
+      final res = await _permissionSource.shouldRequestLocation();
+      return res.toSuccess();
+    } catch (e, s) {
+      logger.e(
+        'Error on shouldRequestLocation',
+        stackTrace: s,
+        error: e,
+      );
+      return const Fault.permission().toFailure();
+    }
+  }
+
+  @override
+  Future<Result<bool, Fault>> shouldRequestNotification() async {
+    try {
+      final res = await _permissionSource.shouldRequestNotifications();
+      return res.toSuccess();
+    } catch (e, s) {
+      logger.e(
+        'Error on shouldRequestNotifications',
+        stackTrace: s,
+        error: e,
+      );
+      return const Fault.permission().toFailure();
     }
   }
 }

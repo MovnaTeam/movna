@@ -17,4 +17,12 @@ abstract interface class PermissionRepository {
   Future<Result<SystemPermissionStatus, Fault>> requestNotificationPermission();
 
   Future<Result<SystemPermissionStatus, Fault>> getNotificationPermission();
+
+  /// Returns whether or not the application should request the location
+  /// permission via a dialog or simply redirect the user to the app's settings.
+  Future<Result<bool, Fault>> shouldRequestLocation();
+
+  /// Returns whether or not the application should request the notifications
+  /// permission via a dialog or simply redirect the user to the app's settings.
+  Future<Result<bool, Fault>> shouldRequestNotification();
 }

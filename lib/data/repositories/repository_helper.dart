@@ -42,7 +42,7 @@ mixin RepositoryHelper {
             stackTrace: stack,
           );
           final failure = errorHandler(error);
-          sink.add(Failure(failure));
+          sink.add(failure.toFailure());
         },
       ),
     );

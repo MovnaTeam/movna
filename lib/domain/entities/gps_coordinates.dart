@@ -14,7 +14,11 @@ class GpsCoordinates with _$GpsCoordinates {
     /// Longitude of position between -90 (included) and 90 (included) degrees
     double longitudeInDegrees,
   ) = _GpsCoordinates;
+
   const GpsCoordinates._();
+
+  /// The kilometer 0 of french roads (point zero des routes de France)
+  static const GpsCoordinates paris = GpsCoordinates(48.85341, 2.3488);
 
   /// Equator radius in meters (WGS84 ellipsoid).
   static const double equatorRadiusInMeters = 6378137.0;
