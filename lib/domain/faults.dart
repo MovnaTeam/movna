@@ -32,4 +32,8 @@ class Fault with _$Fault {
 
   /// Failure occurring when an entity was not successfully deleted.
   const factory Fault.entityNotDeleted() = _EntityNotDeleted;
+
+  /// Occurring when the app cannot retrieve permissions, without a more precise
+  /// reason.
+  const factory Fault.permission() = _Permission;
 }

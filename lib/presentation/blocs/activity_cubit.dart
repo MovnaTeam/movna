@@ -1,13 +1,14 @@
 import 'dart:async';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:movna/domain/entities/gps_coordinates.dart';
 import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/entities/notification_config.dart';
 import 'package:movna/domain/entities/timed_location.dart';
 import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/usecases/get_timed_location_stream.dart';
+import 'package:movna/presentation/blocs/abstract_location_cubit.dart';
 import 'package:movna/presentation/blocs/permissions_cubit.dart';
 import 'package:mutex/mutex.dart';
 import 'package:result_dart/result_dart.dart';
@@ -34,7 +35,7 @@ class ActivityCubitParams with _$ActivityCubitParams {
 ///
 /// Takes in [ActivityCubitParams].
 @injectable
-class ActivityCubit extends Cubit<ActivityState> {
+class ActivityCubit extends AbstractLocationCubit<ActivityState> {
   ActivityCubit(
     this._getLocationStream,
     @factoryParam this._params,
@@ -121,18 +122,11 @@ class ActivityCubit extends Cubit<ActivityState> {
                 );
               },
               (fault) {
-                // If state is loaded ignore the failure, otherwise emit an
-                // error
-                state.maybeMap(
-                  loaded: (_) {},
-                  orElse: () {
-                    emit(
-                      ActivityState.error(
-                        fault: fault,
-                        lastKnownLocation: _lastKnownLocation,
-                      ),
-                    );
-                  },
+                emit(
+                  ActivityState.error(
+                    fault: fault,
+                    lastKnownLocation: _lastKnownLocation,
+                  ),
                 );
                 _closeLocationSubscription();
               },
@@ -168,7 +162,9 @@ class ActivityCubit extends Cubit<ActivityState> {
 }
 
 @freezed
-class ActivityState with _$ActivityState {
+class ActivityState with _$ActivityState implements AbstractLocationState {
+  const ActivityState._();
+
   const factory ActivityState.loaded({
     required Location currentLocation,
   }) = _ActivityState;
@@ -183,4 +179,41 @@ class ActivityState with _$ActivityState {
     required Fault fault,
     Location? lastKnownLocation,
   }) = _Error;
+
+  @override
+  GpsCoordinates? get coordinates {
+    return map(
+      loaded: (loaded) => loaded.currentLocation.gpsCoordinates,
+      loading: (loading) => loading.lastKnownLocation?.gpsCoordinates,
+      error: (error) => error.lastKnownLocation?.gpsCoordinates,
+      initial: (_) => null,
+    );
+  }
+
+  @override
+  Fault? get fault {
+    return mapOrNull(
+      error: (error) => error.fault,
+    );
+  }
+
+  @override
+  Location? get location {
+    return map(
+      loaded: (loaded) => loaded.currentLocation,
+      loading: (loading) => loading.lastKnownLocation,
+      error: (error) => error.lastKnownLocation,
+      initial: (_) => null,
+    );
+  }
+
+  @override
+  LocationStateType get type {
+    return map(
+      loaded: (loaded) => LocationStateType.loaded,
+      loading: (loading) => LocationStateType.loading,
+      error: (error) => LocationStateType.error,
+      initial: (_) => LocationStateType.loaded,
+    );
+  }
 }

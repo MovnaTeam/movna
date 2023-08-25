@@ -30,7 +30,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
     }
   }
 
@@ -48,7 +48,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
     }
   }
 
@@ -67,7 +67,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
     }
   }
 
@@ -85,7 +85,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
     }
   }
 
@@ -104,7 +104,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
     }
   }
 
@@ -119,7 +119,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
         stackTrace: s,
         error: e,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
     }
   }
 
@@ -134,7 +134,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
         stackTrace: s,
         error: e,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.permission().toFailure();
     }
   }
 }

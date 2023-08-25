@@ -8,7 +8,7 @@
     "grant": "Autoriser",
     "location": {
       "notification": {
-        "body": "Cette application a besoin d'accéder à la localisation de l'appareil pour enregistrer une activité.",
+        "body": "Cette application a besoin d'accéder à la localisation de l'appareil pour enregistrer une activité",
         "title": "Impossible d'accéder à la localisation"
       }
     },

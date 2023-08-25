@@ -91,7 +91,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
             userAgentPackageName: 'dev.movna.app',
             tileProvider: injector<FMTCTileProvider>(),
           ),
-          const UserLocationMarker(),
+          const UserLocationMarker<ActivityCubit, ActivityState>(),
           BlocBuilder<ActivityCubit, ActivityState>(
             buildWhen: (prev, next) => prev.runtimeType != next.runtimeType,
             builder: (context, state) {
