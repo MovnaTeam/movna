@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/core/logger.dart';
+import 'package:movna/data/adapters/location_service_status_adapter.dart';
 import 'package:movna/data/adapters/notification_config_adapter.dart';
 import 'package:movna/data/adapters/timed_location_adapter.dart';
 import 'package:movna/data/datasources/position_source.dart';
@@ -23,11 +24,13 @@ class TimedLocationRepositoryImpl
     this._positionSource,
     this._timedLocationAdapter,
     this._notificationConfigAdapter,
+    this._locationServiceStatusAdapter,
   );
 
   final PositionSource _positionSource;
   final TimedLocationAdapter _timedLocationAdapter;
   final NotificationConfigAdapter _notificationConfigAdapter;
+  final LocationServiceStatusAdapter _locationServiceStatusAdapter;
 
   @override
   Future<Result<TimedLocation, Fault>> getLastKnownLocation() async {
@@ -115,7 +118,7 @@ class TimedLocationRepositoryImpl
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.location().toFailure();
     }
   }
 
@@ -130,7 +133,28 @@ class TimedLocationRepositoryImpl
         error: e,
         stackTrace: s,
       );
-      return const Fault.unknown().toFailure();
+      return const Fault.location().toFailure();
+    }
+  }
+
+  @override
+  Stream<Result<LocationServiceStatus, Fault>>
+      watchLocationServiceStatus() async* {
+    try {
+      final statusStream = _positionSource.watchLocationServiceStatus();
+      yield* convertStream(
+        errorLoggerMessage: 'Error in location service status stream',
+        errorHandler: (_) => const Fault.location(),
+        adapter: _locationServiceStatusAdapter,
+        modelStream: statusStream,
+      );
+    } catch (e, s) {
+      logger.e(
+        'Error getting location service status stream',
+        error: e,
+        stackTrace: s,
+      );
+      yield const Fault.location().toFailure();
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
+import 'package:movna/presentation/screens/activity/views/notifications/activity_location_service_notification.dart';
 import 'package:movna/presentation/screens/activity/views/notifications/activity_permission_notification.dart';
 
 /// This widget shows a variety of notification-formatted cards depending on the
@@ -18,6 +19,7 @@ class ActivityNotifications extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        const ActivityLocationServiceNotification(),
         ActivityPermissionNotificationWidget(
           title: LocaleKeys.permissions.notifications.notification
               .title()

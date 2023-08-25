@@ -4,6 +4,7 @@ import 'package:movna/core/injection.dart';
 import 'package:movna/domain/entities/notification_config.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
+import 'package:movna/presentation/blocs/location_service_cubit.dart';
 import 'package:movna/presentation/blocs/permissions_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/activity/activity_screen_content.dart';
@@ -23,6 +24,9 @@ class ActivityScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<LocationServiceCubit>(
+          create: (_) => injector(),
+        ),
         BlocProvider<PermissionsCubit>(
           lazy: false,
           create: (_) {
@@ -48,6 +52,8 @@ class ActivityScreen extends StatelessWidget {
                       .translate(context),
                 ),
                 permissionsCubit: providerContext.read<PermissionsCubit>(),
+                locationServiceCubit:
+                    providerContext.read<LocationServiceCubit>(),
               ),
             )..listenToLocation();
           },

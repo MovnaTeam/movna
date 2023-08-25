@@ -24,6 +24,9 @@ abstract class PositionSource {
 
   Future<bool> isLocationServiceEnabled();
 
+  /// Listens to the status of the location service and emits every change.
+  Stream<ServiceStatus> watchLocationServiceStatus();
+
   Future<void> requestLocationService();
 }
 
@@ -69,5 +72,10 @@ class PositionSourceImpl extends PositionSource {
   @override
   Future<void> requestLocationService() async {
     await _channel.invokeMethod(_enableLocationServiceMethod);
+  }
+
+  @override
+  Stream<ServiceStatus> watchLocationServiceStatus() {
+    return Geolocator.getServiceStatusStream();
   }
 }

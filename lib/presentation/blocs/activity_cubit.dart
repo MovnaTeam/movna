@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/domain/entities/location.dart';
+import 'package:movna/domain/entities/location_service_status.dart';
 import 'package:movna/domain/entities/notification_config.dart';
 import 'package:movna/domain/entities/timed_location.dart';
 import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/domain/usecases/get_timed_location_stream.dart';
 import 'package:movna/presentation/blocs/abstract_location_cubit.dart';
+import 'package:movna/presentation/blocs/location_service_cubit.dart';
 import 'package:movna/presentation/blocs/permissions_cubit.dart';
 import 'package:mutex/mutex.dart';
 import 'package:result_dart/result_dart.dart';
@@ -27,6 +29,7 @@ class ActivityCubitParams with _$ActivityCubitParams {
   const factory ActivityCubitParams({
     required NotificationConfig notificationConfig,
     PermissionsCubit? permissionsCubit,
+    LocationServiceCubit? locationServiceCubit,
   }) = _ActivityCubitParams;
 }
 
@@ -42,6 +45,7 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
     this._getLocationStream,
   ) : super(const ActivityState.initial()) {
     _initPermissionsSubscription();
+    _initLocationServiceStatusSubscription();
   }
 
   final GetLastKnownLocation _getLastKnownLocation;
@@ -52,6 +56,8 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
   final Mutex _locationSubscriptionMutex = Mutex();
 
   late final StreamSubscription<PermissionsState>? _permissionsSubscription;
+  late final StreamSubscription<LocationServiceState>?
+      _locationServiceStatusSubscription;
 
   /// Represents the last location known by this cubit.
   ///
@@ -76,6 +82,33 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
                 false) {
               // Current state is error, retry to get location as the cause for
               // error has gone
+              state.mapOrNull(
+                error: (_) {
+                  retryTrackLocation();
+                },
+              );
+            }
+          },
+        );
+      },
+    );
+  }
+
+  /// Listens to changes in the [LocationServiceCubit].
+  ///
+  /// If a the service status changes eventually retry to get the location if
+  /// the location stream was on error.
+  void _initLocationServiceStatusSubscription() {
+    _locationServiceStatusSubscription =
+        _params.locationServiceCubit?.stream.listen(
+      (statusState) {
+        // Called when the service status changes
+        statusState.whenOrNull(
+          loaded: (status) {
+            // Service is enabled
+            if (status == LocationServiceStatus.enabled) {
+              // Current state is error, retry to get location as the cause for
+              // the error has gone
               state.mapOrNull(
                 error: (_) {
                   retryTrackLocation();
@@ -175,6 +208,7 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
 
   Future<void> _closeSubscriptions() async {
     await _permissionsSubscription?.cancel();
+    await _locationServiceStatusSubscription?.cancel();
     await _closeLocationSubscription();
   }
 

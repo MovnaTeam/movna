@@ -11,6 +11,8 @@ class NotificationConfigAdapter
     return ForegroundNotificationConfig(
       notificationTitle: e.title,
       notificationText: e.text,
+      notificationIcon: const AndroidResource(name: 'ic_stat_name'),
+      setOngoing: true,
     );
   }
 }
