@@ -39,7 +39,7 @@ class TimedLocationRepositoryImpl
           : location.toSuccess();
     } catch (e, s) {
       logger.e(
-        'Error getting position',
+        'Error getting last known position',
         error: e,
         stackTrace: s,
       );
