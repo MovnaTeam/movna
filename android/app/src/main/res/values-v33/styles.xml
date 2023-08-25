@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Specific app splashscreen setting the icon, branding image and background color.
+    Forces the splashscreen to show the icon
+    Changes the activity theme to NormalTheme when the splash screen ends -->
+    <style name="Theme.Movna.Splash" parent="NightAdjusted.Theme.Splash">
+        <item name="windowSplashScreenBackground">@color/splashScreenBackground</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_screen_icon</item>
+        <item name="android:windowSplashScreenBrandingImage">@drawable/splash_screen_branding_image
+        </item>
+        <item name="postSplashScreenTheme">@style/NormalTheme</item>
+        <item name="android:windowSplashScreenBehavior">icon_preferred</item>
+    </style>
+</resources>

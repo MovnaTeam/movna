@@ -1,7 +1,7 @@
 package dev.movna.app
 
-import android.content.IntentSender
 import android.content.Intent
+import android.content.IntentSender
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:movna/jsons.dart';
-import 'package:movna/presentation/locale/locales_helper.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:movna/assets.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -9,7 +9,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(LocaleKeys.appTitle().translate(context)),
+        title: Center(child: SvgPicture.asset(Assets.movnaLogo)),
       ),
     );
   }
