@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:movna/domain/entities/gps_coordinates.dart';
 import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/entities/notification_config.dart';
 import 'package:movna/domain/entities/timed_location.dart';
 import 'package:movna/domain/faults.dart';
+import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/domain/usecases/get_timed_location_stream.dart';
 import 'package:movna/presentation/blocs/abstract_location_cubit.dart';
 import 'package:movna/presentation/blocs/permissions_cubit.dart';
@@ -37,12 +37,14 @@ class ActivityCubitParams with _$ActivityCubitParams {
 @injectable
 class ActivityCubit extends AbstractLocationCubit<ActivityState> {
   ActivityCubit(
-    this._getLocationStream,
     @factoryParam this._params,
+    this._getLastKnownLocation,
+    this._getLocationStream,
   ) : super(const ActivityState.initial()) {
     _initPermissionsSubscription();
   }
 
+  final GetLastKnownLocation _getLastKnownLocation;
   final GetLocationStream _getLocationStream;
   final ActivityCubitParams _params;
 
@@ -103,6 +105,16 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
   /// stream.
   void listenToLocation() {
     emit(ActivityState.loading(lastKnownLocation: _lastKnownLocation));
+
+    // First try to get the last known location, generally faster.
+    _getLastKnownLocation().then((result) {
+      result.onSuccess((success) {
+        _lastKnownLocation = success.location;
+        emit(ActivityState.loading(lastKnownLocation: _lastKnownLocation));
+      });
+    });
+
+    // Actually listen to location change
     _locationSubscriptionMutex.protect(
       () async {
         if (_locationSubscription != null) {
@@ -179,16 +191,6 @@ class ActivityState with _$ActivityState implements AbstractLocationState {
     required Fault fault,
     Location? lastKnownLocation,
   }) = _Error;
-
-  @override
-  GpsCoordinates? get coordinates {
-    return map(
-      loaded: (loaded) => loaded.currentLocation.gpsCoordinates,
-      loading: (loading) => loading.lastKnownLocation?.gpsCoordinates,
-      error: (error) => error.lastKnownLocation?.gpsCoordinates,
-      initial: (_) => null,
-    );
-  }
 
   @override
   Fault? get fault {
