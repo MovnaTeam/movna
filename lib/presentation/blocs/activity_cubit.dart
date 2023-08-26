@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:movna/domain/entities/gps_coordinates.dart';
 import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/entities/notification_config.dart';
 import 'package:movna/domain/entities/timed_location.dart';
@@ -179,16 +178,6 @@ class ActivityState with _$ActivityState implements AbstractLocationState {
     required Fault fault,
     Location? lastKnownLocation,
   }) = _Error;
-
-  @override
-  GpsCoordinates? get coordinates {
-    return map(
-      loaded: (loaded) => loaded.currentLocation.gpsCoordinates,
-      loading: (loading) => loading.lastKnownLocation?.gpsCoordinates,
-      error: (error) => error.lastKnownLocation?.gpsCoordinates,
-      initial: (_) => null,
-    );
-  }
 
   @override
   Fault? get fault {
