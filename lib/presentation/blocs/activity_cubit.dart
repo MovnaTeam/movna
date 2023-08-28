@@ -116,8 +116,9 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
             result.onSuccess(
               (success) {
                 _lastKnownLocation = success.location;
-                emit(ActivityState.loading(
-                    lastKnownLocation: _lastKnownLocation));
+                emit(
+                  ActivityState.loading(lastKnownLocation: _lastKnownLocation),
+                );
               },
             );
           },
