@@ -64,7 +64,7 @@ abstract class BaseAdapter<Entity, Model> {
   /// Converts a model to an entity and returns null if the conversion failed.
   Entity? tryModelToEntity(Model? model) {
     try {
-      return model == null ? null : modelToEntity(model);
+      return modelToEntityOrNull(model);
     } catch (e) {
       return null;
     }
@@ -73,7 +73,7 @@ abstract class BaseAdapter<Entity, Model> {
   /// Converts an Entity to a model and returns null if the conversion failed.
   Model? tryEntityToModel(Entity? entity) {
     try {
-      return entity == null ? null : entityToModel(entity);
+      return entityToModelOrNull(entity);
     } catch (e) {
       return null;
     }

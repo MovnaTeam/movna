@@ -107,18 +107,23 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
     emit(ActivityState.loading(lastKnownLocation: _lastKnownLocation));
 
     // First try to get the last known location, generally faster.
-    _getLastKnownLocation().then((result) {
-      // Only emit if state is not loaded
-      state.maybeMap(
-        loaded: (state) {},
-        orElse: () {
-          result.onSuccess((success) {
-            _lastKnownLocation = success.location;
-            emit(ActivityState.loading(lastKnownLocation: _lastKnownLocation));
-          });
-        },
-      );
-    });
+    _getLastKnownLocation().then(
+      (result) {
+        // Only emit if state is not loaded
+        state.maybeMap(
+          loaded: (state) {},
+          orElse: () {
+            result.onSuccess(
+              (success) {
+                _lastKnownLocation = success.location;
+                emit(ActivityState.loading(
+                    lastKnownLocation: _lastKnownLocation));
+              },
+            );
+          },
+        );
+      },
+    );
 
     // Actually listen to location change
     _locationSubscriptionMutex.protect(
