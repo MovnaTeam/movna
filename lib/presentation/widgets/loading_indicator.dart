@@ -33,8 +33,6 @@ class IconSpinner extends StatefulWidget {
   State<IconSpinner> createState() => _IconSpinnerState();
 }
 
-/// [AnimationController]s can be created with `vsync: this` because of
-/// [TickerProviderStateMixin].
 class _IconSpinnerState extends State<IconSpinner>
     with TickerProviderStateMixin {
   _IconSpinnerState();
@@ -58,6 +56,8 @@ class _IconSpinnerState extends State<IconSpinner>
   @override
   Widget build(BuildContext context) {
     return Center(
+      // This stack relies on the fact that the two provided svg have the same
+      // width, and a height adjusted so that their center align.
       child: Stack(
         alignment: AlignmentDirectional.center,
         children: [
