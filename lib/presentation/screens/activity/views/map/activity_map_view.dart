@@ -15,8 +15,8 @@ import 'package:movna/presentation/widgets/none_widget.dart';
 
 /// Displays a map with location information about the current activity.
 ///
-/// Initializes the map at the last known location using [GetLastCoords] or to
-/// [GpsCoordinates.paris] if no previous location could be found.
+/// Initializes the map at the last known location using [GetLastKnownLocation]
+/// or to [GpsCoordinates.paris] if no previous location could be found.
 class ActivityMapView extends StatefulWidget {
   const ActivityMapView({super.key});
 
@@ -35,13 +35,13 @@ class _ActivityMapViewState extends State<ActivityMapView>
 
   @override
   void initState() {
-    // Get last coords and set controller to the given coordinates or to Paris
-    injector<GetLastCoords>()().then(
+    // Get last location and set controller to the given coordinates or to Paris
+    injector<GetLastKnownLocation>()().then(
       (value) {
         value.fold(
-          (lastCoords) {
+          (lastLocation) {
             _controller.move(
-              lastCoords.toLatLng(),
+              lastLocation.location.gpsCoordinates.toLatLng(),
               16,
             );
           },

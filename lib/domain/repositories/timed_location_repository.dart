@@ -5,6 +5,9 @@ import 'package:movna/domain/faults.dart';
 import 'package:result_dart/result_dart.dart';
 
 abstract class TimedLocationRepository {
+  /// Get the last known device location.
+  Future<Result<TimedLocation, Fault>> getLastKnownLocation();
+
   /// Get the current device location.
   Future<Result<TimedLocation, Fault>> getTimedLocation();
 

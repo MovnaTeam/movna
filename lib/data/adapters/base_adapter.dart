@@ -49,13 +49,31 @@ abstract class BaseAdapter<Entity, Model> {
     throw UnimplementedError();
   }
 
-  /// Converts a model to an entity and returns null if the conversion failed
+  /// Converts a model to an entity and returns null if given model is null.
+  /// Can still throw exception if conversion fails.
+  Entity? modelToEntityOrNull(Model? model) {
+    return model == null ? null : modelToEntity(model);
+  }
+
+  /// Converts an entity to a model and returns null if given entity is null.
+  /// Can still throw exception if conversion fails.
+  Model? entityToModelOrNull(Entity? entity) {
+    return entity == null ? null : entityToModel(entity);
+  }
+
+  /// Converts a model to an entity and returns null if the conversion failed.
   Entity? tryModelToEntity(Model? model) {
     try {
-      if (model == null) {
-        return null;
-      }
-      return modelToEntity(model);
+      return modelToEntityOrNull(model);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Converts an Entity to a model and returns null if the conversion failed.
+  Model? tryEntityToModel(Entity? entity) {
+    try {
+      return entityToModelOrNull(entity);
     } catch (e) {
       return null;
     }
