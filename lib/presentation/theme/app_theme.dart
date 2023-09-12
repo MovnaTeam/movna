@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:movna/assets.dart';
 
 part 'color_scheme.dart';
+part 'colors.dart';
 part 'text_theme.dart';
 
 @injectable
@@ -25,6 +26,17 @@ class AppTheme {
       },
       fontFamily: Fonts.poppins,
       textTheme: _textTheme,
+      extensions: [
+        switch (brightness) {
+          Brightness.light => _lightCustomColors,
+          Brightness.dark => _darkCustomColors,
+        },
+      ],
     );
   }
+}
+
+/// Small set of extensions to easily retrieve [ThemeExtension]s from a theme.
+extension ThemeExtensionGetter on ThemeData {
+  CustomColors get customColors => extension<CustomColors>()!;
 }

@@ -20,6 +20,8 @@ abstract class TimedLocationRepository {
 
   Future<Result<LocationServiceStatus, Fault>> getLocationServiceStatus();
 
+  Stream<Result<LocationServiceStatus, Fault>> watchLocationServiceStatus();
+
   /// Requests that the location service is enabled, this might have different
   /// behavior depending on the underlying platform.
   Future<Result<Unit, Fault>> requestLocationService();

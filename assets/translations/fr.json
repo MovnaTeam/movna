@@ -4,6 +4,13 @@
     "text": "Cette notification permet à Movna de suivre votre position en arrière plan.",
     "title": "L'application Movna est en cours..."
   },
+  "location": {
+    "notification": {
+      "body": "L'application ne peut pas suivre la position de l'appareil tant que la géolocalisation est désactivée",
+      "enable": "Activer la géolocalisation",
+      "title": "Géolocalisation désactivée"
+    }
+  },
   "permissions": {
     "grant": "Autoriser",
     "location": {

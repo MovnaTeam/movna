@@ -4,6 +4,13 @@
     "text": "Movna keeps track of your location from the background.",
     "title": "Movna app is running..."
   },
+  "location": {
+    "notification": {
+      "body": "If the location is off, the app won't be able to track the device location",
+      "enable": "Enable location",
+      "title": "Location off"
+    }
+  },
   "permissions": {
     "grant": "Grant permission",
     "location": {
