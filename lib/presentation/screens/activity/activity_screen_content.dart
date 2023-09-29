@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:movna/presentation/screens/activity/views/alerts/activity_alerts_view.dart';
 import 'package:movna/presentation/screens/activity/views/map/activity_map_view.dart';
-import 'package:movna/presentation/screens/activity/views/notifications/activity_notifications.dart';
 
 /// Displays the content of the activity screen.
 ///
 /// Displays the [ActivityMapView] overlayed by eventual
-/// [ActivityNotifications].
+/// [ActivityAlert].
 class ActivityScreenContent extends StatelessWidget {
   const ActivityScreenContent({super.key});
 
@@ -14,7 +14,7 @@ class ActivityScreenContent extends StatelessWidget {
     return const Stack(
       children: [
         ActivityMapView(),
-        ActivityNotifications(),
+        ActivityAlertsView(),
       ],
     );
   }

@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/permissions_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
-import 'package:movna/presentation/screens/activity/views/notifications/activity_notification.dart';
+import 'package:movna/presentation/screens/activity/views/alerts/activity_alert_widget.dart';
+import 'package:movna/presentation/screens/activity/views/alerts/alert_transition_widget.dart';
 import 'package:movna/presentation/widgets/app_lifecycle_watcher.dart';
 import 'package:movna/presentation/widgets/none_widget.dart';
 
@@ -30,11 +31,11 @@ enum PermissionType {
 /// See also:
 ///   * [AppLifecycleWatcher] The widget that allows for registering callbacks
 ///   on app lifecycle change.
-///   * [ActivityNotificationWidget] The widget laying out and
+///   * [ActivityAlertWidget] The widget laying out and
 ///   rendering the displayed card.
 ///   * [PermissionsCubit] The cubit managing app permissions.
-class ActivityPermissionNotificationWidget extends StatelessWidget {
-  const ActivityPermissionNotificationWidget({
+class ActivityPermissionAlertWidget extends StatelessWidget {
+  const ActivityPermissionAlertWidget({
     required this.title,
     required this.body,
     required this.permissionType,
@@ -59,7 +60,7 @@ class ActivityPermissionNotificationWidget extends StatelessWidget {
       },
       child: BlocBuilder<PermissionsCubit, PermissionsState>(
         builder: (context, state) {
-          return state.maybeWhen(
+          final child = state.maybeWhen(
             loaded: (notifications, location) {
               final bool isPermissionGranted = switch (permissionType) {
                 PermissionType.notifications =>
@@ -70,7 +71,7 @@ class ActivityPermissionNotificationWidget extends StatelessWidget {
               if (isPermissionGranted) {
                 return const NoneWidget();
               }
-              return ActivityNotificationWidget(
+              return ActivityAlertWidget(
                 title: title,
                 body: body,
                 icon: permissionType.icon,
@@ -103,6 +104,7 @@ class ActivityPermissionNotificationWidget extends StatelessWidget {
             },
             orElse: () => const NoneWidget(),
           );
+          return AlertTransitionWidget(child: child);
         },
       ),
     );

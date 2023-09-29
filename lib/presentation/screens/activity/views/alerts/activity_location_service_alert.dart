@@ -4,7 +4,8 @@ import 'package:movna/domain/entities/location_service_status.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/location_service_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
-import 'package:movna/presentation/screens/activity/views/notifications/activity_notification.dart';
+import 'package:movna/presentation/screens/activity/views/alerts/activity_alert_widget.dart';
+import 'package:movna/presentation/screens/activity/views/alerts/alert_transition_widget.dart';
 import 'package:movna/presentation/theme/app_theme.dart';
 import 'package:movna/presentation/widgets/none_widget.dart';
 
@@ -15,20 +16,21 @@ import 'package:movna/presentation/widgets/none_widget.dart';
 /// See [LocationServiceCubit] the cubit responsible for interacting with the
 /// location service.
 ///
-/// See [ActivityNotificationWidget] for more information on the alert
+/// See [ActivityAlertWidget] for more information on the alert
 /// rendering.
-class ActivityLocationServiceNotification extends StatelessWidget {
-  const ActivityLocationServiceNotification({super.key});
+class ActivityLocationServiceAlert extends StatelessWidget {
+  const ActivityLocationServiceAlert({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LocationServiceCubit, LocationServiceState>(
       builder: (context, state) {
         final status = state.whenOrNull(loaded: (status) => status);
+        final Widget child;
         if (status == LocationServiceStatus.disabled) {
-          return ActivityNotificationWidget(
-            title: LocaleKeys.location.notification.title().translate(context),
-            body: LocaleKeys.location.notification.body().translate(context),
+          child = ActivityAlertWidget(
+            title: LocaleKeys.location.alert.title().translate(context),
+            body: LocaleKeys.location.alert.body().translate(context),
             icon: Icons.location_disabled,
             iconBackground: Theme.of(context).customColors.warningContainer,
             iconForeground: Theme.of(context).customColors.onWarningContainer,
@@ -41,16 +43,17 @@ class ActivityLocationServiceNotification extends StatelessWidget {
                 textStyle: Theme.of(context).textTheme.labelSmall,
                 visualDensity: VisualDensity.compact,
               ),
-              onPressed: context
-                  .read<LocationServiceCubit>()
-                  .requestLocationService,
+              onPressed:
+                  context.read<LocationServiceCubit>().requestLocationService,
               child: Text(
-                LocaleKeys.location.notification.enable().translate(context),
+                LocaleKeys.location.alert.enable().translate(context),
               ),
             ),
           );
+        } else {
+          child = const NoneWidget();
         }
-        return const NoneWidget();
+        return AlertTransitionWidget(child: child);
       },
     );
   }

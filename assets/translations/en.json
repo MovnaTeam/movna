@@ -5,7 +5,7 @@
     "title": "Movna app is running..."
   },
   "location": {
-    "notification": {
+    "alert": {
       "body": "If the location is off, the app won't be able to track the device location",
       "enable": "Enable location",
       "title": "Location off"
@@ -14,13 +14,13 @@
   "permissions": {
     "grant": "Grant permission",
     "location": {
-      "notification": {
+      "alert": {
         "body": "This application needs location permissions to keep track of your activity",
         "title": "Please allow app to access location"
       }
     },
     "notifications": {
-      "notification": {
+      "alert": {
         "body": "This application needs notification permissions to keep track of your location while in the background",
         "title": "Please allow notifications"
       }

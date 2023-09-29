@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// This widget displays a  notification-like styled card displaying user
+/// This widget displays an alert card displaying user
 /// information.
 ///
 /// It displays a [title] and [body] that should inform the user of what
@@ -8,11 +8,11 @@ import 'package:flutter/material.dart';
 ///
 /// An [icon] must be provided along with an [iconForeground] and
 /// [iconBackground] to quickly inform the user of the nature of this
-/// notification.
+/// alert.
 ///
 /// An optional [action] can be set if user input is needed.
-class ActivityNotificationWidget extends StatelessWidget {
-  const ActivityNotificationWidget({
+class ActivityAlertWidget extends StatelessWidget {
+  const ActivityAlertWidget({
     required this.title,
     required this.body,
     required this.icon,
