@@ -7,7 +7,7 @@
    viewBox="0 0 25 25"
    version="1.1"
    id="svg5"
-   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   inkscape:version="1.3 (0e150ed, 2023-07-21)"
    sodipodi:docname="movna_icon.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -25,19 +25,23 @@
      inkscape:document-units="mm"
      showgrid="true"
      inkscape:zoom="2.56"
-     inkscape:cx="-122.85156"
-     inkscape:cy="18.359375"
-     inkscape:window-width="1920"
-     inkscape:window-height="1009"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
+     inkscape:cx="20.3125"
+     inkscape:cy="25.976562"
+     inkscape:window-width="1440"
+     inkscape:window-height="784"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
      inkscape:window-maximized="1"
      inkscape:current-layer="g235">
     <inkscape:grid
        type="xygrid"
        id="grid583"
        originx="-124.82701"
-       originy="-148.16667" />
+       originy="-148.16667"
+       spacingy="1"
+       spacingx="1"
+       units="mm"
+       visible="true" />
   </sodipodi:namedview>
   <defs
      id="defs2" />
@@ -59,7 +63,7 @@
              inkscape:label="a whole"
              style="fill:#298164;fill-opacity:1">
             <ellipse
-               style="fill:#298164;fill-opacity:1;stroke-width:0.289836"
+               style="fill:#fe0013;fill-opacity:1;stroke-width:0.289836"
                id="path585"
                cx="71.4375"
                cy="152.13542"
@@ -69,7 +73,7 @@
           </g>
           <path
              id="rect287"
-             style="fill:#298164;fill-opacity:1;stroke-width:0.264583"
+             style="fill:#fe0013;fill-opacity:1;stroke-width:0.264583"
              d="m 131.46277,158.75 -5.31285,13.22917 h 4.27725 l 3.18741,-7.9375 3.1874,7.9375 h 4.27726 L 135.76638,158.75 Z" />
         </g>
       </g>
