@@ -2,11 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:movna/app.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/core/logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await configureDependencies();
+  bool dependenciesInitialized = false;
+
+  try {
+    await configureDependencies();
+    dependenciesInitialized = true;
+  } catch (e, s) {
+    logger.f(
+      'Error initializing app dependencies',
+      error: e,
+      stackTrace: s,
+    );
+  }
 
   //Setting SystemUIOverlay
   SystemChrome.setSystemUIOverlayStyle(
@@ -23,5 +35,9 @@ void main() async {
     overlays: [SystemUiOverlay.top],
   );
 
-  runApp(const MovnaApp());
+  if(dependenciesInitialized) {
+    runApp(const MovnaApp());
+  } else {
+    runApp(const BrokenApp());
+  }
 }

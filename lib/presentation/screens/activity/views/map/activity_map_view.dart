@@ -90,6 +90,11 @@ class _ActivityMapViewState extends State<ActivityMapView>
             // TODO constant or usecase https://github.com/MovnaTeam/movna/issues/21
             userAgentPackageName: 'dev.movna.app',
             tileProvider: injector<FMTCTileProvider>(),
+            tileBuilder: switch (Theme.of(context).brightness) {
+              Brightness.dark => darkModeTileBuilder,
+              Brightness.light => null,
+            },
+            backgroundColor: Theme.of(context).colorScheme.background,
           ),
           const UserLocationMarker<ActivityCubit, ActivityState>(),
           BlocBuilder<ActivityCubit, ActivityState>(

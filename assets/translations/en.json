@@ -1,5 +1,9 @@
 {
   "appTitle": "Movna",
+  "broken_app": {
+    "button": "Restart the app",
+    "label": "It looks like the app crashed while launching, you can try to restart it."
+  },
   "foreground_notification": {
     "text": "Movna keeps track of your location from the background.",
     "title": "Movna app is running..."
