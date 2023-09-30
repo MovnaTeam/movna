@@ -2,7 +2,7 @@
   "appTitle": "Movna",
   "broken_app": {
     "button": "Redémarrer l'application",
-    "label": "L'application a rencontré un problème au lancement. Essayez de la redémarrer"
+    "label": "L'application a rencontré un problème au lancement. Essayez de la redémarrer."
   },
   "foreground_notification": {
     "text": "Cette notification permet à Movna de suivre votre position en arrière plan.",
