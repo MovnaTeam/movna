@@ -9,7 +9,7 @@
     "title": "L'application Movna est en cours..."
   },
   "location": {
-    "notification": {
+    "alert": {
       "body": "L'application ne peut pas suivre la position de l'appareil tant que la géolocalisation est désactivée",
       "enable": "Activer la géolocalisation",
       "title": "Géolocalisation désactivée"
@@ -18,13 +18,13 @@
   "permissions": {
     "grant": "Autoriser",
     "location": {
-      "notification": {
+      "alert": {
         "body": "Cette application a besoin d'accéder à la localisation de l'appareil pour enregistrer une activité",
         "title": "Impossible d'accéder à la localisation"
       }
     },
     "notifications": {
-      "notification": {
+      "alert": {
         "body": "Cette application a besoin d'afficher des notifications pour suivre la position en arrière plan",
         "title": "Autoriser l'affichage de notifications"
       }
