@@ -12,7 +12,10 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Center(child: SvgThemedWidget(svgAsset: Assets.movnaLogo)),
       ),
-      body: const SafeArea(child: ActivityScreen()),
+      body: const SafeArea(
+        bottom: false,
+        child: ActivityScreen(),
+      ),
     );
   }
 }

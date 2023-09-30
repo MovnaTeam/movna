@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/domain/entities/app_metadata.dart';
 import 'package:movna/domain/entities/gps_coordinates.dart';
+import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/extensions/gps_coordinates_extensions.dart';
@@ -34,6 +37,21 @@ class _ActivityMapViewState extends State<ActivityMapView>
     curve: MapConstants.mapAnimationsCurve,
   );
 
+  /// This determines wether the map should be centered on location.
+  ///
+  /// If value is `false`, location updates will move the marker but not the map
+  /// view.
+  /// If value is `true`, location updates will move the marker on the map and
+  /// the map view will move to be centered on the marker.
+  final ValueNotifier<bool> _centerOnLocation = ValueNotifier(true);
+
+  /// The last known location, used to center map immediately when user clicks
+  /// on the center button
+  Location? _lastLocation;
+
+  /// Subscription to the [_controller.mapEventStream].
+  late StreamSubscription<MapEvent> _mapEventSubscription;
+
   @override
   void initState() {
     // Get last location and set controller to the given coordinates or to Paris
@@ -41,6 +59,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
       (value) {
         value.fold(
           (lastLocation) {
+            _lastLocation = lastLocation.location;
             _controller.move(
               lastLocation.location.gpsCoordinates.toLatLng(),
               16,
@@ -55,12 +74,28 @@ class _ActivityMapViewState extends State<ActivityMapView>
         );
       },
     );
+
+    // Listen to map events to detect user gestures
+    _mapEventSubscription = _controller.mapEventStream.listen(
+      (event) {
+        // Update center on location flag if user starts certain gestures
+        _centerOnLocation.value = switch (event) {
+          MapEventFlingAnimationStart() ||
+          MapEventMoveStart() ||
+          MapEventDoubleTapZoomStart() =>
+            false,
+          _ => _centerOnLocation.value,
+        };
+      },
+    );
     super.initState();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _mapEventSubscription.cancel();
+    _centerOnLocation.dispose();
     super.dispose();
   }
 
@@ -72,7 +107,8 @@ class _ActivityMapViewState extends State<ActivityMapView>
         // (do not change zoom level)
         final location =
             state.mapOrNull(loaded: (loaded) => loaded.currentLocation);
-        if (location != null) {
+        if (location != null && _centerOnLocation.value) {
+          _lastLocation = location;
           _controller.animateTo(
             dest: location.gpsCoordinates.toLatLng(),
           );
@@ -85,6 +121,35 @@ class _ActivityMapViewState extends State<ActivityMapView>
           zoom: 6,
           maxZoom: MapConstants.maxZoom,
         ),
+        nonRotatedChildren: [
+          ValueListenableBuilder(
+            valueListenable: _centerOnLocation,
+            builder: (context, centerOnLocation, fab) {
+              if (centerOnLocation) {
+                return const NoneWidget();
+              }
+              return fab!;
+            },
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FloatingActionButton.small(
+                  onPressed: () {
+                    final location = _lastLocation;
+                    if (location != null) {
+                      _centerOnLocation.value = true;
+                      _controller.animateTo(
+                        dest: location.gpsCoordinates.toLatLng(),
+                      );
+                    }
+                  },
+                  child: const Icon(Icons.my_location),
+                ),
+              ),
+            ),
+          ),
+        ],
         children: [
           TileLayer(
             urlTemplate: MapConstants.urlTemplate,
