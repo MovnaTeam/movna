@@ -9,6 +9,9 @@ class Fault with _$Fault {
   /// Prefer using a more specific failure instead of this one.
   const factory Fault.unknown() = _Unknown;
 
+  /// Request data could not be found.
+  const factory Fault.notFound() = _NotFound;
+
   /// Generic failure related to a location operation.
   ///
   /// Prefer using a more specific location failure if possible.

@@ -9,7 +9,9 @@ import 'package:movna/core/injection.dart';
 import 'package:movna/domain/entities/app_metadata.dart';
 import 'package:movna/domain/entities/gps_coordinates.dart';
 import 'package:movna/domain/entities/location.dart';
+import 'package:movna/domain/usecases/get_default_zoom_level.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
+import 'package:movna/domain/usecases/set_default_zoom_level.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/extensions/gps_coordinates_extensions.dart';
 import 'package:movna/presentation/screens/activity/views/map/constants.dart';
@@ -54,6 +56,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
 
   @override
   void initState() {
+    final zoomLevelResult = injector<GetDefaultZoomLevel>()();
     // Get last location and set controller to the given coordinates or to Paris
     injector<GetLastKnownLocation>()().then(
       (value) {
@@ -62,7 +65,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
             _lastLocation = lastLocation.location;
             _controller.move(
               lastLocation.location.gpsCoordinates.toLatLng(),
-              16,
+              zoomLevelResult.getOrDefault(16),
             );
           },
           (f) {
@@ -82,10 +85,16 @@ class _ActivityMapViewState extends State<ActivityMapView>
         _centerOnLocation.value = switch (event) {
           MapEventFlingAnimationStart() ||
           MapEventMoveStart() ||
-          MapEventDoubleTapZoomStart() =>
+          MapEventDoubleTapZoomStart() ||
+          MapEventRotateStart() =>
             false,
           _ => _centerOnLocation.value,
         };
+        if (event is MapEventDoubleTapZoomEnd ||
+            event is MapEventMoveEnd ||
+            event is MapEventScrollWheelZoom) {
+          injector<SetDefaultZoomLevel>()(event.zoom);
+        }
       },
     );
     super.initState();
@@ -120,6 +129,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
           center: GpsCoordinates.paris.toLatLng(),
           zoom: 6,
           maxZoom: MapConstants.maxZoom,
+          enableMultiFingerGestureRace: true,
         ),
         nonRotatedChildren: [
           ValueListenableBuilder(
