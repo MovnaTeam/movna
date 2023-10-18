@@ -41,7 +41,7 @@ class UserRepositoryImpl implements UserRepository {
       return const Fault.unknown().toFailure();
     } catch (e, s) {
       logger.e(
-        'Error getting default zoom level',
+        'Error setting default zoom level',
         stackTrace: s,
         error: e,
       );
