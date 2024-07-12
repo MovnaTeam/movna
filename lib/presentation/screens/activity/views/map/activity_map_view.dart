@@ -126,12 +126,36 @@ class _ActivityMapViewState extends State<ActivityMapView>
       child: FlutterMap(
         mapController: _controller.mapController,
         options: MapOptions(
-          center: GpsCoordinates.paris.toLatLng(),
-          zoom: 6,
+          initialCenter: GpsCoordinates.paris.toLatLng(),
+          initialZoom: 6,
           maxZoom: MapConstants.maxZoom,
-          enableMultiFingerGestureRace: true,
+          interactionOptions: const InteractionOptions(
+            enableMultiFingerGestureRace: true,
+          ),
+          backgroundColor: Theme.of(context).colorScheme.surface,
         ),
-        nonRotatedChildren: [
+        children: [
+          TileLayer(
+            urlTemplate: MapConstants.urlTemplate,
+            userAgentPackageName: injector<AppMetadata>().packageName,
+            tileProvider: injector<FMTCTileProvider>(),
+            tileBuilder: switch (Theme.of(context).brightness) {
+              Brightness.dark => darkModeTileBuilder,
+              Brightness.light => null,
+            },
+          ),
+          const UserLocationMarker<ActivityCubit, ActivityState>(),
+          BlocBuilder<ActivityCubit, ActivityState>(
+            buildWhen: (prev, next) => prev.runtimeType != next.runtimeType,
+            builder: (context, state) {
+              return state.maybeMap(
+                loading: (_) => const Center(
+                  child: LoadingIndicator(),
+                ),
+                orElse: () => const NoneWidget(),
+              );
+            },
+          ),
           ValueListenableBuilder(
             valueListenable: _centerOnLocation,
             builder: (context, centerOnLocation, fab) {
@@ -158,30 +182,6 @@ class _ActivityMapViewState extends State<ActivityMapView>
                 ),
               ),
             ),
-          ),
-        ],
-        children: [
-          TileLayer(
-            urlTemplate: MapConstants.urlTemplate,
-            userAgentPackageName: injector<AppMetadata>().packageName,
-            tileProvider: injector<FMTCTileProvider>(),
-            tileBuilder: switch (Theme.of(context).brightness) {
-              Brightness.dark => darkModeTileBuilder,
-              Brightness.light => null,
-            },
-            backgroundColor: Theme.of(context).colorScheme.background,
-          ),
-          const UserLocationMarker<ActivityCubit, ActivityState>(),
-          BlocBuilder<ActivityCubit, ActivityState>(
-            buildWhen: (prev, next) => prev.runtimeType != next.runtimeType,
-            builder: (context, state) {
-              return state.maybeMap(
-                loading: (_) => const Center(
-                  child: LoadingIndicator(),
-                ),
-                orElse: () => const NoneWidget(),
-              );
-            },
           ),
         ],
       ),
