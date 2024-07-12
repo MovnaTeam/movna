@@ -7,14 +7,14 @@ abstract class FlutterMapTileCacheModule {
   static const _mapTileStore = 'mapStore';
 
   @preResolve
-  Future<FlutterMapTileCaching> get initCache async {
-    await FlutterMapTileCaching.initialise();
-    await FMTC.instance(_mapTileStore).manage.createAsync();
-    return FMTC.instance;
+  Future<FMTCStore> get initCache async {
+    await FMTCObjectBoxBackend().initialise();
+    await const FMTCStore(_mapTileStore).manage.create();
+    return const FMTCStore(_mapTileStore);
   }
 
-  FMTCTileProvider getTileProvider(FlutterMapTileCaching cache) {
-    return cache(_mapTileStore).getTileProvider();
+  FMTCTileProvider getTileProvider(FMTCStore cache) {
+    return const FMTCStore(_mapTileStore).getTileProvider();
   }
 
 }
