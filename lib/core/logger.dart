@@ -5,6 +5,6 @@ final logger = Logger(
   level: kDebugMode ? Level.trace : Level.warning,
   printer: PrettyPrinter(
     methodCount: 5,
-    printTime: true,
+    dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
   ),
 );
