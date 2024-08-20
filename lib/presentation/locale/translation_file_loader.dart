@@ -5,18 +5,13 @@ import 'package:flutter_i18n/utils/message_printer.dart';
 class AppTranslationFileLoader extends FileTranslationLoader {
   AppTranslationFileLoader({
     required this.defaultLocale,
-    String basePath = 'assets/translations',
-    bool useCountryCode = false,
-    bool useScriptCode = false,
-    forcedLocale,
-    decodeStrategies,
-  }) : super(
-          basePath: basePath,
-          useCountryCode: useCountryCode,
-          useScriptCode: useScriptCode,
-          forcedLocale: forcedLocale,
-          decodeStrategies: decodeStrategies,
-        );
+    super.basePath = 'assets/translations',
+    super.useCountryCode,
+    super.useScriptCode,
+    super.forcedLocale,
+    super.decodeStrategies,
+  });
+
   final String defaultLocale;
 
   @override

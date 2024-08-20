@@ -6,11 +6,35 @@ Movnå is an open-source training application.
 
 ## Contributing
 
-### How to build
+### FVM
 
 This project uses [fvm](https://fvm.app/), be sure to have it installed on your computer.
-On Android Studio you can then set the flutter sdk path for this project to `absolute/path/to/movna/.fvm/flutter_sdk/`.
 All calls to `flutter` in the following shell snippets are actually calls to `fvm flutter`.
+You will probably want to update your IDE's path to the flutter sdk accordingly.
+- On Android Studio, go to `Languages & Frameworks > Flutter`, and set it to :
+```txt
+/absolute/path/to/this/project/.fvm/flutter_sdk
+```
+
+- On XCode, go to `Build phases`, and inside `Run script` add the following line :
+```txt
+export FLUTTER_ROOT="$PROJECT_DIR/../.fvm/flutter_sdk"
+```
+
+- On VSCode, add this to your `.vscode/settings.json` :
+```json
+{
+  "dart.flutterSdkPath": ".fvm/flutter_sdk",
+  "search.exclude": {
+    "**/.fvm": true
+  },
+  "files.watcherExclude": {
+    "**/.fvm": true
+  }
+}
+```
+
+### How to build
 
 To install all dependencies, run :
 ```shell

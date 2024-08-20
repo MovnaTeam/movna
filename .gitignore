@@ -43,12 +43,12 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# fvm
-.fvm/flutter_sdk
-
 # Generated files
 *.g.dart
 *.freezed.dart
 *.config.dart
 assets.dart
 jsons.dart
+
+# FVM Version Cache
+.fvm/

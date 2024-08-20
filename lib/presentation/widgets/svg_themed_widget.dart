@@ -17,8 +17,8 @@ class SvgThemedWidget extends StatelessWidget {
     required this.svgAsset,
     this.width,
     this.fit = BoxFit.contain,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final double? width;
   final String svgAsset;

@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:go_router/go_router.dart';
 import 'package:movna/assets.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
-import 'package:movna/presentation/router/router.dart';
 import 'package:movna/presentation/theme/app_theme.dart';
 import 'package:movna/presentation/widgets/svg_themed_widget.dart';
 import 'package:restart_app/restart_app.dart';
@@ -16,7 +16,7 @@ class MovnaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: injector<AppRouter>(),
+      routerConfig: injector<GoRouter>(),
       debugShowCheckedModeBanner: kDebugMode,
       theme: injector<AppTheme>().buildLight(),
       darkTheme: injector<AppTheme>().buildDark(),

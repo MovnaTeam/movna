@@ -63,15 +63,15 @@ class _ActivityMapViewState extends State<ActivityMapView>
         value.fold(
           (lastLocation) {
             _lastLocation = lastLocation.location;
-            _controller.move(
-              lastLocation.location.gpsCoordinates.toLatLng(),
-              zoomLevelResult.getOrDefault(16),
+            _controller.animateTo(
+              dest: lastLocation.location.gpsCoordinates.toLatLng(),
+              zoom: zoomLevelResult.getOrDefault(16),
             );
           },
           (f) {
-            _controller.move(
-              GpsCoordinates.paris.toLatLng(),
-              6,
+            _controller.animateTo(
+              dest: GpsCoordinates.paris.toLatLng(),
+              zoom: 6,
             );
           },
         );
@@ -79,7 +79,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
     );
 
     // Listen to map events to detect user gestures
-    _mapEventSubscription = _controller.mapEventStream.listen(
+    _mapEventSubscription = _controller.mapController.mapEventStream.listen(
       (event) {
         // Update center on location flag if user starts certain gestures
         _centerOnLocation.value = switch (event) {
@@ -93,7 +93,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
         if (event is MapEventDoubleTapZoomEnd ||
             event is MapEventMoveEnd ||
             event is MapEventScrollWheelZoom) {
-          injector<SetDefaultZoomLevel>()(event.zoom);
+          injector<SetDefaultZoomLevel>()(event.camera.zoom);
         }
       },
     );
@@ -124,14 +124,38 @@ class _ActivityMapViewState extends State<ActivityMapView>
         }
       },
       child: FlutterMap(
-        mapController: _controller,
+        mapController: _controller.mapController,
         options: MapOptions(
-          center: GpsCoordinates.paris.toLatLng(),
-          zoom: 6,
+          initialCenter: GpsCoordinates.paris.toLatLng(),
+          initialZoom: 6,
           maxZoom: MapConstants.maxZoom,
-          enableMultiFingerGestureRace: true,
+          interactionOptions: const InteractionOptions(
+            enableMultiFingerGestureRace: true,
+          ),
+          backgroundColor: Theme.of(context).colorScheme.surface,
         ),
-        nonRotatedChildren: [
+        children: [
+          TileLayer(
+            urlTemplate: MapConstants.urlTemplate,
+            userAgentPackageName: injector<AppMetadata>().packageName,
+            tileProvider: injector<FMTCTileProvider>(),
+            tileBuilder: switch (Theme.of(context).brightness) {
+              Brightness.dark => darkModeTileBuilder,
+              Brightness.light => null,
+            },
+          ),
+          const UserLocationMarker<ActivityCubit, ActivityState>(),
+          BlocBuilder<ActivityCubit, ActivityState>(
+            buildWhen: (prev, next) => prev.runtimeType != next.runtimeType,
+            builder: (context, state) {
+              return state.maybeMap(
+                loading: (_) => const Center(
+                  child: LoadingIndicator(),
+                ),
+                orElse: () => const NoneWidget(),
+              );
+            },
+          ),
           ValueListenableBuilder(
             valueListenable: _centerOnLocation,
             builder: (context, centerOnLocation, fab) {
@@ -158,30 +182,6 @@ class _ActivityMapViewState extends State<ActivityMapView>
                 ),
               ),
             ),
-          ),
-        ],
-        children: [
-          TileLayer(
-            urlTemplate: MapConstants.urlTemplate,
-            userAgentPackageName: injector<AppMetadata>().packageName,
-            tileProvider: injector<FMTCTileProvider>(),
-            tileBuilder: switch (Theme.of(context).brightness) {
-              Brightness.dark => darkModeTileBuilder,
-              Brightness.light => null,
-            },
-            backgroundColor: Theme.of(context).colorScheme.background,
-          ),
-          const UserLocationMarker<ActivityCubit, ActivityState>(),
-          BlocBuilder<ActivityCubit, ActivityState>(
-            buildWhen: (prev, next) => prev.runtimeType != next.runtimeType,
-            builder: (context, state) {
-              return state.maybeMap(
-                loading: (_) => const Center(
-                  child: LoadingIndicator(),
-                ),
-                orElse: () => const NoneWidget(),
-              );
-            },
           ),
         ],
       ),

@@ -17,33 +17,33 @@ jobs:
     #runs-on: windows-2022
 
     steps:
-      # use fvm flutter
-      - uses: actions/checkout@v3
-      - uses: kuhnroyal/flutter-fvm-config-action@v1
-        id: fvm-config-action
-        with:
-          path: ".fvm/fvm_config.json"
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ steps.fvm-config-action.outputs.FLUTTER_VERSION }}
-          channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter Version Management CLI
+        uses: flutter-actions/setup-fvm@v1
+
+      - name: Install Flutter SDK
+        run: echo yes | fvm install
+
+      - name: Print Flutter SDK version
+        run: fvm flutter --version
 
       - name: Install dependencies
-        run: flutter pub get
+        run: fvm flutter pub get
 
       - name: Generate files
-        run: flutter pub run build_runner build
+        run: fvm dart run build_runner build
 
       # Uncomment this step to verify the use of 'dart format' on each commit.
       # - name: Verify formatting
-      #   run: flutter format --output=none --set-exit-if-changed
+      #   run: fvm flutter format --output=none --set-exit-if-changed
 
       - name: Analyze project source
-        run: flutter analyze
+        run: fvm flutter analyze
 
       - name: Run tests
-        run: flutter test
+        run: fvm flutter test
 
       # Uncomment to build apk.
       # - name: Build APK
-      #  run: flutter build apk
+      #  run: fvm flutter build apk
