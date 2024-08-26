@@ -29,5 +29,8 @@
         "title": "Autoriser l'affichage de notifications"
       }
     }
+  },
+  "home": {
+    "startActivity": "Commencer l'activité"
   }
 }

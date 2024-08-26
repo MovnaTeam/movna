@@ -29,5 +29,8 @@
         "title": "Please allow notifications"
       }
     }
+  },
+  "home": {
+    "startActivity": "Start activity"
   }
 }
