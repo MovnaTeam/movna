@@ -13,7 +13,7 @@ class GetLocationServiceStatus
   final TimedLocationRepository _repository;
 
   @override
-  Future<Result<LocationServiceStatus, Fault>> call([void params]) {
+  Future<ResultDart<LocationServiceStatus, Fault>> call([void params]) {
     return _repository.getLocationServiceStatus();
   }
 }

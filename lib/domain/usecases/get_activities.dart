@@ -15,7 +15,7 @@ class GetActivities implements UseCaseAsync<List<Activity>, void> {
   final ActivityRepository _repository;
 
   @override
-  Future<Result<List<Activity>, Fault>> call([void p]) {
+  Future<ResultDart<List<Activity>, Fault>> call([void p]) {
     return _repository.getActivities();
   }
 }

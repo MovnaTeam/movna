@@ -71,8 +71,8 @@ class PermissionsCubit extends Cubit<PermissionsState> {
     }
     final paramsToUse = overrideParams ?? _params;
 
-    Result<SystemPermissionStatus, Fault>? notificationPermission;
-    Result<SystemPermissionStatus, Fault>? locationPermission;
+    ResultDart<SystemPermissionStatus, Fault>? notificationPermission;
+    ResultDart<SystemPermissionStatus, Fault>? locationPermission;
 
     if (paramsToUse.requestNotifications) {
       notificationPermission = await _getNotificationPermission();
@@ -108,8 +108,8 @@ class PermissionsCubit extends Cubit<PermissionsState> {
     if (!silent) {
       emit(const PermissionsState.loading());
     }
-    Result<SystemPermissionStatus, Fault>? notificationPermission;
-    Result<SystemPermissionStatus, Fault>? locationPermission;
+    ResultDart<SystemPermissionStatus, Fault>? notificationPermission;
+    ResultDart<SystemPermissionStatus, Fault>? locationPermission;
     final paramsToUse = overrideParams ?? _params;
 
     if (paramsToUse.requestNotifications) {
@@ -174,8 +174,8 @@ class PermissionsCubit extends Cubit<PermissionsState> {
   /// used or [SystemPermissionStatusHolder.notDemanded] if no current
   /// holder exists.
   void emitState(
-    Result<SystemPermissionStatus, Fault>? notification,
-    Result<SystemPermissionStatus, Fault>? location,
+    ResultDart<SystemPermissionStatus, Fault>? notification,
+    ResultDart<SystemPermissionStatus, Fault>? location,
   ) async {
     state.maybeMap(
       loaded: (loaded) {
@@ -213,8 +213,8 @@ class PermissionsState with _$PermissionsState {
   /// On failure [SystemPermissionStatusHolder.failure] contains
   /// the failure's reason.
   const factory PermissionsState.loaded({
-    required Result<SystemPermissionStatus, Fault>? notificationPermission,
-    required Result<SystemPermissionStatus, Fault>? locationPermission,
+    required ResultDart<SystemPermissionStatus, Fault>? notificationPermission,
+    required ResultDart<SystemPermissionStatus, Fault>? locationPermission,
   }) = _Loaded;
 
   const factory PermissionsState.loading() = _Loading;

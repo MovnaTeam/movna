@@ -13,7 +13,7 @@ class ShouldRequestLocationPermission implements UseCaseAsync<bool, void> {
   final PermissionRepository _repository;
 
   @override
-  Future<Result<bool, Fault>> call([void params]) {
+  Future<ResultDart<bool, Fault>> call([void params]) {
     return _repository.shouldRequestLocation();
   }
 }

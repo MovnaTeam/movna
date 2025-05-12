@@ -52,7 +52,7 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
   final GetLocationStream _getLocationStream;
   final ActivityCubitParams _params;
 
-  StreamSubscription<Result<TimedLocation, Fault>>? _locationSubscription;
+  StreamSubscription<ResultDart<TimedLocation, Fault>>? _locationSubscription;
   final Mutex _locationSubscriptionMutex = Mutex();
 
   late final StreamSubscription<PermissionsState>? _permissionsSubscription;

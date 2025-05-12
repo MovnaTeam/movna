@@ -18,7 +18,7 @@ class GetLocationStream
   final TimedLocationRepository repository;
 
   @override
-  Stream<Result<TimedLocation, Fault>> call(NotificationConfig config) {
+  Stream<ResultDart<TimedLocation, Fault>> call(NotificationConfig config) {
     return repository.getTimedLocationStream(config);
   }
 }
