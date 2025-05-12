@@ -3,15 +3,22 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:movna/presentation/widgets/none_widget.dart';
 
-const int hexadecimalToSubtract = 0xFF000000;
+extension HexColorString on Color {
+  /// Prefixes a hash sign if [leadingHashSign] is set to `true`.
+  String toHexString({bool leadingHashSign = true}) =>
+      '${leadingHashSign ? '#' : ''}'
+      '${(a * 255.0).round().toRadixString(16).padLeft(2, '0')}'
+      '${(r * 255.0).round().toRadixString(16).padLeft(2, '0')}'
+      '${(g * 255.0).round().toRadixString(16).padLeft(2, '0')}'
+      '${(b * 255.0).round().toRadixString(16).padLeft(2, '0')}';
+}
+
 const String svgThemedImagePrimary = 'fe0013';
 
 /// This widget replace the default color by [primaryColor] from the theme of
 /// the application.
 ///
 /// [svgThemedImagePrimary] is the hexadecimal primary color to replace.
-/// [hexadecimalToSubtract] is the hexadecimal value to subtract to convert an
-/// ARGB color into RGB color.
 class SvgThemedWidget extends StatelessWidget {
   const SvgThemedWidget({
     required this.svgAsset,
@@ -30,14 +37,14 @@ class SvgThemedWidget extends StatelessWidget {
       future: readSvgImage(svgAsset),
       builder: (BuildContext context, AsyncSnapshot<String> data) {
         if (data.hasData) {
-          // Converts ARGB color into RGB color
-          final primaryColor = Theme.of(context).colorScheme.primary.value -
-              hexadecimalToSubtract;
+          // Converts ARGB color into RGB color string
+          final primaryColorHexString =
+              Theme.of(context).colorScheme.primary.toHexString().substring(3);
 
           return SvgPicture.string(
             data.data!.replaceAll(
               RegExp(svgThemedImagePrimary, caseSensitive: false),
-              primaryColor.toRadixString(16).padLeft(6, '0').toString(),
+              primaryColorHexString,
             ),
             fit: fit,
             width: width,
