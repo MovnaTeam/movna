@@ -39,7 +39,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
     curve: MapConstants.mapAnimationsCurve,
   );
 
-  /// This determines wether the map should be centered on location.
+  /// This determines whether the map should be centered on location.
   ///
   /// If value is `false`, location updates will move the marker but not the map
   /// view.
