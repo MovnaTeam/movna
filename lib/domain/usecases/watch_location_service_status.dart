@@ -15,7 +15,7 @@ class WatchLocationServiceStatus
   final TimedLocationRepository _repository;
 
   @override
-  Stream<Result<LocationServiceStatus, Fault>> call([void params]) {
+  Stream<ResultDart<LocationServiceStatus, Fault>> call([void params]) {
     return _repository.watchLocationServiceStatus();
   }
 }

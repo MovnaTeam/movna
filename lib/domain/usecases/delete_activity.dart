@@ -15,7 +15,7 @@ class DeleteActivity implements UseCaseAsync<Unit, Activity> {
   final ActivityRepository _repository;
 
   @override
-  Future<Result<Unit, Fault>> call(Activity activity) {
+  Future<ResultDart<Unit, Fault>> call(Activity activity) {
     return _repository.deleteActivity(activity);
   }
 }

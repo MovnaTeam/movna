@@ -7,14 +7,15 @@ import 'package:result_dart/result_dart.dart';
 
 /// A mixin containing helper methods for repositories
 mixin RepositoryHelper {
-  /// Converts a [modelStream] to a stream of [Result<Entity, Fault>].
+  /// Converts a [modelStream] to a stream of [ResultDart<Entity, Fault>].
   ///
   /// Takes an [adapter] to convert the incoming models to entities.
   /// [errorHandler] is a function that converts an error to a [Fault] that
   /// will be emitted if the [modelStream] emits an error.
   /// When such an error is emitted by [modelStream] this method will log the
   /// error and stackTrace along with the [errorLoggerMessage].
-  Stream<Result<Entity, Fault>> convertStream<Entity extends Object, Model>({
+  Stream<ResultDart<Entity, Fault>>
+      convertStream<Entity extends Object, Model>({
     required Stream<Model> modelStream,
     required BaseAdapter<Entity, Model> adapter,
     required Fault Function(Object) errorHandler,

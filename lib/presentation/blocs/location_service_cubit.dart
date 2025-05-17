@@ -32,7 +32,7 @@ class LocationServiceCubit extends Cubit<LocationServiceState> {
   final RequestLocationService _requestLocationService;
   final WatchLocationServiceStatus _watchLocationServiceStatus;
 
-  late final StreamSubscription<Result<LocationServiceStatus, Fault>>
+  late final StreamSubscription<ResultDart<LocationServiceStatus, Fault>>
       _locationServiceStatusSubscription;
 
   void _initCubit() async {

@@ -8,7 +8,7 @@ import 'package:result_dart/result_dart.dart';
 /// [R] is the return type of the use-case.
 /// [P] is the type of the use-case's arguments.
 abstract interface class UseCaseSync<R extends Object, P> {
-  Result<R, Fault> call(P params);
+  ResultDart<R, Fault> call(P params);
 }
 
 /// Interface that defines the behavior of an asynchronous use-case.
@@ -19,7 +19,7 @@ abstract interface class UseCaseSync<R extends Object, P> {
 /// [R] is the return type of the use-case.
 /// [P] is the type of the use-case's arguments.
 abstract interface class UseCaseAsync<R extends Object, P> {
-  Future<Result<R, Fault>> call(P params);
+  Future<ResultDart<R, Fault>> call(P params);
 }
 
 /// Interface that defines the behavior of an asynchronous stream use-case.
@@ -30,5 +30,5 @@ abstract interface class UseCaseAsync<R extends Object, P> {
 /// [R] is the return type of the use-case.
 /// [P] is the type of the use-case's arguments.
 abstract interface class UseCaseStream<R extends Object, P> {
-  Stream<Result<R, Fault>> call(P params);
+  Stream<ResultDart<R, Fault>> call(P params);
 }

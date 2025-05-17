@@ -18,7 +18,8 @@ class PermissionRepositoryImpl implements PermissionRepository {
   final PermissionStatusAdapter _permissionStatusAdapter;
 
   @override
-  Future<Result<SystemPermissionStatus, Fault>> getLocationPermission() async {
+  Future<ResultDart<SystemPermissionStatus, Fault>>
+      getLocationPermission() async {
     try {
       final permission = await _permissionSource.getLocationPermission();
       final permissionEntity =
@@ -35,7 +36,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
   }
 
   @override
-  Future<Result<SystemPermissionStatus, Fault>>
+  Future<ResultDart<SystemPermissionStatus, Fault>>
       getNotificationPermission() async {
     try {
       final permission = await _permissionSource.getNotificationPermission();
@@ -53,7 +54,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
   }
 
   @override
-  Future<Result<SystemPermissionStatus, Fault>>
+  Future<ResultDart<SystemPermissionStatus, Fault>>
       getBackgroundLocationPermission() async {
     try {
       final permission =
@@ -72,7 +73,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
   }
 
   @override
-  Future<Result<SystemPermissionStatus, Fault>>
+  Future<ResultDart<SystemPermissionStatus, Fault>>
       requestLocationPermission() async {
     try {
       final permission = await _permissionSource.requestLocationPermission();
@@ -90,7 +91,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
   }
 
   @override
-  Future<Result<SystemPermissionStatus, Fault>>
+  Future<ResultDart<SystemPermissionStatus, Fault>>
       requestNotificationPermission() async {
     try {
       final permission =
@@ -109,7 +110,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
   }
 
   @override
-  Future<Result<bool, Fault>> shouldRequestLocation() async {
+  Future<ResultDart<bool, Fault>> shouldRequestLocation() async {
     try {
       final res = await _permissionSource.shouldRequestLocation();
       return res.toSuccess();
@@ -124,7 +125,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
   }
 
   @override
-  Future<Result<bool, Fault>> shouldRequestNotification() async {
+  Future<ResultDart<bool, Fault>> shouldRequestNotification() async {
     try {
       final res = await _permissionSource.shouldRequestNotifications();
       return res.toSuccess();

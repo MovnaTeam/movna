@@ -33,7 +33,7 @@ class TimedLocationRepositoryImpl
   final LocationServiceStatusAdapter _locationServiceStatusAdapter;
 
   @override
-  Future<Result<TimedLocation, Fault>> getLastKnownLocation() async {
+  Future<ResultDart<TimedLocation, Fault>> getLastKnownLocation() async {
     try {
       final position = await _positionSource.getLastKnownPosition();
       final location = _timedLocationAdapter.modelToEntityOrNull(position);
@@ -52,7 +52,7 @@ class TimedLocationRepositoryImpl
   }
 
   @override
-  Future<Result<TimedLocation, Fault>> getTimedLocation() async {
+  Future<ResultDart<TimedLocation, Fault>> getTimedLocation() async {
     try {
       Position position = await _positionSource.getPosition();
       return _timedLocationAdapter.modelToEntity(position).toSuccess();
@@ -68,7 +68,7 @@ class TimedLocationRepositoryImpl
   }
 
   @override
-  Stream<Result<TimedLocation, Fault>> getTimedLocationStream(
+  Stream<ResultDart<TimedLocation, Fault>> getTimedLocationStream(
     NotificationConfig notificationConfig,
   ) async* {
     try {
@@ -105,7 +105,7 @@ class TimedLocationRepositoryImpl
   }
 
   @override
-  Future<Result<LocationServiceStatus, Fault>>
+  Future<ResultDart<LocationServiceStatus, Fault>>
       getLocationServiceStatus() async {
     try {
       final res = await _positionSource.isLocationServiceEnabled()
@@ -123,7 +123,7 @@ class TimedLocationRepositoryImpl
   }
 
   @override
-  Future<Result<Unit, Fault>> requestLocationService() async {
+  Future<ResultDart<Unit, Fault>> requestLocationService() async {
     try {
       await _positionSource.requestLocationService();
       return unit.toSuccess();
@@ -138,7 +138,7 @@ class TimedLocationRepositoryImpl
   }
 
   @override
-  Stream<Result<LocationServiceStatus, Fault>>
+  Stream<ResultDart<LocationServiceStatus, Fault>>
       watchLocationServiceStatus() async* {
     try {
       final statusStream = _positionSource.watchLocationServiceStatus();

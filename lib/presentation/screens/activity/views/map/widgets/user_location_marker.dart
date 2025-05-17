@@ -37,7 +37,7 @@ class UserLocationMarker<B extends AbstractLocationCubit<S>,
           rotateAnimationCurve: MapConstants.mapAnimationsCurve,
           style: LocationMarkerStyle(
             accuracyCircleColor:
-                Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
             headingSectorColor: Theme.of(context).colorScheme.primary,
             marker: DefaultLocationMarker(
               color: Theme.of(context).colorScheme.primary,

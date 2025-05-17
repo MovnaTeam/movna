@@ -13,7 +13,7 @@ class GetLastKnownLocation implements UseCaseAsync<TimedLocation, void> {
   final TimedLocationRepository repository;
 
   @override
-  Future<Result<TimedLocation, Fault>> call([void params]) async {
+  Future<ResultDart<TimedLocation, Fault>> call([void params]) async {
     return repository.getLastKnownLocation();
   }
 }
