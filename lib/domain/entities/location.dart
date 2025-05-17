@@ -5,7 +5,7 @@ part 'location.freezed.dart';
 
 /// Position and movement of the device on the globe.
 @freezed
-class Location with _$Location {
+abstract class Location with _$Location {
   const Location._();
 
   const factory Location({

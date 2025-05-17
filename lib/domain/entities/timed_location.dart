@@ -5,7 +5,7 @@ part 'timed_location.freezed.dart';
 
 /// Position and movement of the device on the globe at an instant.
 @freezed
-class TimedLocation with _$TimedLocation {
+abstract class TimedLocation with _$TimedLocation {
   const TimedLocation._();
 
   const factory TimedLocation({

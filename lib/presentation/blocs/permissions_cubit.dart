@@ -16,7 +16,7 @@ part 'permissions_cubit.freezed.dart';
 
 /// Data class to specify to [PermissionsCubit] which permissions to query.
 @freezed
-class PermissionsCubitParams with _$PermissionsCubitParams {
+abstract class PermissionsCubitParams with _$PermissionsCubitParams {
   const factory PermissionsCubitParams({
     @Default(false) bool requestNotifications,
     @Default(false) bool requestLocation,
@@ -177,8 +177,9 @@ class PermissionsCubit extends Cubit<PermissionsState> {
     ResultDart<SystemPermissionStatus, Fault>? notification,
     ResultDart<SystemPermissionStatus, Fault>? location,
   ) async {
-    state.maybeMap(
-      loaded: (loaded) {
+    switch (state) {
+      case Loaded():
+        final loaded = state as Loaded;
         emit(
           loaded.copyWith(
             locationPermission: location ?? loaded.notificationPermission,
@@ -186,21 +187,21 @@ class PermissionsCubit extends Cubit<PermissionsState> {
                 notification ?? loaded.notificationPermission,
           ),
         );
-      },
-      orElse: () {
+        break;
+      default:
         emit(
           PermissionsState.loaded(
             notificationPermission: notification,
             locationPermission: location,
           ),
         );
-      },
-    );
+        break;
+    }
   }
 }
 
 @freezed
-class PermissionsState with _$PermissionsState {
+sealed class PermissionsState with _$PermissionsState {
   /// Contains the status of notification and location permissions.
   ///
   /// The [SystemPermissionStatus] is wrapped in a
@@ -215,9 +216,9 @@ class PermissionsState with _$PermissionsState {
   const factory PermissionsState.loaded({
     required ResultDart<SystemPermissionStatus, Fault>? notificationPermission,
     required ResultDart<SystemPermissionStatus, Fault>? locationPermission,
-  }) = _Loaded;
+  }) = Loaded;
 
-  const factory PermissionsState.loading() = _Loading;
+  const factory PermissionsState.loading() = Loading;
 
-  const factory PermissionsState.initial() = _Initial;
+  const factory PermissionsState.initial() = Initial;
 }

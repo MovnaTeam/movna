@@ -25,7 +25,10 @@ class ActivityLocationServiceAlert extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<LocationServiceCubit, LocationServiceState>(
       builder: (context, state) {
-        final status = state.whenOrNull(loaded: (status) => status);
+        final status = switch (state) {
+          Loaded(:final status) => status,
+          _ => null,
+        };
         final Widget child;
         if (status == LocationServiceStatus.disabled) {
           child = ActivityAlertWidget(

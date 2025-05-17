@@ -6,7 +6,7 @@ part 'gps_coordinates.freezed.dart';
 
 /// Position of the device on the globe at a moment.
 @freezed
-class GpsCoordinates with _$GpsCoordinates {
+abstract class GpsCoordinates with _$GpsCoordinates {
   const factory GpsCoordinates(
     /// Latitude of position between -180 (excluded) and 180 (included) degrees
     double latitudeInDegrees,
