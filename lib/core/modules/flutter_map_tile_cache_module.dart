@@ -2,6 +2,7 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:injectable/injectable.dart';
 
 @module
+
 /// A module that initializes the [FlutterMapTileCaching] package.
 abstract class FlutterMapTileCacheModule {
   static const _mapTileStore = 'mapStore';
@@ -14,7 +15,8 @@ abstract class FlutterMapTileCacheModule {
   }
 
   FMTCTileProvider getTileProvider(FMTCStore cache) {
-    return const FMTCStore(_mapTileStore).getTileProvider();
+    return FMTCTileProvider(
+      stores: {_mapTileStore: BrowseStoreStrategy.readUpdate},
+    );
   }
-
 }
