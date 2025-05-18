@@ -97,14 +97,14 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
         _params.locationServiceCubit?.stream.listen(
       (statusState) {
         // Called when the service status changes
-        if (statusState case l.Loaded(:final status)) {
-          if (status == LocationServiceStatus.enabled) {
+        if (statusState case l.Loaded(:final status)
+            when status == LocationServiceStatus.enabled) {
             // Current state is error, retry to get location as the cause for
             // the error has gone
             if (state case Error()) {
               retryTrackLocation();
             }
-          }
+          
         }
       },
     );
