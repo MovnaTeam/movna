@@ -182,7 +182,7 @@ class PermissionsCubit extends Cubit<PermissionsState> {
         final loaded = state as PermissionsLoaded;
         emit(
           loaded.copyWith(
-            locationPermission: location ?? loaded.notificationPermission,
+            locationPermission: location ?? loaded.locationPermission,
             notificationPermission:
                 notification ?? loaded.notificationPermission,
           ),
