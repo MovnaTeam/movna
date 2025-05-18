@@ -10,8 +10,8 @@ import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/domain/usecases/get_timed_location_stream.dart';
 import 'package:movna/presentation/blocs/abstract_location_cubit.dart';
-import 'package:movna/presentation/blocs/location_service_cubit.dart' as l;
-import 'package:movna/presentation/blocs/permissions_cubit.dart' as p;
+import 'package:movna/presentation/blocs/location_service_cubit.dart';
+import 'package:movna/presentation/blocs/permissions_cubit.dart';
 import 'package:mutex/mutex.dart';
 import 'package:result_dart/result_dart.dart';
 
@@ -28,8 +28,8 @@ part 'activity_cubit.freezed.dart';
 abstract class ActivityCubitParams with _$ActivityCubitParams {
   const factory ActivityCubitParams({
     required NotificationConfig notificationConfig,
-    p.PermissionsCubit? permissionsCubit,
-    l.LocationServiceCubit? locationServiceCubit,
+    PermissionsCubit? permissionsCubit,
+    LocationServiceCubit? locationServiceCubit,
   }) = _ActivityCubitParams;
 }
 
@@ -55,8 +55,8 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
   StreamSubscription<ResultDart<TimedLocation, Fault>>? _locationSubscription;
   final Mutex _locationSubscriptionMutex = Mutex();
 
-  late final StreamSubscription<p.PermissionsState>? _permissionsSubscription;
-  late final StreamSubscription<l.LocationServiceState>?
+  late final StreamSubscription<PermissionsState>? _permissionsSubscription;
+  late final StreamSubscription<LocationServiceState>?
       _locationServiceStatusSubscription;
 
   /// Represents the last location known by this cubit.
@@ -75,7 +75,8 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
     _permissionsSubscription = _params.permissionsCubit?.stream.listen(
       (permissionsState) {
         // If the permissions state changes
-        if (permissionsState case p.Loaded(:final locationPermission)) {
+        if (permissionsState
+            case PermissionsLoaded(:final locationPermission)) {
           if (locationPermission?.getOrNull()?.isGranted ?? false) {
             // Current state is error, retry to get location as the cause for
             // error has gone
@@ -97,7 +98,7 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
         _params.locationServiceCubit?.stream.listen(
       (statusState) {
         // Called when the service status changes
-        if (statusState case l.Loaded(:final status)
+        if (statusState case LocationServiceLoaded(:final status)
             when status == LocationServiceStatus.enabled) {
             // Current state is error, retry to get location as the cause for
             // the error has gone
@@ -133,7 +134,7 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
       (result) {
         // Only emit if state is not loaded
         switch (state) {
-          case Loaded():
+          case ActivityLoaded():
             break;
           default:
             result.onSuccess(
@@ -217,22 +218,22 @@ sealed class ActivityState
 
   const factory ActivityState.loaded({
     required Location currentLocation,
-  }) = Loaded;
+  }) = ActivityLoaded;
 
   const factory ActivityState.loading({
     Location? lastKnownLocation,
-  }) = Loading;
+  }) = ActivityLoading;
 
-  const factory ActivityState.initial() = Initial;
+  const factory ActivityState.initial() = ActivityInitial;
 
   const factory ActivityState.error({
     required Fault fault,
     Location? lastKnownLocation,
-  }) = Error;
+  }) = ActivityError;
 
   @override
   Fault? get fault {
-    if (this case Error(:final fault)) {
+    if (this case ActivityError(:final fault)) {
       return fault;
     }
     return null;
@@ -241,13 +242,13 @@ sealed class ActivityState
   @override
   Location? get location {
     switch (this) {
-      case Loaded(:final currentLocation):
+      case ActivityLoaded(:final currentLocation):
         return currentLocation;
-      case Loading(:final lastKnownLocation):
+      case ActivityLoading(:final lastKnownLocation):
         return lastKnownLocation;
-      case Error(:final lastKnownLocation):
+      case ActivityError(:final lastKnownLocation):
         return lastKnownLocation;
-      case Initial():
+      case ActivityInitial():
         return null;
     }
   }
@@ -255,13 +256,13 @@ sealed class ActivityState
   @override
   LocationStateType get type {
     switch (this) {
-      case Loaded():
+      case ActivityLoaded():
         return LocationStateType.loaded;
-      case Loading():
+      case ActivityLoading():
         return LocationStateType.loading;
-      case Error():
+      case ActivityError():
         return LocationStateType.error;
-      case Initial():
+      case ActivityInitial():
         return LocationStateType.loaded;
     }
   }

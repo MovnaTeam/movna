@@ -61,7 +61,7 @@ class ActivityPermissionAlertWidget extends StatelessWidget {
       child: BlocBuilder<PermissionsCubit, PermissionsState>(
         builder: (context, state) {
           if (state
-              case Loaded(
+              case PermissionsLoaded(
                 :final notificationPermission,
                 :final locationPermission
               )) {

@@ -178,8 +178,8 @@ class PermissionsCubit extends Cubit<PermissionsState> {
     ResultDart<SystemPermissionStatus, Fault>? location,
   ) async {
     switch (state) {
-      case Loaded():
-        final loaded = state as Loaded;
+      case PermissionsLoaded():
+        final loaded = state as PermissionsLoaded;
         emit(
           loaded.copyWith(
             locationPermission: location ?? loaded.notificationPermission,
@@ -216,9 +216,9 @@ sealed class PermissionsState with _$PermissionsState {
   const factory PermissionsState.loaded({
     required ResultDart<SystemPermissionStatus, Fault>? notificationPermission,
     required ResultDart<SystemPermissionStatus, Fault>? locationPermission,
-  }) = Loaded;
+  }) = PermissionsLoaded;
 
-  const factory PermissionsState.loading() = Loading;
+  const factory PermissionsState.loading() = PermissionsLoading;
 
-  const factory PermissionsState.initial() = Initial;
+  const factory PermissionsState.initial() = PermissionsInitial;
 }

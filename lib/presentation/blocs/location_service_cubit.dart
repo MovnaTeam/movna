@@ -80,11 +80,12 @@ class LocationServiceCubit extends Cubit<LocationServiceState> {
 sealed class LocationServiceState with _$LocationServiceState {
   const factory LocationServiceState.loaded({
     required LocationServiceStatus status,
-  }) = Loaded;
+  }) = LocationServiceLoaded;
 
-  const factory LocationServiceState.loading() = Loading;
+  const factory LocationServiceState.loading() = LocationServiceLoading;
 
-  const factory LocationServiceState.initial() = Initial;
+  const factory LocationServiceState.initial() = LocationServiceInitial;
 
-  const factory LocationServiceState.error({required Fault fault}) = Error;
+  const factory LocationServiceState.error({required Fault fault}) =
+      LocationServiceError;
 }

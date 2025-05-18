@@ -115,7 +115,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
         // Listen to location changes and animate the map to the location
         // (do not change zoom level)
         final location = switch (state) {
-          Loaded(:final currentLocation) => currentLocation,
+          ActivityLoaded(:final currentLocation) => currentLocation,
           _ => null,
         };
         if (location != null && _centerOnLocation.value) {
@@ -150,7 +150,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
           BlocBuilder<ActivityCubit, ActivityState>(
             buildWhen: (prev, next) => prev.runtimeType != next.runtimeType,
             builder: (context, state) {
-              if (state case Loading()) {
+              if (state case ActivityLoading()) {
                 return const Center(
                   child: LoadingIndicator(),
                 );
