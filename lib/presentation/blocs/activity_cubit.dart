@@ -25,7 +25,7 @@ part 'activity_cubit.freezed.dart';
 /// An optional [PermissionsCubit] can be provided to restart a failed location
 /// stream on permission change.
 @freezed
-class ActivityCubitParams with _$ActivityCubitParams {
+abstract class ActivityCubitParams with _$ActivityCubitParams {
   const factory ActivityCubitParams({
     required NotificationConfig notificationConfig,
     PermissionsCubit? permissionsCubit,
@@ -52,7 +52,7 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
   final GetLocationStream _getLocationStream;
   final ActivityCubitParams _params;
 
-  StreamSubscription<Result<TimedLocation, Fault>>? _locationSubscription;
+  StreamSubscription<ResultDart<TimedLocation, Fault>>? _locationSubscription;
   final Mutex _locationSubscriptionMutex = Mutex();
 
   late final StreamSubscription<PermissionsState>? _permissionsSubscription;
@@ -75,21 +75,16 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
     _permissionsSubscription = _params.permissionsCubit?.stream.listen(
       (permissionsState) {
         // If the permissions state changes
-        permissionsState.mapOrNull(
-          loaded: (loadedPermissions) {
-            // Location permission is granted
-            if (loadedPermissions.locationPermission?.getOrNull()?.isGranted ??
-                false) {
-              // Current state is error, retry to get location as the cause for
-              // error has gone
-              state.mapOrNull(
-                error: (_) {
-                  retryTrackLocation();
-                },
-              );
+        if (permissionsState
+            case PermissionsLoaded(:final locationPermission)) {
+          if (locationPermission?.getOrNull()?.isGranted ?? false) {
+            // Current state is error, retry to get location as the cause for
+            // error has gone
+            if (state case Error()) {
+              retryTrackLocation();
             }
-          },
-        );
+          }
+        }
       },
     );
   }
@@ -103,20 +98,15 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
         _params.locationServiceCubit?.stream.listen(
       (statusState) {
         // Called when the service status changes
-        statusState.whenOrNull(
-          loaded: (status) {
-            // Service is enabled
-            if (status == LocationServiceStatus.enabled) {
-              // Current state is error, retry to get location as the cause for
-              // the error has gone
-              state.mapOrNull(
-                error: (_) {
-                  retryTrackLocation();
-                },
-              );
+        if (statusState case LocationServiceLoaded(:final status)
+            when status == LocationServiceStatus.enabled) {
+            // Current state is error, retry to get location as the cause for
+            // the error has gone
+            if (state case Error()) {
+              retryTrackLocation();
             }
-          },
-        );
+          
+        }
       },
     );
   }
@@ -143,9 +133,10 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
     _getLastKnownLocation().then(
       (result) {
         // Only emit if state is not loaded
-        state.maybeMap(
-          loaded: (state) {},
-          orElse: () {
+        switch (state) {
+          case ActivityLoaded():
+            break;
+          default:
             result.onSuccess(
               (success) {
                 _lastKnownLocation = success.location;
@@ -154,8 +145,8 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
                 );
               },
             );
-          },
-        );
+            break;
+        }
       },
     );
 
@@ -220,48 +211,59 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
 }
 
 @freezed
-class ActivityState with _$ActivityState implements AbstractLocationState {
+sealed class ActivityState
+    with _$ActivityState
+    implements AbstractLocationState {
   const ActivityState._();
 
   const factory ActivityState.loaded({
     required Location currentLocation,
-  }) = _ActivityState;
+  }) = ActivityLoaded;
 
   const factory ActivityState.loading({
     Location? lastKnownLocation,
-  }) = _Loading;
+  }) = ActivityLoading;
 
-  const factory ActivityState.initial() = _Initial;
+  const factory ActivityState.initial() = ActivityInitial;
 
   const factory ActivityState.error({
     required Fault fault,
     Location? lastKnownLocation,
-  }) = _Error;
+  }) = ActivityError;
 
   @override
   Fault? get fault {
-    return mapOrNull(
-      error: (error) => error.fault,
-    );
+    if (this case ActivityError(:final fault)) {
+      return fault;
+    }
+    return null;
   }
 
   @override
   Location? get location {
-    return map(
-      loaded: (loaded) => loaded.currentLocation,
-      loading: (loading) => loading.lastKnownLocation,
-      error: (error) => error.lastKnownLocation,
-      initial: (_) => null,
-    );
+    switch (this) {
+      case ActivityLoaded(:final currentLocation):
+        return currentLocation;
+      case ActivityLoading(:final lastKnownLocation):
+        return lastKnownLocation;
+      case ActivityError(:final lastKnownLocation):
+        return lastKnownLocation;
+      case ActivityInitial():
+        return null;
+    }
   }
 
   @override
   LocationStateType get type {
-    return map(
-      loaded: (loaded) => LocationStateType.loaded,
-      loading: (loading) => LocationStateType.loading,
-      error: (error) => LocationStateType.error,
-      initial: (_) => LocationStateType.loaded,
-    );
+    switch (this) {
+      case ActivityLoaded():
+        return LocationStateType.loaded;
+      case ActivityLoading():
+        return LocationStateType.loading;
+      case ActivityError():
+        return LocationStateType.error;
+      case ActivityInitial():
+        return LocationStateType.loaded;
+    }
   }
 }

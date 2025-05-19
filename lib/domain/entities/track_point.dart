@@ -5,7 +5,7 @@ part 'track_point.freezed.dart';
 
 /// A point crossed by user at an instant, with associated data.
 @freezed
-class TrackPoint with _$TrackPoint {
+abstract class TrackPoint with _$TrackPoint {
   const TrackPoint._();
 
   const factory TrackPoint({

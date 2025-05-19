@@ -17,7 +17,7 @@ class ActivityRepositoryImpl
   final ActivityIsarAdapter _activityAdapter;
 
   @override
-  Future<Result<Unit, Fault>> saveActivity(Activity activity) async {
+  Future<ResultDart<Unit, Fault>> saveActivity(Activity activity) async {
     try {
       final model = _activityAdapter.entityToModel(activity);
       _source.saveActivity(model);
@@ -28,7 +28,7 @@ class ActivityRepositoryImpl
   }
 
   @override
-  Future<Result<Unit, Fault>> deleteActivity(Activity activity) async {
+  Future<ResultDart<Unit, Fault>> deleteActivity(Activity activity) async {
     try {
       final model = _activityAdapter.entityToModel(activity);
       _source.deleteActivity(model.id);
@@ -39,7 +39,7 @@ class ActivityRepositoryImpl
   }
 
   @override
-  Future<Result<List<Activity>, Fault>> getActivities() async {
+  Future<ResultDart<List<Activity>, Fault>> getActivities() async {
     try {
       final activities = await _source.getActivities();
       return _activityAdapter.modelsToEntities(activities).toSuccess();

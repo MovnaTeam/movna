@@ -14,7 +14,7 @@ class UserRepositoryImpl implements UserRepository {
   final SharedPreferences _prefs;
 
   @override
-  Result<double, Fault> getDefaultZoomLevel() {
+  ResultDart<double, Fault> getDefaultZoomLevel() {
     try {
       final value = _prefs.getDouble(_kZoomLevel);
       if (value == null) {
@@ -32,7 +32,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Result<Unit, Fault>> setDefaultZoomLevel(double level) async {
+  Future<ResultDart<Unit, Fault>> setDefaultZoomLevel(double level) async {
     try {
       final result = await _prefs.setDouble(_kZoomLevel, level);
       if (result) {

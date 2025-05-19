@@ -60,51 +60,53 @@ class ActivityPermissionAlertWidget extends StatelessWidget {
       },
       child: BlocBuilder<PermissionsCubit, PermissionsState>(
         builder: (context, state) {
-          final child = state.maybeWhen(
-            loaded: (notifications, location) {
-              final bool isPermissionGranted = switch (permissionType) {
-                PermissionType.notifications =>
-                  notifications?.getOrNull()?.isGranted ?? false,
-                PermissionType.location =>
-                  location?.getOrNull()?.isGranted ?? false,
-              };
-              if (isPermissionGranted) {
-                return const NoneWidget();
-              }
-              return ActivityAlertWidget(
-                title: title,
-                body: body,
-                icon: permissionType.icon,
-                iconBackground: Theme.of(context).colorScheme.errorContainer,
-                iconForeground: Theme.of(context).colorScheme.onErrorContainer,
-                action: ElevatedButton(
-                  onPressed: () async {
-                    final permissionsCubit = context.read<PermissionsCubit>();
-                    final callback = switch (permissionType) {
-                      PermissionType.notifications => await permissionsCubit
-                          .getNotificationRequestMethod(true),
-                      PermissionType.location =>
-                        await permissionsCubit.getLocationRequestMethod(true)
-                    };
-                    callback();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Theme.of(context).colorScheme.secondaryContainer,
-                    foregroundColor:
-                        Theme.of(context).colorScheme.onSecondaryContainer,
-                    textStyle: Theme.of(context).textTheme.labelSmall,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  child: Text(
-                    LocaleKeys.permissions.grant().translate(context),
-                  ),
+          if (state
+              case PermissionsLoaded(
+                :final notificationPermission,
+                :final locationPermission
+              )) {
+            final bool isPermissionGranted = switch (permissionType) {
+              PermissionType.notifications =>
+                notificationPermission?.getOrNull()?.isGranted ?? false,
+              PermissionType.location =>
+                locationPermission?.getOrNull()?.isGranted ?? false,
+            };
+            if (isPermissionGranted) {
+              return AlertTransitionWidget(child: NoneWidget());
+            }
+            return ActivityAlertWidget(
+              title: title,
+              body: body,
+              icon: permissionType.icon,
+              iconBackground: Theme.of(context).colorScheme.errorContainer,
+              iconForeground: Theme.of(context).colorScheme.onErrorContainer,
+              action: ElevatedButton(
+                onPressed: () async {
+                  final permissionsCubit = context.read<PermissionsCubit>();
+                  final callback = switch (permissionType) {
+                    PermissionType.notifications =>
+                      await permissionsCubit.getNotificationRequestMethod(true),
+                    PermissionType.location =>
+                      await permissionsCubit.getLocationRequestMethod(true)
+                  };
+                  callback();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      Theme.of(context).colorScheme.secondaryContainer,
+                  foregroundColor:
+                      Theme.of(context).colorScheme.onSecondaryContainer,
+                  textStyle: Theme.of(context).textTheme.labelSmall,
+                  visualDensity: VisualDensity.compact,
                 ),
-              );
-            },
-            orElse: () => const NoneWidget(),
-          );
-          return AlertTransitionWidget(child: child);
+                child: Text(
+                  LocaleKeys.permissions.grant().translate(context),
+                ),
+              ),
+            );
+          } else {
+            return AlertTransitionWidget(child: NoneWidget());
+          }
         },
       ),
     );

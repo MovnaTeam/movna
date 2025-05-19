@@ -15,7 +15,7 @@ class RequestLocationService implements UseCaseAsync<Unit, void> {
   final TimedLocationRepository _repository;
 
   @override
-  Future<Result<Unit, Fault>> call([void params]) {
+  Future<ResultDart<Unit, Fault>> call([void params]) {
     return _repository.requestLocationService();
   }
 }

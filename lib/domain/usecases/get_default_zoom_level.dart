@@ -14,7 +14,7 @@ class GetDefaultZoomLevel implements UseCaseSync<double, void> {
   final UserRepository _repository;
 
   @override
-  Result<double, Fault> call([void params]) {
+  ResultDart<double, Fault> call([void params]) {
     return _repository.getDefaultZoomLevel();
   }
 }

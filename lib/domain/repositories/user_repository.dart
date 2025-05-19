@@ -6,10 +6,10 @@ abstract interface class UserRepository {
   /// Stores the given [level].
   ///
   /// Returns [Unit] on success and a [Fault] on failure.
-  Future<Result<Unit, Fault>> setDefaultZoomLevel(double level);
+  Future<ResultDart<Unit, Fault>> setDefaultZoomLevel(double level);
 
   /// Retrieves the latest zoom level stored by [setDefaultZoomLevel].
   ///
   /// If no value has been previously set, returns a [Fault.notFound].
-  Result<double, Fault> getDefaultZoomLevel();
+  ResultDart<double, Fault> getDefaultZoomLevel();
 }

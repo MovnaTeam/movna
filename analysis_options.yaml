@@ -55,8 +55,6 @@ linter:
     - missing_whitespace_between_adjacent_strings
     # https://dart.dev/tools/linter-rules#only_throw_errors
     - only_throw_errors
-    # https://dart.dev/tools/linter-rules#package_api_docs
-    - package_api_docs
     # https://dart.dev/tools/linter-rules#parameter_assignments
     - parameter_assignments
     # https://dart.dev/tools/linter-rules#prefer_single_quotes

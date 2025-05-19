@@ -32,7 +32,7 @@ class LocationServiceCubit extends Cubit<LocationServiceState> {
   final RequestLocationService _requestLocationService;
   final WatchLocationServiceStatus _watchLocationServiceStatus;
 
-  late final StreamSubscription<Result<LocationServiceStatus, Fault>>
+  late final StreamSubscription<ResultDart<LocationServiceStatus, Fault>>
       _locationServiceStatusSubscription;
 
   void _initCubit() async {
@@ -77,14 +77,15 @@ class LocationServiceCubit extends Cubit<LocationServiceState> {
 }
 
 @freezed
-class LocationServiceState with _$LocationServiceState {
+sealed class LocationServiceState with _$LocationServiceState {
   const factory LocationServiceState.loaded({
     required LocationServiceStatus status,
-  }) = _Loaded;
+  }) = LocationServiceLoaded;
 
-  const factory LocationServiceState.loading() = _Loading;
+  const factory LocationServiceState.loading() = LocationServiceLoading;
 
-  const factory LocationServiceState.initial() = _Initial;
+  const factory LocationServiceState.initial() = LocationServiceInitial;
 
-  const factory LocationServiceState.error({required Fault fault}) = _Error;
+  const factory LocationServiceState.error({required Fault fault}) =
+      LocationServiceError;
 }

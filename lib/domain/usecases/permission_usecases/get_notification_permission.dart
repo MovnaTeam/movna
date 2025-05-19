@@ -13,7 +13,7 @@ class GetNotificationPermission
   final PermissionRepository _repository;
 
   @override
-  Future<Result<SystemPermissionStatus, Fault>> call([void params]) {
+  Future<ResultDart<SystemPermissionStatus, Fault>> call([void params]) {
     return _repository.getNotificationPermission();
   }
 }

@@ -16,7 +16,7 @@ class GetLocation implements UseCaseAsync<TimedLocation, void> {
   final TimedLocationRepository repository;
 
   @override
-  Future<Result<TimedLocation, Fault>> call([void p]) {
+  Future<ResultDart<TimedLocation, Fault>> call([void p]) {
     return repository.getTimedLocation();
   }
 }

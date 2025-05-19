@@ -11,7 +11,7 @@ class SetDefaultZoomLevel implements UseCaseAsync<Unit, double> {
   final UserRepository _repository;
 
   @override
-  Future<Result<Unit, Fault>> call(double zoomLevel) {
+  Future<ResultDart<Unit, Fault>> call(double zoomLevel) {
     return _repository.setDefaultZoomLevel(zoomLevel);
   }
 }

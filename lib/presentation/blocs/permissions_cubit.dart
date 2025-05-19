@@ -16,7 +16,7 @@ part 'permissions_cubit.freezed.dart';
 
 /// Data class to specify to [PermissionsCubit] which permissions to query.
 @freezed
-class PermissionsCubitParams with _$PermissionsCubitParams {
+abstract class PermissionsCubitParams with _$PermissionsCubitParams {
   const factory PermissionsCubitParams({
     @Default(false) bool requestNotifications,
     @Default(false) bool requestLocation,
@@ -71,8 +71,8 @@ class PermissionsCubit extends Cubit<PermissionsState> {
     }
     final paramsToUse = overrideParams ?? _params;
 
-    Result<SystemPermissionStatus, Fault>? notificationPermission;
-    Result<SystemPermissionStatus, Fault>? locationPermission;
+    ResultDart<SystemPermissionStatus, Fault>? notificationPermission;
+    ResultDart<SystemPermissionStatus, Fault>? locationPermission;
 
     if (paramsToUse.requestNotifications) {
       notificationPermission = await _getNotificationPermission();
@@ -108,8 +108,8 @@ class PermissionsCubit extends Cubit<PermissionsState> {
     if (!silent) {
       emit(const PermissionsState.loading());
     }
-    Result<SystemPermissionStatus, Fault>? notificationPermission;
-    Result<SystemPermissionStatus, Fault>? locationPermission;
+    ResultDart<SystemPermissionStatus, Fault>? notificationPermission;
+    ResultDart<SystemPermissionStatus, Fault>? locationPermission;
     final paramsToUse = overrideParams ?? _params;
 
     if (paramsToUse.requestNotifications) {
@@ -174,33 +174,34 @@ class PermissionsCubit extends Cubit<PermissionsState> {
   /// used or [SystemPermissionStatusHolder.notDemanded] if no current
   /// holder exists.
   void emitState(
-    Result<SystemPermissionStatus, Fault>? notification,
-    Result<SystemPermissionStatus, Fault>? location,
+    ResultDart<SystemPermissionStatus, Fault>? notification,
+    ResultDart<SystemPermissionStatus, Fault>? location,
   ) async {
-    state.maybeMap(
-      loaded: (loaded) {
+    switch (state) {
+      case PermissionsLoaded():
+        final loaded = state as PermissionsLoaded;
         emit(
           loaded.copyWith(
-            locationPermission: location ?? loaded.notificationPermission,
+            locationPermission: location ?? loaded.locationPermission,
             notificationPermission:
                 notification ?? loaded.notificationPermission,
           ),
         );
-      },
-      orElse: () {
+        break;
+      default:
         emit(
           PermissionsState.loaded(
             notificationPermission: notification,
             locationPermission: location,
           ),
         );
-      },
-    );
+        break;
+    }
   }
 }
 
 @freezed
-class PermissionsState with _$PermissionsState {
+sealed class PermissionsState with _$PermissionsState {
   /// Contains the status of notification and location permissions.
   ///
   /// The [SystemPermissionStatus] is wrapped in a
@@ -213,11 +214,11 @@ class PermissionsState with _$PermissionsState {
   /// On failure [SystemPermissionStatusHolder.failure] contains
   /// the failure's reason.
   const factory PermissionsState.loaded({
-    required Result<SystemPermissionStatus, Fault>? notificationPermission,
-    required Result<SystemPermissionStatus, Fault>? locationPermission,
-  }) = _Loaded;
+    required ResultDart<SystemPermissionStatus, Fault>? notificationPermission,
+    required ResultDart<SystemPermissionStatus, Fault>? locationPermission,
+  }) = PermissionsLoaded;
 
-  const factory PermissionsState.loading() = _Loading;
+  const factory PermissionsState.loading() = PermissionsLoading;
 
-  const factory PermissionsState.initial() = _Initial;
+  const factory PermissionsState.initial() = PermissionsInitial;
 }

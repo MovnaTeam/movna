@@ -6,23 +6,23 @@ import 'package:result_dart/result_dart.dart';
 
 abstract class TimedLocationRepository {
   /// Get the last known device location.
-  Future<Result<TimedLocation, Fault>> getLastKnownLocation();
+  Future<ResultDart<TimedLocation, Fault>> getLastKnownLocation();
 
   /// Get the current device location.
-  Future<Result<TimedLocation, Fault>> getTimedLocation();
+  Future<ResultDart<TimedLocation, Fault>> getTimedLocation();
 
   /// Get stream of device locations.
   ///
   /// Specify the foreground notification text using [NotificationConfig]
-  Stream<Result<TimedLocation, Fault>> getTimedLocationStream(
+  Stream<ResultDart<TimedLocation, Fault>> getTimedLocationStream(
     NotificationConfig notificationConfig,
   );
 
-  Future<Result<LocationServiceStatus, Fault>> getLocationServiceStatus();
+  Future<ResultDart<LocationServiceStatus, Fault>> getLocationServiceStatus();
 
-  Stream<Result<LocationServiceStatus, Fault>> watchLocationServiceStatus();
+  Stream<ResultDart<LocationServiceStatus, Fault>> watchLocationServiceStatus();
 
   /// Requests that the location service is enabled, this might have different
   /// behavior depending on the underlying platform.
-  Future<Result<Unit, Fault>> requestLocationService();
+  Future<ResultDart<Unit, Fault>> requestLocationService();
 }

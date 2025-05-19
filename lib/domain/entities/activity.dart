@@ -7,7 +7,7 @@ part 'activity.freezed.dart';
 
 /// Training activity session.
 @freezed
-class Activity with _$Activity {
+abstract class Activity with _$Activity {
   const Activity._();
 
   const factory Activity({

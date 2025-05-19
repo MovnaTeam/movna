@@ -114,8 +114,10 @@ class _ActivityMapViewState extends State<ActivityMapView>
       listener: (context, state) {
         // Listen to location changes and animate the map to the location
         // (do not change zoom level)
-        final location =
-            state.mapOrNull(loaded: (loaded) => loaded.currentLocation);
+        final location = switch (state) {
+          ActivityLoaded(:final currentLocation) => currentLocation,
+          _ => null,
+        };
         if (location != null && _centerOnLocation.value) {
           _lastLocation = location;
           _controller.animateTo(
@@ -148,12 +150,13 @@ class _ActivityMapViewState extends State<ActivityMapView>
           BlocBuilder<ActivityCubit, ActivityState>(
             buildWhen: (prev, next) => prev.runtimeType != next.runtimeType,
             builder: (context, state) {
-              return state.maybeMap(
-                loading: (_) => const Center(
+              if (state case ActivityLoading()) {
+                return const Center(
                   child: LoadingIndicator(),
-                ),
-                orElse: () => const NoneWidget(),
-              );
+                );
+              } else {
+                return const NoneWidget();
+              }
             },
           ),
           ValueListenableBuilder(

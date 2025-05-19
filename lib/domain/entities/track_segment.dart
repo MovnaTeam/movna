@@ -5,7 +5,7 @@ part 'track_segment.freezed.dart';
 
 /// Continuous track segment followed by user, without any pause.
 @freezed
-class TrackSegment with _$TrackSegment {
+abstract class TrackSegment with _$TrackSegment {
   const TrackSegment._();
 
   const factory TrackSegment({

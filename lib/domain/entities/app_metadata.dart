@@ -9,7 +9,7 @@ enum AppEnvironment {
 
 /// Contains useful data about the running app.
 @freezed
-class AppMetadata with _$AppMetadata {
+abstract class AppMetadata with _$AppMetadata {
   const factory AppMetadata({
     required String packageName,
     required AppEnvironment environment,
