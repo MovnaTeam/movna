@@ -21,11 +21,14 @@ class HomePage extends StatelessWidget {
             onPressed: () => showModalBottomSheet<void>(
               context: context,
               builder: (context) {
-                return ElevatedButton(
-                  child: Text(
-                    LocaleKeys.home.startActivity().translate(context),
+                return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    child: Text(
+                      LocaleKeys.home.startActivity().translate(context),
+                    ),
+                    onPressed: () => const ActivityRoute().go(context),
                   ),
-                  onPressed: () => const ActivityRoute().go(context),
                 );
               },
             ),
