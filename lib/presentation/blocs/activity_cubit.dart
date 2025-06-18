@@ -1,11 +1,16 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:movna/domain/entities/activity.dart';
 import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/entities/location_service_status.dart';
 import 'package:movna/domain/entities/notification_config.dart';
+import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/domain/entities/timed_location.dart';
+import 'package:movna/domain/entities/track_point.dart';
+import 'package:movna/domain/entities/track_segment.dart';
 import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/domain/usecases/get_timed_location_stream.dart';
@@ -27,6 +32,7 @@ part 'activity_cubit.freezed.dart';
 @freezed
 abstract class ActivityCubitParams with _$ActivityCubitParams {
   const factory ActivityCubitParams({
+    required Sport sport,
     required NotificationConfig notificationConfig,
     PermissionsCubit? permissionsCubit,
     LocationServiceCubit? locationServiceCubit,
@@ -58,14 +64,6 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
   late final StreamSubscription<PermissionsState>? _permissionsSubscription;
   late final StreamSubscription<LocationServiceState>?
       _locationServiceStatusSubscription;
-
-  /// Represents the last location known by this cubit.
-  ///
-  /// This only concerns memory-persisted location in a small scope and is used
-  /// for temporary loss of location such as if the user mistakenly disables
-  /// their location service. This does NOT corresponds to the last known
-  /// location from a previous session.
-  Location? _lastKnownLocation;
 
   /// Listens to changes in the [PermissionsCubit].
   ///
@@ -100,12 +98,11 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
         // Called when the service status changes
         if (statusState case LocationServiceLoaded(:final status)
             when status == LocationServiceStatus.enabled) {
-            // Current state is error, retry to get location as the cause for
-            // the error has gone
-            if (state case Error()) {
-              retryTrackLocation();
-            }
-          
+          // Current state is error, retry to get location as the cause for
+          // the error has gone
+          if (state case Error()) {
+            retryTrackLocation();
+          }
         }
       },
     );
@@ -121,13 +118,9 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
   ///
   /// Cancels any previous subscription before attempting a new one.
   ///
-  /// If the location stream fails, [ActivityState.error] is emitted with
-  /// [_lastKnownLocation] set if available.
-  ///
-  /// Updates [_lastKnownLocation] each time a new location is emitted from the
-  /// stream.
+  /// If the location stream fails, [ActivityState.error] is emitted.
   void listenToLocation() {
-    emit(ActivityState.loading(lastKnownLocation: _lastKnownLocation));
+    emit(ActivityState.loading());
 
     // First try to get the last known location, generally faster.
     _getLastKnownLocation().then(
@@ -139,9 +132,8 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
           default:
             result.onSuccess(
               (success) {
-                _lastKnownLocation = success.location;
                 emit(
-                  ActivityState.loading(lastKnownLocation: _lastKnownLocation),
+                  ActivityState.loading(lastKnownLocation: success.location),
                 );
               },
             );
@@ -161,19 +153,13 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
         ).listen(
           (locationResult) {
             locationResult.fold(
-              (timedLocation) {
-                _lastKnownLocation = timedLocation.location;
-                emit(
-                  ActivityState.loaded(
-                    currentLocation: timedLocation.location,
-                  ),
-                );
-              },
+              (timedLocation) => _onNewTimedLocation(timedLocation),
               (fault) {
                 emit(
                   ActivityState.error(
                     fault: fault,
-                    lastKnownLocation: _lastKnownLocation,
+                    lastKnownLocation: state.location,
+                    activity: state.activity,
                   ),
                 );
                 _closeLocationSubscription();
@@ -186,6 +172,97 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
         );
       },
     );
+  }
+
+  /// Called when a new [timedLocation] is available.
+  void _onNewTimedLocation(TimedLocation timedLocation) {
+    final newTrackPoint = TrackPoint(
+      timestamp: timedLocation.timestamp,
+      location: timedLocation.location,
+    );
+    switch (state) {
+      case ActivityInitial():
+      case ActivityLoading():
+        emit(
+          ActivityState.loaded(
+            currentLocation: timedLocation.location,
+            activity: Activity(
+              startTime: timedLocation.timestamp,
+              sport: _params.sport,
+            ),
+          ),
+        );
+        break;
+      case ActivityLoaded(:final activity, :final currentLocation):
+        final newDistanceInMeters = (activity.distanceInMeters ?? 0) +
+            timedLocation.location.gpsCoordinates.distanceToInMeters(
+              currentLocation.gpsCoordinates,
+            );
+        final newMaxSpeed = activity.maxSpeedInMetersPerSecond == null
+            ? timedLocation.location.speedInMetersPerSecond
+            : max(
+                activity.maxSpeedInMetersPerSecond!,
+                timedLocation.location.speedInMetersPerSecond,
+              );
+        final newDuration =
+            timedLocation.timestamp.difference(activity.startTime);
+        final newAverageSpeedInMetersPerSecond =
+            newDistanceInMeters / newDuration.inSeconds;
+
+        var newTrackSegments = activity.trackSegments.isEmpty
+            ? [
+                TrackSegment(),
+              ]
+            : activity.trackSegments;
+        newTrackSegments.last.trackPoints.add(newTrackPoint);
+
+        emit(
+          ActivityState.loaded(
+            currentLocation: timedLocation.location,
+            activity: activity.copyWith(
+              distanceInMeters: newDistanceInMeters,
+              maxSpeedInMetersPerSecond: newMaxSpeed,
+              duration: newDuration,
+              averageSpeedInMetersPerSecond: newAverageSpeedInMetersPerSecond,
+              trackSegments: newTrackSegments,
+            ),
+          ),
+        );
+        break;
+      case ActivityError(activity: final previousActivity):
+        final activity =
+            previousActivity ?? Activity(startTime: timedLocation.timestamp);
+        final newMaxSpeed = activity.maxSpeedInMetersPerSecond == null
+            ? timedLocation.location.speedInMetersPerSecond
+            : max(
+                activity.maxSpeedInMetersPerSecond!,
+                timedLocation.location.speedInMetersPerSecond,
+              );
+        final newDuration =
+            timedLocation.timestamp.difference(activity.startTime);
+        final newAverageSpeedInMetersPerSecond =
+            (activity.distanceInMeters ?? 0) / newDuration.inSeconds;
+
+        var newTrackSegments = activity.trackSegments.isEmpty
+            ? [
+                TrackSegment(),
+              ]
+            : activity.trackSegments;
+        newTrackSegments.last.trackPoints.add(newTrackPoint);
+
+        emit(
+          ActivityState.loaded(
+            currentLocation: timedLocation.location,
+            activity: activity.copyWith(
+              maxSpeedInMetersPerSecond: newMaxSpeed,
+              duration: newDuration,
+              averageSpeedInMetersPerSecond: newAverageSpeedInMetersPerSecond,
+              trackSegments: newTrackSegments,
+            ),
+          ),
+        );
+        break;
+    }
   }
 
   Future<void> _closeLocationSubscription() async {
@@ -218,6 +295,7 @@ sealed class ActivityState
 
   const factory ActivityState.loaded({
     required Location currentLocation,
+    required Activity activity,
   }) = ActivityLoaded;
 
   const factory ActivityState.loading({
@@ -229,6 +307,7 @@ sealed class ActivityState
   const factory ActivityState.error({
     required Fault fault,
     Location? lastKnownLocation,
+    Activity? activity,
   }) = ActivityError;
 
   @override
@@ -241,29 +320,29 @@ sealed class ActivityState
 
   @override
   Location? get location {
-    switch (this) {
-      case ActivityLoaded(:final currentLocation):
-        return currentLocation;
-      case ActivityLoading(:final lastKnownLocation):
-        return lastKnownLocation;
-      case ActivityError(:final lastKnownLocation):
-        return lastKnownLocation;
-      case ActivityInitial():
-        return null;
-    }
+    return switch (this) {
+      ActivityLoaded(:final currentLocation) => currentLocation,
+      ActivityLoading(:final lastKnownLocation) => lastKnownLocation,
+      ActivityError(:final lastKnownLocation) => lastKnownLocation,
+      _ => null,
+    };
+  }
+
+  Activity? get activity {
+    return switch (this) {
+      ActivityLoaded(:final activity) => activity,
+      ActivityError(:final activity) => activity,
+      _ => null,
+    };
   }
 
   @override
   LocationStateType get type {
-    switch (this) {
-      case ActivityLoaded():
-        return LocationStateType.loaded;
-      case ActivityLoading():
-        return LocationStateType.loading;
-      case ActivityError():
-        return LocationStateType.error;
-      case ActivityInitial():
-        return LocationStateType.loaded;
-    }
+    return switch (this) {
+      ActivityLoaded() => LocationStateType.loaded,
+      ActivityLoading() => LocationStateType.loading,
+      ActivityError() => LocationStateType.error,
+      ActivityInitial() => LocationStateType.loaded,
+    };
   }
 }

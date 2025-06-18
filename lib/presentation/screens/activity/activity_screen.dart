@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/domain/entities/notification_config.dart';
+import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/blocs/location_service_cubit.dart';
@@ -54,6 +55,7 @@ class ActivityScreen extends StatelessWidget {
                 permissionsCubit: providerContext.read<PermissionsCubit>(),
                 locationServiceCubit:
                     providerContext.read<LocationServiceCubit>(),
+                sport: Sport.other, // TODO get from previous screen
               ),
             )..listenToLocation();
           },
