@@ -19,4 +19,4 @@ abstract interface class AbstractLocationState {
   Fault? get fault;
 }
 
-enum LocationStateType { initial, loading, error, loaded }
+enum LocationStateType { initial, loading, error, loaded, done }

@@ -274,7 +274,14 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
           ),
         );
         break;
+      case ActivityDone():
+        break;
     }
+  }
+
+  void stopActivity() {
+    //TODO await save Activity.
+    emit(ActivityState.done());
   }
 
   Future<void> _closeLocationSubscription() async {
@@ -322,6 +329,8 @@ sealed class ActivityState
     Activity? activity,
   }) = ActivityError;
 
+  const factory ActivityState.done() = ActivityDone;
+
   @override
   Fault? get fault {
     if (this case ActivityError(:final fault)) {
@@ -355,6 +364,7 @@ sealed class ActivityState
       ActivityLoading() => LocationStateType.loading,
       ActivityError() => LocationStateType.error,
       ActivityInitial() => LocationStateType.loaded,
+      ActivityDone() => LocationStateType.done,
     };
   }
 }
