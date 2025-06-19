@@ -14,6 +14,7 @@ import 'package:movna/domain/entities/track_segment.dart';
 import 'package:movna/domain/faults.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/domain/usecases/get_timed_location_stream.dart';
+import 'package:movna/domain/usecases/save_activity.dart';
 import 'package:movna/presentation/blocs/abstract_location_cubit.dart';
 import 'package:movna/presentation/blocs/location_service_cubit.dart';
 import 'package:movna/presentation/blocs/permissions_cubit.dart';
@@ -49,6 +50,7 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
     @factoryParam this._params,
     this._getLastKnownLocation,
     this._getLocationStream,
+    this._saveActivity,
   ) : super(const ActivityState.initial()) {
     _initPermissionsSubscription();
     _initLocationServiceStatusSubscription();
@@ -56,6 +58,7 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
 
   final GetLastKnownLocation _getLastKnownLocation;
   final GetLocationStream _getLocationStream;
+  final SaveActivity _saveActivity;
   final ActivityCubitParams _params;
 
   StreamSubscription<ResultDart<TimedLocation, Fault>>? _locationSubscription;
@@ -280,7 +283,7 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
   }
 
   void stopActivity() {
-    //TODO await save Activity.
+    if (state.activity != null) _saveActivity(state.activity!);
     emit(ActivityState.done());
   }
 
