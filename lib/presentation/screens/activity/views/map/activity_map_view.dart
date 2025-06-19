@@ -137,6 +137,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
           backgroundColor: Theme.of(context).colorScheme.surface,
         ),
         children: [
+          // Actual map layer
           TileLayer(
             urlTemplate: MapConstants.urlTemplate,
             userAgentPackageName: injector<AppMetadata>().packageName,
@@ -146,17 +147,67 @@ class _ActivityMapViewState extends State<ActivityMapView>
               Brightness.light => null,
             },
           ),
+          // TrackPoints layer
+          BlocBuilder<ActivityCubit, ActivityState>(
+            builder: (context, state) {
+              return switch (state) {
+                ActivityLoaded(:final activity)
+                    when activity.trackPoints.length >= 2 =>
+                  PolylineLayer(
+                    polylines: [
+                      // TODO several polylines for each segment
+                      Polyline(
+                        points: List.from(
+                          activity.trackPoints
+                              .where((tp) => tp.location != null)
+                              .map(
+                                (tp) => tp.location!.gpsCoordinates.toLatLng(),
+                              ),
+                        ),
+                        color: Theme.of(context).colorScheme.primary,
+                        borderColor: Theme.of(context).colorScheme.onPrimary,
+                        strokeWidth: 5.0,
+                        borderStrokeWidth: 5.0,
+                      ),
+                    ],
+                  ),
+                _ => const NoneWidget(),
+              };
+            },
+          ),
+          // Start Point Layer
+          BlocSelector<ActivityCubit, ActivityState, GpsCoordinates?>(
+            selector: (state) => state.activity?.trackSegments.firstOrNull
+                ?.trackPoints.firstOrNull?.location?.gpsCoordinates,
+            builder: (context, startPoint) {
+              return startPoint != null
+                  ? CircleLayer(
+                      circles: [
+                        CircleMarker(
+                          point: startPoint.toLatLng(),
+                          radius: 7.5,
+                          color: Theme.of(context).colorScheme.secondary,
+                          borderColor:
+                              Theme.of(context).colorScheme.onSecondary,
+                          borderStrokeWidth: 5.0,
+                        ),
+                      ],
+                    )
+                  : const NoneWidget();
+            },
+          ),
+          // User Marker layer
           const UserLocationMarker<ActivityCubit, ActivityState>(),
+          // Loading indicator layer.
           BlocBuilder<ActivityCubit, ActivityState>(
             buildWhen: (prev, next) => prev.runtimeType != next.runtimeType,
             builder: (context, state) {
-              if (state case ActivityLoading()) {
-                return const Center(
-                  child: LoadingIndicator(),
-                );
-              } else {
-                return const NoneWidget();
-              }
+              return switch (state) {
+                ActivityInitial() ||
+                ActivityLoading() =>
+                  const Center(child: LoadingIndicator()),
+                _ => const NoneWidget(),
+              };
             },
           ),
           ValueListenableBuilder(

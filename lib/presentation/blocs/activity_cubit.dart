@@ -209,12 +209,24 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
         final newAverageSpeedInMetersPerSecond =
             newDistanceInMeters / newDuration.inSeconds;
 
-        var newTrackSegments = activity.trackSegments.isEmpty
+        // Create new track segments list by adding the new track point to the
+        // last track segment.
+        final newTrackSegments = activity.trackSegments.isEmpty
             ? [
-                TrackSegment(),
+                TrackSegment(trackPoints: [newTrackPoint]),
               ]
-            : activity.trackSegments;
-        newTrackSegments.last.trackPoints.add(newTrackPoint);
+            : [
+                ...List<TrackSegment>.from(
+                  activity.trackSegments
+                      .getRange(0, activity.trackSegments.length - 1),
+                ),
+                activity.trackSegments.last.copyWith(
+                  trackPoints: [
+                    ...activity.trackSegments.last.trackPoints,
+                    newTrackPoint,
+                  ],
+                ),
+              ];
 
         emit(
           ActivityState.loaded(
