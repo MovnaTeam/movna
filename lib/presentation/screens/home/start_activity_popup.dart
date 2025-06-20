@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/jsons.dart';
+import 'package:movna/presentation/extensions/sport_translation_extension.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/router/router.dart';
 import 'package:movna/presentation/screens/activity/activity_screen.dart';
@@ -33,7 +34,7 @@ class _StartActivityPopupState extends State<StartActivityPopup> {
               return DropdownMenuItem<Sport>(
                 value: value,
                 child: Text(
-                  value.name, // TODO translate this
+                  value.translatable().translate(context),
                 ),
               );
             }).toList(),
