@@ -17,6 +17,9 @@
     "title": "L'application Movna est en cours..."
   },
   "home": {
+    "activityConfiguration": {
+      "sport": "Sport"
+    },
     "startActivity": "Commencer l'activité"
   },
   "location": {

@@ -17,6 +17,9 @@
     "title": "Movna app is running..."
   },
   "home": {
+    "activityConfiguration": {
+      "sport": "Sport"
+    },
     "startActivity": "Start activity"
   },
   "location": {

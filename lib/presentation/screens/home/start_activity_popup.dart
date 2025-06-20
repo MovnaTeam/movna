@@ -18,36 +18,72 @@ class _StartActivityPopupState extends State<StartActivityPopup> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: Column(
-        children: [
-          DropdownButton<Sport>(
-            value: _sport,
-            onChanged: (Sport? value) {
-              if (value == null) return;
-              setState(() {
-                _sport = value;
-              });
-            },
-            items: Sport.values.map<DropdownMenuItem<Sport>>((Sport value) {
-              return DropdownMenuItem<Sport>(
-                value: value,
+    return SafeArea(
+      child: SizedBox(
+        width: double.infinity,
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Sport selection
+              _buildSportSelectionRow(context),
+              // Start button.
+              ElevatedButton(
                 child: Text(
-                  value.translatable().translate(context),
+                  LocaleKeys.home.startActivity().translate(context),
                 ),
-              );
-            }).toList(),
+                onPressed: () =>
+                    ActivityRoute(ActivityScreenParams(sport: _sport))
+                        .go(context),
+              ),
+            ],
           ),
-          ElevatedButton(
-            child: Text(
-              LocaleKeys.home.startActivity().translate(context),
-            ),
-            onPressed: () =>
-                ActivityRoute(ActivityScreenParams(sport: _sport)).go(context),
-          ),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildSportDropDownButton(BuildContext context) {
+    return DropdownButton(
+      isExpanded: true,
+      value: _sport,
+      onChanged: (Sport? value) {
+        if (value == null) return;
+        setState(() {
+          _sport = value;
+        });
+      },
+      items: Sport.values.map<DropdownMenuItem<Sport>>((Sport value) {
+        return DropdownMenuItem(
+          value: value,
+          child: Text(
+            value.translatable().translate(context),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildSportSelectionRow(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              LocaleKeys.home.activityConfiguration.sport().translate(context),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: _buildSportDropDownButton(context),
+          ),
+        ),
+      ],
     );
   }
 }
