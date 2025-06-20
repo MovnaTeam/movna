@@ -17,10 +17,13 @@ class HomeRoute extends GoRouteData {
 
 @TypedGoRoute<ActivityRoute>(path: '/activity')
 class ActivityRoute extends GoRouteData {
-  const ActivityRoute();
+  const ActivityRoute(this.$extra);
+  final ActivityScreenParams $extra;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const ActivityScreen();
+    return ActivityScreen(
+      parameters: $extra,
+    );
   }
 }

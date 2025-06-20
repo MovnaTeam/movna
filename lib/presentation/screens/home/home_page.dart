@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movna/assets.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
-import 'package:movna/presentation/router/router.dart';
+import 'package:movna/presentation/screens/home/start_activity_popup.dart';
 import 'package:movna/presentation/widgets/svg_themed_widget.dart';
 
 class HomePage extends StatelessWidget {
@@ -20,17 +20,7 @@ class HomePage extends StatelessWidget {
           child: ElevatedButton(
             onPressed: () => showModalBottomSheet<void>(
               context: context,
-              builder: (context) {
-                return SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    child: Text(
-                      LocaleKeys.home.startActivity().translate(context),
-                    ),
-                    onPressed: () => const ActivityRoute().go(context),
-                  ),
-                );
-              },
+              builder: (context) => const StartActivityPopup(),
             ),
             child: Text(LocaleKeys.home.startActivity().translate(context)),
           ),
