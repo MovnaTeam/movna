@@ -10,7 +10,7 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-
+  workflow_dispatch:
 jobs:
   analyze:
     runs-on: ubuntu-latest
@@ -25,8 +25,8 @@ jobs:
       - name: Install Flutter SDK
         run: echo yes | fvm install
 
-      - name: Print Flutter SDK version
-        run: fvm flutter --version
+      - name: Print Flutter SDK and dependent tools versions
+        run: fvm flutter doctor --verbose
 
       - name: Install dependencies
         run: fvm flutter pub get
@@ -44,6 +44,5 @@ jobs:
       - name: Run tests
         run: fvm flutter test
 
-      # Uncomment to build apk.
-      # - name: Build APK
-      #  run: fvm flutter build apk
+      - name: Build APK
+        run: fvm flutter build apk
