@@ -4,6 +4,14 @@
     "button": "Redémarrer l'application",
     "label": "L'application a rencontré un problème au lancement. Essayez de la redémarrer."
   },
+  "enums": {
+    "sport": {
+      "biking": "Vélo",
+      "hiking": "Randonnée",
+      "other": "Autre",
+      "running": "Course à pied"
+    }
+  },
   "foreground_notification": {
     "text": "Cette notification permet à Movna de suivre votre position en arrière plan.",
     "title": "L'application Movna est en cours..."
