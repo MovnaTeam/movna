@@ -13,12 +13,14 @@ import 'package:movna/domain/usecases/get_default_zoom_level.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/domain/usecases/set_default_zoom_level.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
+import 'package:movna/presentation/blocs/location_cubit.dart';
 import 'package:movna/presentation/extensions/gps_coordinates_extensions.dart';
 import 'package:movna/presentation/screens/activity/views/map/constants.dart';
 import 'package:movna/presentation/screens/activity/views/map/widgets/activity_map_layer.dart';
 import 'package:movna/presentation/screens/activity/views/map/widgets/user_location_marker.dart';
 import 'package:movna/presentation/widgets/loading_indicator.dart';
 import 'package:movna/presentation/widgets/none_widget.dart';
+import 'package:movna/presentation/widgets/visible_if_bloc_available.dart';
 
 /// Displays a map with location information about the current activity.
 ///
@@ -111,18 +113,20 @@ class _ActivityMapViewState extends State<ActivityMapView>
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ActivityCubit, ActivityState>(
+    return BlocListener<LocationCubit, LocationCubitState>(
       listener: (context, state) {
         // Listen to location changes and animate the map to the location
         // (do not change zoom level)
-        final location = switch (state) {
-          ActivityLoaded(:final currentLocation) => currentLocation,
+        final timedLocation = switch (state) {
+          LocationCubitStateLoading(:final lastKnownLocation) =>
+            lastKnownLocation,
+          LocationCubitStateLoaded(:final currentLocation) => currentLocation,
           _ => null,
         };
-        if (location != null && _centerOnLocation.value) {
-          _lastLocation = location;
+        if (timedLocation != null && _centerOnLocation.value) {
+          _lastLocation = timedLocation.location;
           _controller.animateTo(
-            dest: location.gpsCoordinates.toLatLng(),
+            dest: timedLocation.location.gpsCoordinates.toLatLng(),
           );
         }
       },
@@ -148,17 +152,20 @@ class _ActivityMapViewState extends State<ActivityMapView>
               Brightness.light => null,
             },
           ),
-          // Activity Layer
-          const ActivityMapLayer(),
+          const VisibleIfBlocAvailable<ActivityCubit>(
+            child: ActivityMapLayer(),
+          ),
           // User Marker layer
-          const UserLocationMarker<ActivityCubit, ActivityState>(),
+          const VisibleIfBlocAvailable<LocationCubit>(
+            child: UserLocationMarker(),
+          ),
           // Loading indicator layer.
-          BlocBuilder<ActivityCubit, ActivityState>(
+          BlocBuilder<LocationCubit, LocationCubitState>(
             buildWhen: (prev, next) => prev.runtimeType != next.runtimeType,
             builder: (context, state) {
               return switch (state) {
-                ActivityInitial() ||
-                ActivityLoading() =>
+                LocationCubitStateInitial() ||
+                LocationCubitStateLoading() =>
                   const Center(child: LoadingIndicator()),
                 _ => const NoneWidget(),
               };

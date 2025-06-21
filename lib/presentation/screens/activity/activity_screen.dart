@@ -6,6 +6,7 @@ import 'package:movna/domain/entities/notification_config.dart';
 import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
+import 'package:movna/presentation/blocs/location_cubit.dart';
 import 'package:movna/presentation/blocs/location_service_cubit.dart';
 import 'package:movna/presentation/blocs/permissions_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
@@ -52,11 +53,11 @@ class ActivityScreen extends StatelessWidget {
             )..requestPermissions();
           },
         ),
-        BlocProvider<ActivityCubit>(
+        BlocProvider<LocationCubit>(
           lazy: false,
           create: (providerContext) {
             return injector(
-              param1: ActivityCubitParams(
+              param1: LocationCubitParams(
                 notificationConfig: NotificationConfig(
                   title: LocaleKeys.foreground_notification
                       .title()
@@ -68,10 +69,18 @@ class ActivityScreen extends StatelessWidget {
                 permissionsCubit: providerContext.read<PermissionsCubit>(),
                 locationServiceCubit:
                     providerContext.read<LocationServiceCubit>(),
-                sport: parameters.sport,
               ),
             )..listenToLocation();
           },
+        ),
+        BlocProvider<ActivityCubit>(
+          lazy: false,
+          create: (providerContext) => injector(
+            param1: ActivityCubitParams(
+              locationCubit: providerContext.read<LocationCubit>(),
+              sport: parameters.sport,
+            ),
+          ),
         ),
       ],
       child: const ActivityScreenContent(),
