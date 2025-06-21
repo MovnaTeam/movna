@@ -192,6 +192,9 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
             activity: Activity(
               startTime: timedLocation.timestamp,
               sport: _params.sport,
+              trackSegments: [
+                TrackSegment(trackPoints: [newTrackPoint]),
+              ],
             ),
           ),
         );
@@ -216,6 +219,7 @@ class ActivityCubit extends AbstractLocationCubit<ActivityState> {
         // last track segment.
         final newTrackSegments = activity.trackSegments.isEmpty
             ? [
+                // Should be impossible (first location creates a new segment)
                 TrackSegment(trackPoints: [newTrackPoint]),
               ]
             : [
