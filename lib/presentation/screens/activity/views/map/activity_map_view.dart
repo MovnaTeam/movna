@@ -9,6 +9,7 @@ import 'package:movna/core/injection.dart';
 import 'package:movna/domain/entities/app_metadata.dart';
 import 'package:movna/domain/entities/gps_coordinates.dart';
 import 'package:movna/domain/entities/location.dart';
+import 'package:movna/domain/entities/track_segment.dart';
 import 'package:movna/domain/usecases/get_default_zoom_level.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/domain/usecases/set_default_zoom_level.dart';
@@ -148,31 +149,34 @@ class _ActivityMapViewState extends State<ActivityMapView>
             },
           ),
           // TrackPoints layer
-          BlocBuilder<ActivityCubit, ActivityState>(
-            builder: (context, state) {
-              return switch (state) {
-                ActivityLoaded(:final activity)
-                    when activity.trackPoints.length >= 2 =>
-                  PolylineLayer(
-                    polylines: [
-                      // TODO several polylines for each segment
-                      Polyline(
-                        points: List.from(
-                          activity.trackPoints
-                              .where((tp) => tp.location != null)
-                              .map(
-                                (tp) => tp.location!.gpsCoordinates.toLatLng(),
-                              ),
-                        ),
+          BlocSelector<ActivityCubit, ActivityState, List<TrackSegment>?>(
+            selector: (state) => state.activity?.trackSegments,
+            builder: (context, trackSegments) {
+              if (trackSegments == null) return NoneWidget();
+              // Polyline errors if less than 2 points.
+              final segmentsWithMoreThanTwoPoints = trackSegments.where(
+                (ts) =>
+                    ts.trackPoints.where((tp) => tp.location != null).length >=
+                    2,
+              );
+              return PolylineLayer(
+                polylines: segmentsWithMoreThanTwoPoints
+                    .map(
+                      (ts) => Polyline(
+                        points: ts.trackPoints
+                            .where((tp) => tp.location != null)
+                            .map(
+                              (tp) => tp.location!.gpsCoordinates.toLatLng(),
+                            )
+                            .toList(),
                         color: Theme.of(context).colorScheme.primary,
                         borderColor: Theme.of(context).colorScheme.onPrimary,
                         strokeWidth: 5.0,
                         borderStrokeWidth: 5.0,
                       ),
-                    ],
-                  ),
-                _ => const NoneWidget(),
-              };
+                    )
+                    .toList(),
+              );
             },
           ),
           // Start Point Layer
@@ -180,20 +184,18 @@ class _ActivityMapViewState extends State<ActivityMapView>
             selector: (state) => state.activity?.trackSegments.firstOrNull
                 ?.trackPoints.firstOrNull?.location?.gpsCoordinates,
             builder: (context, startPoint) {
-              return startPoint != null
-                  ? CircleLayer(
-                      circles: [
-                        CircleMarker(
-                          point: startPoint.toLatLng(),
-                          radius: 7.5,
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderColor:
-                              Theme.of(context).colorScheme.onSecondary,
-                          borderStrokeWidth: 5.0,
-                        ),
-                      ],
-                    )
-                  : const NoneWidget();
+              if (startPoint == null) return NoneWidget();
+              return CircleLayer(
+                circles: [
+                  CircleMarker(
+                    point: startPoint.toLatLng(),
+                    radius: 7.5,
+                    color: Theme.of(context).colorScheme.secondary,
+                    borderColor: Theme.of(context).colorScheme.onSecondary,
+                    borderStrokeWidth: 5.0,
+                  ),
+                ],
+              );
             },
           ),
           // User Marker layer
