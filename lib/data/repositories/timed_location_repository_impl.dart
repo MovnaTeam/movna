@@ -69,7 +69,7 @@ class TimedLocationRepositoryImpl
 
   @override
   Stream<ResultDart<TimedLocation, Fault>> getTimedLocationStream(
-    NotificationConfig notificationConfig,
+    NotificationConfig? notificationConfig,
   ) async* {
     try {
       Stream<Position> geoPositionStream = _positionSource.getPositionStream(

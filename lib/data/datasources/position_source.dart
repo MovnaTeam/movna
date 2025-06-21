@@ -17,9 +17,10 @@ abstract class PositionSource {
   /// Emits the device location in a stream until cancelled.
   ///
   /// Provide [notificationConfig] to specify the title and text of the
-  /// notification allowing for background location access.
+  /// notification allowing for background location access. If null then the
+  /// stream will not run in the background.
   Stream<Position> getPositionStream(
-    ForegroundNotificationConfig notificationConfig,
+    ForegroundNotificationConfig? notificationConfig,
   );
 
   Future<bool> isLocationServiceEnabled();
@@ -48,7 +49,7 @@ class PositionSourceImpl extends PositionSource {
 
   @override
   Stream<Position> getPositionStream(
-    ForegroundNotificationConfig notificationConfig,
+    ForegroundNotificationConfig? notificationConfig,
   ) {
     return Geolocator.getPositionStream(
       locationSettings: Platform.isAndroid

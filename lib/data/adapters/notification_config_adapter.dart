@@ -5,9 +5,10 @@ import 'package:movna/domain/entities/notification_config.dart';
 
 @injectable
 class NotificationConfigAdapter
-    extends BaseAdapter<NotificationConfig, ForegroundNotificationConfig> {
+    extends BaseAdapter<NotificationConfig?, ForegroundNotificationConfig?> {
   @override
-  ForegroundNotificationConfig entityToModel(NotificationConfig e) {
+  ForegroundNotificationConfig? entityToModel(NotificationConfig? e) {
+    if (e == null) return null;
     return ForegroundNotificationConfig(
       notificationTitle: e.title,
       notificationText: e.text,

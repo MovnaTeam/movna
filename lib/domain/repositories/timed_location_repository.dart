@@ -13,9 +13,9 @@ abstract class TimedLocationRepository {
 
   /// Get stream of device locations.
   ///
-  /// Specify the foreground notification text using [NotificationConfig]
+  /// Specify the foreground notification text using [NotificationConfig].
   Stream<ResultDart<TimedLocation, Fault>> getTimedLocationStream(
-    NotificationConfig notificationConfig,
+    NotificationConfig? notificationConfig,
   );
 
   Future<ResultDart<LocationServiceStatus, Fault>> getLocationServiceStatus();
