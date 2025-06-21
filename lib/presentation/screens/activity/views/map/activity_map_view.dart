@@ -9,13 +9,13 @@ import 'package:movna/core/injection.dart';
 import 'package:movna/domain/entities/app_metadata.dart';
 import 'package:movna/domain/entities/gps_coordinates.dart';
 import 'package:movna/domain/entities/location.dart';
-import 'package:movna/domain/entities/track_segment.dart';
 import 'package:movna/domain/usecases/get_default_zoom_level.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/domain/usecases/set_default_zoom_level.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/extensions/gps_coordinates_extensions.dart';
 import 'package:movna/presentation/screens/activity/views/map/constants.dart';
+import 'package:movna/presentation/screens/activity/views/map/widgets/activity_map_layer.dart';
 import 'package:movna/presentation/screens/activity/views/map/widgets/user_location_marker.dart';
 import 'package:movna/presentation/widgets/loading_indicator.dart';
 import 'package:movna/presentation/widgets/none_widget.dart';
@@ -148,56 +148,8 @@ class _ActivityMapViewState extends State<ActivityMapView>
               Brightness.light => null,
             },
           ),
-          // TrackPoints layer
-          BlocSelector<ActivityCubit, ActivityState, List<TrackSegment>?>(
-            selector: (state) => state.activity?.trackSegments,
-            builder: (context, trackSegments) {
-              if (trackSegments == null) return NoneWidget();
-              // Polyline errors if less than 2 points.
-              final segmentsWithMoreThanTwoPoints = trackSegments.where(
-                (ts) =>
-                    ts.trackPoints.where((tp) => tp.location != null).length >=
-                    2,
-              );
-              return PolylineLayer(
-                polylines: segmentsWithMoreThanTwoPoints
-                    .map(
-                      (ts) => Polyline(
-                        points: ts.trackPoints
-                            .where((tp) => tp.location != null)
-                            .map(
-                              (tp) => tp.location!.gpsCoordinates.toLatLng(),
-                            )
-                            .toList(),
-                        color: Theme.of(context).colorScheme.primary,
-                        borderColor: Theme.of(context).colorScheme.onPrimary,
-                        strokeWidth: 5.0,
-                        borderStrokeWidth: 5.0,
-                      ),
-                    )
-                    .toList(),
-              );
-            },
-          ),
-          // Start Point Layer
-          BlocSelector<ActivityCubit, ActivityState, GpsCoordinates?>(
-            selector: (state) => state.activity?.trackSegments.firstOrNull
-                ?.trackPoints.firstOrNull?.location?.gpsCoordinates,
-            builder: (context, startPoint) {
-              if (startPoint == null) return NoneWidget();
-              return CircleLayer(
-                circles: [
-                  CircleMarker(
-                    point: startPoint.toLatLng(),
-                    radius: 7.5,
-                    color: Theme.of(context).colorScheme.secondary,
-                    borderColor: Theme.of(context).colorScheme.onSecondary,
-                    borderStrokeWidth: 5.0,
-                  ),
-                ],
-              );
-            },
-          ),
+          // Activity Layer
+          const ActivityMapLayer(),
           // User Marker layer
           const UserLocationMarker<ActivityCubit, ActivityState>(),
           // Loading indicator layer.
