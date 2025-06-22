@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/assets.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/domain/entities/notification_config.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/location_cubit.dart';
 import 'package:movna/presentation/blocs/location_service_cubit.dart';
@@ -73,6 +74,21 @@ class HomePage extends StatelessWidget {
           create: (providerContext) {
             return injector(
               param1: LocationCubitParams(
+                // This should not be necessary here as we do not care about
+                // getting location in the background on this screen, but it is
+                // the first time the app gets the Geolocator location stream,
+                // and it will not be closed immediately when switching screen,
+                // resulting in Android not recreating it with a new
+                // notification when called again. So a notification is added
+                // here as a workaround, even if unnecessary on this screen.
+                notificationConfig: NotificationConfig(
+                  title: LocaleKeys.foreground_notification
+                      .title()
+                      .translate(context),
+                  text: LocaleKeys.foreground_notification
+                      .text()
+                      .translate(context),
+                ),
                 permissionsCubit: providerContext.read<PermissionsCubit>(),
                 locationServiceCubit:
                     providerContext.read<LocationServiceCubit>(),
