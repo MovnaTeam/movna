@@ -69,13 +69,13 @@ class _ActivityMapViewState extends State<ActivityMapView>
             _lastLocation = lastLocation.location;
             _controller.animateTo(
               dest: lastLocation.location.gpsCoordinates.toLatLng(),
-              zoom: zoomLevelResult.getOrDefault(16),
+              zoom: zoomLevelResult.getOrDefault(MapConstants.defaultZoom),
             );
           },
           (f) {
             _controller.animateTo(
               dest: GpsCoordinates.paris.toLatLng(),
-              zoom: 6,
+              zoom: MapConstants.errorZoom,
             );
           },
         );

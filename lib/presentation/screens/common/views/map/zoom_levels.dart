@@ -1,6 +1,6 @@
 /// Representation of the zoom levels used by OpenStreetMap.
 /// More info at https://wiki.openstreetmap.org/wiki/Zoom_levels.
-class ZoomLevel {
+sealed class ZoomLevel {
   static const double wholeWorld = 0;
   static const double subcontinentalArea = 2;
   static const double largestCountry = 3;
@@ -20,5 +20,6 @@ class ZoomLevel {
   static const double midSizedBuilding = 20;
 
   static const double min = wholeWorld;
+  // Open street map does not provide tiles above this zoom level.
   static const double max = crossingDetails;
 }
