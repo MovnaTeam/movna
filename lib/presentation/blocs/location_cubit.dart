@@ -138,7 +138,8 @@ class LocationCubit extends Cubit<LocationCubitState> {
         if (_locationSubscription != null) {
           await _locationSubscription!.cancel();
         }
-        _locationSubscription = _getLocationStream().listen(
+        _locationSubscription =
+            _getLocationStream(_params.notificationConfig).listen(
           (locationResult) {
             locationResult.fold(
               (timedLocation) => _onNewTimedLocation(timedLocation),
