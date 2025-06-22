@@ -135,7 +135,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
         mapController: _controller.mapController,
         options: MapOptions(
           initialCenter: GpsCoordinates.paris.toLatLng(),
-          initialZoom: ZoomLevel.block.toValue(),
+          initialZoom: ZoomLevel.block,
           maxZoom: MapConstants.maxZoom,
           interactionOptions: const InteractionOptions(
             enableMultiFingerGestureRace: true,

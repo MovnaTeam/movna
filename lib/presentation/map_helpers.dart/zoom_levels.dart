@@ -1,43 +1,24 @@
 /// Representation of the zoom levels used by OpenStreetMap.
 /// More info at https://wiki.openstreetmap.org/wiki/Zoom_levels.
-enum ZoomLevel {
-  wholeWorld,
-  subcontinentalArea,
-  largestCountry,
-  largeAfricanCountry,
-  largeEuropeanCountry,
-  smallCountry,
-  wideMetropolitanArea,
-  metropolitanArea,
-  city,
-  cityDistrict,
-  village,
-  smallRoad,
-  street,
-  block,
-  buildings,
-  crossingDetails,
-  midSizedBuilding
-}
+class ZoomLevel {
+  static const double wholeWorld = 0;
+  static const double subcontinentalArea = 2;
+  static const double largestCountry = 3;
+  static const double largeAfricanCountry = 5;
+  static const double largeEuropeanCountry = 6;
+  static const double smallCountry = 7;
+  static const double wideMetropolitanArea = 9;
+  static const double metropolitanArea = 10;
+  static const double city = 11;
+  static const double cityDistrict = 12;
+  static const double village = 13;
+  static const double smallRoad = 15;
+  static const double street = 16;
+  static const double block = 17;
+  static const double buildings = 18;
+  static const double crossingDetails = 19;
+  static const double midSizedBuilding = 20;
 
-extension ZoomLevelValues on ZoomLevel {
-  double toValue() => switch (this) {
-        ZoomLevel.wholeWorld => 0,
-        ZoomLevel.subcontinentalArea => 2,
-        ZoomLevel.largestCountry => 3,
-        ZoomLevel.largeAfricanCountry => 5,
-        ZoomLevel.largeEuropeanCountry => 6,
-        ZoomLevel.smallCountry => 7,
-        ZoomLevel.wideMetropolitanArea => 9,
-        ZoomLevel.metropolitanArea => 10,
-        ZoomLevel.city => 11,
-        ZoomLevel.cityDistrict => 12,
-        ZoomLevel.village => 13,
-        ZoomLevel.smallRoad => 15,
-        ZoomLevel.street => 16,
-        ZoomLevel.block => 17,
-        ZoomLevel.buildings => 18,
-        ZoomLevel.crossingDetails => 19,
-        ZoomLevel.midSizedBuilding => 20,
-      };
+  static const double min = wholeWorld;
+  static const double max = crossingDetails;
 }
