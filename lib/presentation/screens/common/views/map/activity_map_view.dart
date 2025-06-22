@@ -65,26 +65,6 @@ class _ActivityMapViewState extends State<ActivityMapView>
   void initState() {
     _zoomLevel = injector<GetDefaultZoomLevel>()()
         .getOrDefault(MapConstants.defaultZoom);
-    // Get last location and set controller to the given coordinates or to Paris
-    injector<GetLastKnownLocation>()().then(
-      (value) {
-        value.fold(
-          (lastLocation) {
-            _lastLocation = lastLocation.location;
-            _controller.animateTo(
-              dest: lastLocation.location.gpsCoordinates.toLatLng(),
-              zoom: _zoomLevel,
-            );
-          },
-          (f) {
-            _controller.animateTo(
-              dest: GpsCoordinates.paris.toLatLng(),
-              zoom: MapConstants.errorZoom,
-            );
-          },
-        );
-      },
-    );
 
     // Listen to map events to detect user gestures
     _mapEventSubscription = _controller.mapController.mapEventStream.listen(
