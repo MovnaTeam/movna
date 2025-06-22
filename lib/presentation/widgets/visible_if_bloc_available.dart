@@ -9,8 +9,11 @@ import 'package:movna/presentation/widgets/none_widget.dart';
 /// unavailable.
 class VisibleIfBlocAvailable<ConcreteBloc extends BlocBase>
     extends StatelessWidget {
-  const VisibleIfBlocAvailable(
-      {required this.child, this.fallbackChild, super.key});
+  const VisibleIfBlocAvailable({
+    required this.child,
+    this.fallbackChild,
+    super.key,
+  });
 
   final Widget child;
   final Widget? fallbackChild;

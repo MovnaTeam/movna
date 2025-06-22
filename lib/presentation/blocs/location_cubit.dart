@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/entities/location_service_status.dart';
 import 'package:movna/domain/entities/notification_config.dart';
 import 'package:movna/domain/entities/timed_location.dart';
@@ -36,9 +35,11 @@ abstract class LocationCubitParams with _$LocationCubitParams {
 /// Takes in [LocationCubitParams].
 @injectable
 class LocationCubit extends Cubit<LocationCubitState> {
-  LocationCubit(@factoryParam this._params, this._getLastKnownLocation,
-      this._getLocationStream)
-      : super(const LocationCubitState.initial()) {
+  LocationCubit(
+    @factoryParam this._params,
+    this._getLastKnownLocation,
+    this._getLocationStream,
+  ) : super(const LocationCubitState.initial()) {
     _initPermissionsSubscription();
     _initLocationServiceStatusSubscription();
   }
@@ -201,9 +202,10 @@ sealed class LocationCubitState with _$LocationCubitState {
 
   const factory LocationCubitState.initial() = LocationCubitStateInitial;
 
-  const factory LocationCubitState.error(
-      {required Fault fault,
-      TimedLocation? lastKnownLocation}) = LocationCubitStateError;
+  const factory LocationCubitState.error({
+    required Fault fault,
+    TimedLocation? lastKnownLocation,
+  }) = LocationCubitStateError;
 
   TimedLocation? get location {
     return switch (this) {
