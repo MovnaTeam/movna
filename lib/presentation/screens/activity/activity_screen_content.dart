@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/router/router.dart';
-import 'package:movna/presentation/screens/activity/views/alerts/activity_alerts_view.dart';
-import 'package:movna/presentation/widgets/activity_map_view.dart';
+import 'package:movna/presentation/screens/common/views/alerts/alerts_view.dart';
+import 'package:movna/presentation/screens/common/views/map/activity_map_view.dart';
 
 /// Displays the content of the activity screen.
 ///
@@ -28,7 +28,7 @@ class ActivityScreenContent extends StatelessWidget {
         child: const Stack(
           children: [
             ActivityMapView(),
-            ActivityAlertsView(),
+            AlertsView(),
           ],
         ),
       ),

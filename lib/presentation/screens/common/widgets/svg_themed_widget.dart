@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:movna/presentation/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 
 extension HexColorString on Color {
   /// Prefixes a hash sign if [leadingHashSign] is set to `true`.

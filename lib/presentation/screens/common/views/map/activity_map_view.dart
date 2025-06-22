@@ -15,13 +15,13 @@ import 'package:movna/domain/usecases/set_default_zoom_level.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/blocs/location_cubit.dart';
 import 'package:movna/presentation/extensions/gps_coordinates_extensions.dart';
-import 'package:movna/presentation/map_helpers.dart/zoom_levels.dart';
-import 'package:movna/presentation/screens/activity/views/map/constants.dart';
-import 'package:movna/presentation/screens/activity/views/map/widgets/activity_map_layer.dart';
-import 'package:movna/presentation/screens/activity/views/map/widgets/user_location_marker.dart';
-import 'package:movna/presentation/widgets/loading_indicator.dart';
-import 'package:movna/presentation/widgets/none_widget.dart';
-import 'package:movna/presentation/widgets/visible_if_bloc_available.dart';
+import 'package:movna/presentation/screens/common/views/map/constants.dart';
+import 'package:movna/presentation/screens/common/views/map/widgets/activity_map_layer.dart';
+import 'package:movna/presentation/screens/common/views/map/widgets/user_location_marker.dart';
+import 'package:movna/presentation/screens/common/views/map/zoom_levels.dart';
+import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
+import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/visible_if_bloc_available.dart';
 
 /// Displays a map with location information about the current activity.
 ///

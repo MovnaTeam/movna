@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:movna/presentation/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 
 /// A widget that makes [child] only visible if some [ConcreteBloc] is available
 /// in the context.

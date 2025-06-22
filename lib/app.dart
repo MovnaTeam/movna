@@ -6,8 +6,8 @@ import 'package:movna/assets.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
+import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
 import 'package:movna/presentation/theme/app_theme.dart';
-import 'package:movna/presentation/widgets/svg_themed_widget.dart';
 import 'package:restart_app/restart_app.dart';
 
 class MovnaApp extends StatelessWidget {

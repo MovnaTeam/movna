@@ -5,7 +5,7 @@ import 'package:movna/domain/entities/gps_coordinates.dart';
 import 'package:movna/domain/entities/track_segment.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/extensions/gps_coordinates_extensions.dart';
-import 'package:movna/presentation/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 
 class ActivityMapLayer extends StatelessWidget {
   const ActivityMapLayer({super.key});

@@ -7,10 +7,10 @@ import 'package:movna/presentation/blocs/location_cubit.dart';
 import 'package:movna/presentation/blocs/location_service_cubit.dart';
 import 'package:movna/presentation/blocs/permissions_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
+import 'package:movna/presentation/screens/common/views/map/activity_map_view.dart';
+import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
 import 'package:movna/presentation/screens/home/start_activity_popup.dart';
-import 'package:movna/presentation/widgets/activity_map_view.dart';
-import 'package:movna/presentation/widgets/none_widget.dart';
-import 'package:movna/presentation/widgets/svg_themed_widget.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

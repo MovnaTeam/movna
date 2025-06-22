@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movna/presentation/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 
 /// Watches changes in the app's lifecycle and calls the corresponding callback
 /// on a lifecycle change.

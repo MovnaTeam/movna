@@ -5,8 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:movna/domain/entities/location.dart';
 import 'package:movna/presentation/blocs/location_cubit.dart';
-import 'package:movna/presentation/screens/activity/views/map/constants.dart';
-import 'package:movna/presentation/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/views/map/constants.dart';
+import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 
 /// Displays a location marker at the current device location or nothing if no
 /// location is available.
