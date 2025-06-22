@@ -134,7 +134,17 @@ class ActivityCubit extends Cubit<ActivityState> {
   }
 
   void stopActivity() {
-    if (state.activity != null) _saveActivity(state.activity!);
+    if (state case ActivityLoaded(:final activity)) {
+      emit(
+        ActivityState.loaded(
+          activity: activity.copyWith(
+            stopTime:
+                activity.trackPoints.lastOrNull?.timestamp ?? DateTime.now(),
+          ),
+        ),
+      );
+      _saveActivity(state.activity!);
+    }
     emit(ActivityState.done());
   }
 
