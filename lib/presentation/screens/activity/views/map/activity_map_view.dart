@@ -15,6 +15,7 @@ import 'package:movna/domain/usecases/set_default_zoom_level.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/blocs/location_cubit.dart';
 import 'package:movna/presentation/extensions/gps_coordinates_extensions.dart';
+import 'package:movna/presentation/map_helpers.dart/zoom_levels.dart';
 import 'package:movna/presentation/screens/activity/views/map/constants.dart';
 import 'package:movna/presentation/screens/activity/views/map/widgets/activity_map_layer.dart';
 import 'package:movna/presentation/screens/activity/views/map/widgets/user_location_marker.dart';
@@ -134,7 +135,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
         mapController: _controller.mapController,
         options: MapOptions(
           initialCenter: GpsCoordinates.paris.toLatLng(),
-          initialZoom: 6,
+          initialZoom: ZoomLevel.block.toValue(),
           maxZoom: MapConstants.maxZoom,
           interactionOptions: const InteractionOptions(
             enableMultiFingerGestureRace: true,
