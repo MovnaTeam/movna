@@ -80,7 +80,7 @@ class ActivityScreen extends StatelessWidget {
               locationCubit: providerContext.read<LocationCubit>(),
               sport: parameters.sport,
             ),
-          ),
+          )..listenToDateTime(),
         ),
       ],
       child: const ActivityScreenContent(),
