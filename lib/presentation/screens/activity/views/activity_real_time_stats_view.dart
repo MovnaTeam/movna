@@ -12,31 +12,40 @@ class ActivityRealTimeStatsView extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        BlocSelector<ActivityCubit, ActivityState, double?>(
-          selector: (state) => state.activity?.distanceInMeters,
-          builder: (BuildContext context, distance) =>
-              ActivityRealTimeStatWidget(
-            title: 'Distance', // TODO translate
-            value: distance,
-            unit: 'm',
+        Expanded(
+          child: BlocSelector<ActivityCubit, ActivityState, double?>(
+            selector: (state) => state.activity?.distanceInMeters,
+            builder: (BuildContext context, distance) =>
+                ActivityRealTimeStatWidget(
+              title: 'Distance', // TODO translate
+              value: distance,
+              unit: 'm',
+            ),
           ),
         ),
-        BlocSelector<LocationCubit, LocationCubitState, double?>(
-          selector: (state) => state.location?.location.speedInMetersPerSecond,
-          builder: (BuildContext context, speed) => ActivityRealTimeStatWidget(
-            title: 'Speed', // TODO translate
-            value: speed,
-            unit: 'm/s',
-            decimals: 1,
+        Expanded(
+          child: BlocSelector<LocationCubit, LocationCubitState, double?>(
+            selector: (state) =>
+                state.location?.location.speedInMetersPerSecond,
+            builder: (BuildContext context, speed) =>
+                ActivityRealTimeStatWidget(
+              title: 'Speed', // TODO translate
+              value: speed,
+              unit: 'm/s',
+              decimals: 1,
+            ),
           ),
         ),
-        BlocSelector<ActivityCubit, ActivityState, double?>(
-          selector: (state) => state.activity?.averageSpeedInMetersPerSecond,
-          builder: (BuildContext context, speed) => ActivityRealTimeStatWidget(
-            title: 'Average Speed', // TODO translate
-            value: speed,
-            unit: 'm/s',
-            decimals: 1,
+        Expanded(
+          child: BlocSelector<ActivityCubit, ActivityState, double?>(
+            selector: (state) => state.activity?.averageSpeedInMetersPerSecond,
+            builder: (BuildContext context, speed) =>
+                ActivityRealTimeStatWidget(
+              title: 'Average Speed', // TODO translate
+              value: speed,
+              unit: 'm/s',
+              decimals: 1,
+            ),
           ),
         ),
       ],
