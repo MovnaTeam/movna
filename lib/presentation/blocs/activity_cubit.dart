@@ -93,8 +93,9 @@ class ActivityCubit extends Cubit<ActivityState> {
               );
         final newDuration =
             timedLocation.timestamp.difference(activity.startTime);
-        final newAverageSpeedInMetersPerSecond =
-            newDistanceInMeters / newDuration.inSeconds;
+        final newAverageSpeedInMetersPerSecond = newDuration.inSeconds != 0
+            ? newDistanceInMeters / newDuration.inSeconds
+            : timedLocation.location.speedInMetersPerSecond;
 
         // Create new track segments list by adding the new track point to the
         // last track segment.
