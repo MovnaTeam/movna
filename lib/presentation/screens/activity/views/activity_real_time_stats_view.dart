@@ -1,3 +1,4 @@
+import 'dart:ui' as dui;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -150,17 +151,56 @@ class ActivityDurationWidget extends StatelessWidget {
           minutes * Duration.secondsPerMinute;
     }
 
+    final textStyle = DefaultTextStyle.of(context).style.apply(
+          fontSizeFactor: 3.0,
+          fontWeightDelta: 5,
+          color: Theme.of(context).colorScheme.primary,
+        );
+    final formatter = NumberFormat('00');
+
+    // Compute width of largest number '88' (plus another digit for margin),
+    // and apply this width to display in order for the ':' not to move.
+    final textPainter = TextPainter(
+      text: TextSpan(text: '888', style: textStyle),
+      textDirection: dui.TextDirection.ltr,
+    );
+    textPainter.layout();
+
     return Container(
       padding: EdgeInsets.all(8.0),
-      child: Text(
-        style: DefaultTextStyle.of(context).style.apply(
-            fontSizeFactor: 3.0,
-            fontWeightDelta: 5,
-              color: Theme.of(context).colorScheme.primary,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox.fromSize(
+            size: textPainter.size,
+            child: Center(
+              child: Text(
+                style: textStyle,
+                hours != null ? formatter.format(hours) : '--',
+              ),
             ),
-        '${hours != null ? NumberFormat('00').format(hours) : '--'}:'
-        '${minutes != null ? NumberFormat('00').format(minutes) : '--'}:'
-        '${seconds != null ? NumberFormat('00').format(seconds) : '--'}',
+          ),
+          Text(style: textStyle, ':'),
+          SizedBox.fromSize(
+            size: textPainter.size,
+            child: Center(
+              child: Text(
+                style: textStyle,
+                minutes != null ? formatter.format(minutes) : '--',
+              ),
+            ),
+          ),
+          Text(style: textStyle, ':'),
+          SizedBox.fromSize(
+            size: textPainter.size,
+            child: Center(
+              child: Text(
+                style: textStyle,
+                seconds != null ? formatter.format(seconds) : '--',
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
