@@ -50,6 +50,8 @@ class ActivityRealTimeStatsView extends StatelessWidget {
               ),
             ),
             Expanded(
+              // TODO investigate speed does not change when not moving
+              // (maybe emulator only ?)
               child: BlocSelector<LocationCubit, LocationCubitState, double?>(
                 selector: (state) =>
                     state.location?.location.speedInMetersPerSecond,
