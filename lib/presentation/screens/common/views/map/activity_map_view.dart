@@ -51,6 +51,9 @@ class _ActivityMapViewState extends State<ActivityMapView>
   /// the map view will move to be centered on the marker.
   final ValueNotifier<bool> _centerOnLocation = ValueNotifier(true);
 
+  /// This determines whether the map orientation should follow user.
+  final ValueNotifier<bool> _followUserOrientation = ValueNotifier(true);
+
   /// The last known location, used to center map immediately when user clicks
   /// on the center button
   Location? _lastLocation;
@@ -69,15 +72,15 @@ class _ActivityMapViewState extends State<ActivityMapView>
     // Listen to map events to detect user gestures
     _mapEventSubscription = _controller.mapController.mapEventStream.listen(
       (event) {
-        // Update center on location flag if user starts certain gestures
-        _centerOnLocation.value = switch (event) {
-          MapEventFlingAnimationStart() ||
-          MapEventMoveStart() ||
-          MapEventDoubleTapZoomStart() ||
-          MapEventRotateStart() =>
-            false,
-          _ => _centerOnLocation.value,
-        };
+        // Update flags if user starts certain gestures
+        if (event is MapEventFlingAnimationStart ||
+            event is MapEventMoveStart ||
+            event is MapEventDoubleTapZoomStart ||
+            event is MapEventRotateStart) {
+          _centerOnLocation.value = false;
+          _followUserOrientation.value = false;
+        }
+      
         if (event is MapEventDoubleTapZoomEnd ||
             event is MapEventMoveEnd ||
             event is MapEventScrollWheelZoom) {
@@ -94,6 +97,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
     _controller.dispose();
     _mapEventSubscription.cancel();
     _centerOnLocation.dispose();
+    _followUserOrientation.dispose();
     super.dispose();
   }
 
@@ -109,12 +113,19 @@ class _ActivityMapViewState extends State<ActivityMapView>
           LocationCubitStateLoaded(:final currentLocation) => currentLocation,
           _ => null,
         };
-        if (timedLocation != null && _centerOnLocation.value) {
-          _lastLocation = timedLocation.location;
-          _controller.animateTo(
-            dest: timedLocation.location.gpsCoordinates.toLatLng(),
-          );
-        }
+        if (timedLocation == null) return;
+
+        _lastLocation = timedLocation.location;
+        final destination = _centerOnLocation.value
+            ? timedLocation.location.gpsCoordinates.toLatLng()
+            : null;
+        final orientation = _followUserOrientation.value
+            ? -timedLocation.location.headingInDegrees
+            : null;
+        _controller.animateTo(
+          dest: destination,
+          rotation: orientation,
+        );
       },
       child: FlutterMap(
         mapController: _controller.mapController,
