@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -68,6 +69,9 @@ class _ActivityMapViewState extends State<ActivityMapView>
   final ValueNotifier<FollowUserBehavior> _followUserBehavior =
       ValueNotifier(FollowUserBehavior.location);
 
+  /// The current map rotation in degrees.
+  final ValueNotifier<double> _mapRotationDegrees = ValueNotifier(0.0);
+
   /// The last known location, used to center map immediately when user clicks
   /// on the center button
   Location? _lastLocation;
@@ -99,6 +103,10 @@ class _ActivityMapViewState extends State<ActivityMapView>
             event is MapEventScrollWheelZoom) {
           _zoomLevel = event.camera.zoom;
           injector<SetDefaultZoomLevel>()(_zoomLevel);
+        }
+
+        if (event is MapEventRotate) {
+          _mapRotationDegrees.value = event.camera.rotation;
         }
       },
     );
@@ -140,6 +148,9 @@ class _ActivityMapViewState extends State<ActivityMapView>
           dest: destination,
           rotation: orientation,
         );
+        if (orientation != null) {
+          _mapRotationDegrees.value = orientation;
+        }
       },
       child: FlutterMap(
         mapController: _controller.mapController,
@@ -191,7 +202,12 @@ class _ActivityMapViewState extends State<ActivityMapView>
             alignment: Alignment.topRight,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: _buildMapFollowUserFloatingActionButtons(context),
+              child: Column(
+                children: [
+                  _buildMapCompass(context),
+                  _buildMapFollowUserFloatingActionButtons(context),
+                ],
+              ),
             ),
           ),
         ],
@@ -240,6 +256,25 @@ class _ActivityMapViewState extends State<ActivityMapView>
           },
         );
       },
+    );
+  }
+
+  Widget _buildMapCompass(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: _mapRotationDegrees,
+      builder: (context, rotation, child) {
+        return FloatingActionButton.small(
+          onPressed: () {
+            _controller.animateTo(rotation: 0.0);
+            if (_followUserBehavior.value ==
+                FollowUserBehavior.locationRotation) {
+              _followUserBehavior.value = FollowUserBehavior.location;
+            }
+          },
+          child: Transform.rotate(angle: rotation * pi / 180, child: child!),
+        );
+      },
+      child: const Icon(Icons.north),
     );
   }
 }
