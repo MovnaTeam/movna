@@ -187,53 +187,56 @@ class _ActivityMapViewState extends State<ActivityMapView>
               };
             },
           ),
-          ValueListenableBuilder(
-            valueListenable: _followUserBehavior,
-            builder: (context, followUserBehavior, _) {
-              if (followUserBehavior == FollowUserBehavior.locationRotation) {
-                return const NoneWidget();
-              }
-
-              return Align(
-                alignment: Alignment.topRight,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: switch (followUserBehavior) {
-                    FollowUserBehavior.disabled => FloatingActionButton.small(
-                        onPressed: () {
-                          final location = _lastLocation;
-                          if (location != null) {
-                            _followUserBehavior.value =
-                                FollowUserBehavior.location;
-                            _controller.animateTo(
-                              dest: location.gpsCoordinates.toLatLng(),
-                            );
-                          }
-                        },
-                        child: const Icon(Icons.my_location),
-                      ),
-                    FollowUserBehavior.location => FloatingActionButton.small(
-                        onPressed: () {
-                          final location = _lastLocation;
-                          if (location != null) {
-                            _followUserBehavior.value =
-                                FollowUserBehavior.locationRotation;
-                            _controller.animateTo(
-                              dest: location.gpsCoordinates.toLatLng(),
-                              rotation: -location.headingInDegrees,
-                            );
-                          }
-                        },
-                        child: const Icon(Icons.navigation),
-                      ),
-                    _ => NoneWidget(),
-                  },
-                ),
-              );
-            },
-          ),
+          _buildMapFollowUserFloatingActionButtons(context),
         ],
       ),
+    );
+  }
+
+  Widget _buildMapFollowUserFloatingActionButtons(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: _followUserBehavior,
+      builder: (context, followUserBehavior, _) {
+        if (followUserBehavior == FollowUserBehavior.locationRotation) {
+          return const NoneWidget();
+        }
+
+        return Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: switch (followUserBehavior) {
+              FollowUserBehavior.disabled => FloatingActionButton.small(
+                  onPressed: () {
+                    final location = _lastLocation;
+                    if (location != null) {
+                      _followUserBehavior.value = FollowUserBehavior.location;
+                      _controller.animateTo(
+                        dest: location.gpsCoordinates.toLatLng(),
+                      );
+                    }
+                  },
+                  child: const Icon(Icons.my_location),
+                ),
+              FollowUserBehavior.location => FloatingActionButton.small(
+                  onPressed: () {
+                    final location = _lastLocation;
+                    if (location != null) {
+                      _followUserBehavior.value =
+                          FollowUserBehavior.locationRotation;
+                      _controller.animateTo(
+                        dest: location.gpsCoordinates.toLatLng(),
+                        rotation: -location.headingInDegrees,
+                      );
+                    }
+                  },
+                  child: const Icon(Icons.navigation),
+                ),
+              _ => NoneWidget(),
+            },
+          ),
+        );
+      },
     );
   }
 }
