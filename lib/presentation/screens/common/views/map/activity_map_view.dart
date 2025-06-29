@@ -34,6 +34,18 @@ class ActivityMapView extends StatefulWidget {
   State<ActivityMapView> createState() => _ActivityMapViewState();
 }
 
+/// How the map should follow user movements.
+enum FollowUserBehavior {
+  /// Do not follow user.
+  disabled,
+
+  /// Only follow use location.
+  location,
+
+  /// Follow user location and heading direction.
+  locationRotation,
+}
+
 class _ActivityMapViewState extends State<ActivityMapView>
     with TickerProviderStateMixin {
   /// Controller use to modify and animate the [FlutterMap].
@@ -43,16 +55,18 @@ class _ActivityMapViewState extends State<ActivityMapView>
     curve: MapConstants.mapAnimationsCurve,
   );
 
-  /// This determines whether the map should be centered on location.
+  /// This determines whether the map should follow user location and heading
+  /// direction.
   ///
-  /// If value is `false`, location updates will move the marker but not the map
-  /// view.
-  /// If value is `true`, location updates will move the marker on the map and
-  /// the map view will move to be centered on the marker.
-  final ValueNotifier<bool> _centerOnLocation = ValueNotifier(true);
-
-  /// This determines whether the map orientation should follow user.
-  final ValueNotifier<bool> _followUserOrientation = ValueNotifier(true);
+  /// If value is `disabled`, location updates will move the marker but not the
+  /// map view.
+  /// If value is `location`, location updates will move the marker on the map
+  /// and the map view will move to be centered on the marker.
+  /// If value is `locationRotation`, location updates will move the marker on
+  /// the map and the map view will move to be centered on the marker and
+  /// rotation so that the user heading direction is up.
+  final ValueNotifier<FollowUserBehavior> _followUserBehavior =
+      ValueNotifier(FollowUserBehavior.location);
 
   /// The last known location, used to center map immediately when user clicks
   /// on the center button
@@ -77,10 +91,9 @@ class _ActivityMapViewState extends State<ActivityMapView>
             event is MapEventMoveStart ||
             event is MapEventDoubleTapZoomStart ||
             event is MapEventRotateStart) {
-          _centerOnLocation.value = false;
-          _followUserOrientation.value = false;
+          _followUserBehavior.value = FollowUserBehavior.disabled;
         }
-      
+
         if (event is MapEventDoubleTapZoomEnd ||
             event is MapEventMoveEnd ||
             event is MapEventScrollWheelZoom) {
@@ -96,8 +109,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
   void dispose() {
     _controller.dispose();
     _mapEventSubscription.cancel();
-    _centerOnLocation.dispose();
-    _followUserOrientation.dispose();
+    _followUserBehavior.dispose();
     super.dispose();
   }
 
@@ -116,12 +128,14 @@ class _ActivityMapViewState extends State<ActivityMapView>
         if (timedLocation == null) return;
 
         _lastLocation = timedLocation.location;
-        final destination = _centerOnLocation.value
-            ? timedLocation.location.gpsCoordinates.toLatLng()
-            : null;
-        final orientation = _followUserOrientation.value
-            ? -timedLocation.location.headingInDegrees
-            : null;
+        final destination =
+            _followUserBehavior.value != FollowUserBehavior.disabled
+                ? timedLocation.location.gpsCoordinates.toLatLng()
+                : null;
+        final orientation =
+            _followUserBehavior.value == FollowUserBehavior.locationRotation
+                ? -timedLocation.location.headingInDegrees
+                : null;
         _controller.animateTo(
           dest: destination,
           rotation: orientation,
@@ -174,31 +188,49 @@ class _ActivityMapViewState extends State<ActivityMapView>
             },
           ),
           ValueListenableBuilder(
-            valueListenable: _centerOnLocation,
-            builder: (context, centerOnLocation, fab) {
-              if (centerOnLocation) {
+            valueListenable: _followUserBehavior,
+            builder: (context, followUserBehavior, _) {
+              if (followUserBehavior == FollowUserBehavior.locationRotation) {
                 return const NoneWidget();
               }
-              return fab!;
-            },
-            child: Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: FloatingActionButton.small(
-                  onPressed: () {
-                    final location = _lastLocation;
-                    if (location != null) {
-                      _centerOnLocation.value = true;
-                      _controller.animateTo(
-                        dest: location.gpsCoordinates.toLatLng(),
-                      );
-                    }
+
+              return Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: switch (followUserBehavior) {
+                    FollowUserBehavior.disabled => FloatingActionButton.small(
+                        onPressed: () {
+                          final location = _lastLocation;
+                          if (location != null) {
+                            _followUserBehavior.value =
+                                FollowUserBehavior.location;
+                            _controller.animateTo(
+                              dest: location.gpsCoordinates.toLatLng(),
+                            );
+                          }
+                        },
+                        child: const Icon(Icons.my_location),
+                      ),
+                    FollowUserBehavior.location => FloatingActionButton.small(
+                        onPressed: () {
+                          final location = _lastLocation;
+                          if (location != null) {
+                            _followUserBehavior.value =
+                                FollowUserBehavior.locationRotation;
+                            _controller.animateTo(
+                              dest: location.gpsCoordinates.toLatLng(),
+                              rotation: -location.headingInDegrees,
+                            );
+                          }
+                        },
+                        child: const Icon(Icons.navigation),
+                      ),
+                    _ => NoneWidget(),
                   },
-                  child: const Icon(Icons.my_location),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ],
       ),
