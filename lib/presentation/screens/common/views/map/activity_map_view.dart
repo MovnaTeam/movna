@@ -203,39 +203,42 @@ class _ActivityMapViewState extends State<ActivityMapView>
     return ValueListenableBuilder(
       valueListenable: _followUserBehavior,
       builder: (context, followUserBehavior, _) {
-        if (followUserBehavior == FollowUserBehavior.locationRotation) {
-          return const NoneWidget();
-        }
-
-        return switch (followUserBehavior) {
-          FollowUserBehavior.disabled => FloatingActionButton.small(
-              onPressed: () {
-                final location = _lastLocation;
-                if (location != null) {
-                  _followUserBehavior.value = FollowUserBehavior.location;
-                  _controller.animateTo(
-                    dest: location.gpsCoordinates.toLatLng(),
-                  );
-                }
-              },
-              child: const Icon(Icons.my_location),
-            ),
-          FollowUserBehavior.location => FloatingActionButton.small(
-              onPressed: () {
-                final location = _lastLocation;
-                if (location != null) {
-                  _followUserBehavior.value =
-                      FollowUserBehavior.locationRotation;
-                  _controller.animateTo(
-                    dest: location.gpsCoordinates.toLatLng(),
-                    rotation: -location.headingInDegrees,
-                  );
-                }
-              },
-              child: const Icon(Icons.navigation),
-            ),
-          _ => NoneWidget(),
-        };
+        return AnimatedSwitcher(
+          transitionBuilder: (Widget child, Animation<double> animation) =>
+              ScaleTransition(scale: animation, child: child),
+          duration: Duration(milliseconds: 100),
+          child: switch (followUserBehavior) {
+            FollowUserBehavior.disabled => FloatingActionButton.small(
+                key: Key('$followUserBehavior'),
+                onPressed: () {
+                  final location = _lastLocation;
+                  if (location != null) {
+                    _followUserBehavior.value = FollowUserBehavior.location;
+                    _controller.animateTo(
+                      dest: location.gpsCoordinates.toLatLng(),
+                    );
+                  }
+                },
+                child: const Icon(Icons.my_location),
+              ),
+            FollowUserBehavior.location => FloatingActionButton.small(
+                key: Key('$followUserBehavior'),
+                onPressed: () {
+                  final location = _lastLocation;
+                  if (location != null) {
+                    _followUserBehavior.value =
+                        FollowUserBehavior.locationRotation;
+                    _controller.animateTo(
+                      dest: location.gpsCoordinates.toLatLng(),
+                      rotation: -location.headingInDegrees,
+                    );
+                  }
+                },
+                child: const Icon(Icons.navigation),
+              ),
+            _ => const NoneWidget(),
+          },
+        );
       },
     );
   }
