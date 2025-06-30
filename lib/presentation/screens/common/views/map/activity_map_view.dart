@@ -276,7 +276,22 @@ class _ActivityMapViewState extends State<ActivityMapView>
           turns: rotation / 360,
           child: child!,
         ),
-        child: const Icon(Icons.north),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgThemedWidget(
+              svgAsset: Assets.movnaIconBody,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            Transform.flip(
+              flipY: true,
+              child: SvgThemedWidget(
+                svgAsset: Assets.movnaIconBody,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
