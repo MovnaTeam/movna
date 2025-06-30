@@ -20,6 +20,7 @@ import 'package:movna/presentation/extensions/gps_coordinates_extensions.dart';
 import 'package:movna/presentation/screens/common/views/map/constants.dart';
 import 'package:movna/presentation/screens/common/views/map/widgets/activity_map_layer.dart';
 import 'package:movna/presentation/screens/common/views/map/widgets/user_location_marker.dart';
+import 'package:movna/presentation/screens/common/widgets/continuously_animated_rotation.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
 import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
@@ -107,10 +108,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
         }
 
         if (event is MapEventRotate) {
-          // Quick hack for the rotation value to always be continuous.
-          _mapRotationDegrees.value +=
-              ((event.camera.rotation - event.oldCamera.rotation + 180) % 360) -
-                  180;
+          _mapRotationDegrees.value = event.camera.rotation;
         }
       },
     );
@@ -283,7 +281,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
       },
       child: ValueListenableBuilder(
         valueListenable: _mapRotationDegrees,
-        builder: (context, rotation, child) => AnimatedRotation(
+        builder: (context, rotation, child) => ContinuouslyAnimatedRotation(
           duration: Duration(milliseconds: 100),
           turns: rotation / 360,
           child: child!,
