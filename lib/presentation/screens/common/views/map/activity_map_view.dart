@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -106,7 +105,10 @@ class _ActivityMapViewState extends State<ActivityMapView>
         }
 
         if (event is MapEventRotate) {
-          _mapRotationDegrees.value = event.camera.rotation;
+          // Quick hack for the rotation value to always be continuous.
+          _mapRotationDegrees.value +=
+              ((event.camera.rotation - event.oldCamera.rotation + 180) % 360) -
+                  180;
         }
       },
     );
@@ -271,7 +273,11 @@ class _ActivityMapViewState extends State<ActivityMapView>
               _followUserBehavior.value = FollowUserBehavior.location;
             }
           },
-          child: Transform.rotate(angle: rotation * pi / 180, child: child!),
+          child: AnimatedRotation(
+            duration: Duration(milliseconds: 100),
+            turns: rotation / 360,
+            child: child!,
+          ),
         );
       },
       child: const Icon(Icons.north),
