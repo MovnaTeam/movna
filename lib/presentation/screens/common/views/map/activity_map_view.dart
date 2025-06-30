@@ -262,25 +262,22 @@ class _ActivityMapViewState extends State<ActivityMapView>
   }
 
   Widget _buildMapCompass(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: _mapRotationDegrees,
-      builder: (context, rotation, child) {
-        return FloatingActionButton.small(
-          onPressed: () {
-            _controller.animateTo(rotation: 0.0);
-            if (_followUserBehavior.value ==
-                FollowUserBehavior.locationRotation) {
-              _followUserBehavior.value = FollowUserBehavior.location;
-            }
-          },
-          child: AnimatedRotation(
-            duration: Duration(milliseconds: 100),
-            turns: rotation / 360,
-            child: child!,
-          ),
-        );
+    return FloatingActionButton.small(
+      onPressed: () {
+        _controller.animateTo(rotation: 0.0);
+        if (_followUserBehavior.value == FollowUserBehavior.locationRotation) {
+          _followUserBehavior.value = FollowUserBehavior.location;
+        }
       },
-      child: const Icon(Icons.north),
+      child: ValueListenableBuilder(
+        valueListenable: _mapRotationDegrees,
+        builder: (context, rotation, child) => AnimatedRotation(
+          duration: Duration(milliseconds: 100),
+          turns: rotation / 360,
+          child: child!,
+        ),
+        child: const Icon(Icons.north),
+      ),
     );
   }
 }
