@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:movna/assets.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/logger.dart';
 import 'package:movna/domain/entities/app_metadata.dart';
@@ -21,6 +22,7 @@ import 'package:movna/presentation/screens/common/views/map/widgets/activity_map
 import 'package:movna/presentation/screens/common/views/map/widgets/user_location_marker.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
 import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
 import 'package:movna/presentation/screens/common/widgets/visible_if_bloc_available.dart';
 
 /// Displays a map with location information about the current activity.
@@ -237,7 +239,10 @@ class _ActivityMapViewState extends State<ActivityMapView>
                     );
                   }
                 },
-                child: const Icon(Icons.my_location),
+                child: Icon(
+                  Icons.my_location,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             FollowUserBehavior.location => FloatingActionButton.small(
                 key: Key('$followUserBehavior'),
@@ -252,7 +257,10 @@ class _ActivityMapViewState extends State<ActivityMapView>
                     );
                   }
                 },
-                child: const Icon(Icons.navigation),
+                child: Icon(
+                  Icons.navigation,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             _ => const NoneWidget(),
           },
