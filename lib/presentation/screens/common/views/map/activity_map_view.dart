@@ -223,12 +223,14 @@ class _ActivityMapViewState extends State<ActivityMapView>
     return ValueListenableBuilder(
       valueListenable: _followUserBehavior,
       builder: (context, followUserBehavior, _) {
+        const String tag = 'followUserBehavior';
         return AnimatedSwitcher(
           transitionBuilder: (Widget child, Animation<double> animation) =>
               ScaleTransition(scale: animation, child: child),
           duration: Duration(milliseconds: 100),
           child: switch (followUserBehavior) {
             FollowUserBehavior.disabled => FloatingActionButton.small(
+                heroTag: tag,
                 key: Key('$followUserBehavior'),
                 onPressed: () {
                   final location = _lastLocation;
@@ -245,6 +247,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
                 ),
               ),
             FollowUserBehavior.location => FloatingActionButton.small(
+                heroTag: tag,
                 key: Key('$followUserBehavior'),
                 onPressed: () {
                   final location = _lastLocation;
@@ -271,6 +274,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
 
   Widget _buildMapCompass(BuildContext context) {
     return FloatingActionButton.small(
+      heroTag: 'compass',
       onPressed: () {
         _controller.animateTo(rotation: 0.0);
         if (_followUserBehavior.value == FollowUserBehavior.locationRotation) {
