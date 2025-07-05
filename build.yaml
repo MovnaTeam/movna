@@ -1,0 +1,10 @@
+# Documentation at https://pub.dev/packages/build_config
+
+targets:
+  $default:
+    builders:
+      drift_dev:
+        # https://drift.simonbinder.eu/generation_options/
+        options:
+          # To store drift dates as ISO 8601 strings
+          store_date_time_values_as_text: true
