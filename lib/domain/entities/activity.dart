@@ -14,6 +14,9 @@ abstract class Activity with _$Activity {
     /// The time at which this activity begun.
     required DateTime startTime,
 
+    /// Unique identifier of this activity.
+    int? id,
+
     /// The time at which this activity ended.
     /// Null while activity has not ended.
     DateTime? stopTime,
