@@ -30,15 +30,27 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Center(child: SvgThemedWidget(svgAsset: Assets.movnaLogo)),
       ),
-      body: ValueListenableBuilder<int>(
-        valueListenable: _selectedTab,
-        builder: (context, selectedTab, _) {
-          return SlideIndexedStack(
-            index: selectedTab,
-            duration: Duration(milliseconds: 200),
-            children: tabs,
-          );
+      body: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          const threshold = 300;
+          if (details.primaryVelocity == null) return;
+          if (details.primaryVelocity! > threshold && _selectedTab.value > 0) {
+            _selectedTab.value -= 1;
+          } else if (details.primaryVelocity! < -threshold &&
+              _selectedTab.value < tabs.length - 1) {
+            _selectedTab.value += 1;
+          }
         },
+        child: ValueListenableBuilder(
+          valueListenable: _selectedTab,
+          builder: (context, selectedTab, _) {
+            return SlideIndexedStack(
+              index: selectedTab,
+              duration: Duration(milliseconds: 200),
+              children: tabs,
+            );
+          },
+        ),
       ),
       bottomNavigationBar: ValueListenableBuilder(
         valueListenable: _selectedTab,
