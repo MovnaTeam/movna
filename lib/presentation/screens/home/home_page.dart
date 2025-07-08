@@ -3,7 +3,7 @@ import 'package:movna/assets.dart';
 import 'package:movna/presentation/screens/common/widgets/slide_indexed_stack.dart';
 import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
 import 'package:movna/presentation/screens/home/home_activity_screen.dart';
-import 'package:movna/presentation/screens/home/statistics_screen.dart';
+import 'package:movna/presentation/screens/home/home_statistics_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
