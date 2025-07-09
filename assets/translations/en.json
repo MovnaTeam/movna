@@ -1,4 +1,11 @@
 {
+  "activity": {
+    "statistics": {
+      "averageSpeed": "Average speed",
+      "distance": "Distance",
+      "speed": "Speed"
+    }
+  },
   "appTitle": "Movna",
   "broken_app": {
     "button": "Restart the app",
@@ -43,5 +50,11 @@
         "title": "Please allow notifications"
       }
     }
+  },
+  "units": {
+    "kilometersPerHourShort": "km/h",
+    "kilometersShort": "km",
+    "metersPerSecondShort": "m/s",
+    "metersShort": "m"
   }
 }
