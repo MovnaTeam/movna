@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/blocs/location_cubit.dart';
+import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 
 class ActivityRealTimeStatsView extends StatelessWidget {
@@ -15,12 +17,24 @@ class ActivityRealTimeStatsView extends StatelessWidget {
         Expanded(
           child: BlocSelector<ActivityCubit, ActivityState, double?>(
             selector: (state) => state.activity?.distanceInMeters,
-            builder: (BuildContext context, distance) =>
-                ActivityRealTimeStatWidget(
-              title: 'Distance', // TODO translate
-              value: distance,
-              unit: 'm',
-            ),
+            builder: (BuildContext context, distance) {
+              var value = distance;
+              var decimals = 0;
+              var unit = LocaleKeys.units.metersShort().translate(context);
+              if (distance != null && distance >= 1000) {
+                value = distance / 1000;
+                decimals = 1;
+                unit = LocaleKeys.units.kilometersShort().translate(context);
+              }
+              return ActivityRealTimeStatWidget(
+                title: LocaleKeys.activity.statistics
+                    .distance()
+                    .translate(context),
+                value: value,
+                unit: unit,
+                decimals: decimals,
+              );
+            },
           ),
         ),
         Expanded(
@@ -29,9 +43,10 @@ class ActivityRealTimeStatsView extends StatelessWidget {
                 state.location?.location.speedInMetersPerSecond,
             builder: (BuildContext context, speed) =>
                 ActivityRealTimeStatWidget(
-              title: 'Speed', // TODO translate
-              value: speed,
-              unit: 'm/s',
+              title: LocaleKeys.activity.statistics.speed().translate(context),
+              value: speed != null ? speed * 3600 / 1000 : speed,
+              unit:
+                  LocaleKeys.units.kilometersPerHourShort().translate(context),
               decimals: 1,
             ),
           ),
@@ -41,9 +56,12 @@ class ActivityRealTimeStatsView extends StatelessWidget {
             selector: (state) => state.activity?.averageSpeedInMetersPerSecond,
             builder: (BuildContext context, speed) =>
                 ActivityRealTimeStatWidget(
-              title: 'Average Speed', // TODO translate
-              value: speed,
-              unit: 'm/s',
+              title: LocaleKeys.activity.statistics
+                  .averageSpeed()
+                  .translate(context),
+              value: speed != null ? speed * 3600 / 1000 : speed,
+              unit:
+                  LocaleKeys.units.kilometersPerHourShort().translate(context),
               decimals: 1,
             ),
           ),
