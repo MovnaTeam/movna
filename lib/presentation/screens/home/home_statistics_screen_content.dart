@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/presentation/blocs/statistics_cubit.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
+import 'package:movna/presentation/screens/home/widgets/saved_activity_card.dart';
 
 class StatisticsScreenContent extends StatelessWidget {
   const StatisticsScreenContent({super.key});
@@ -19,7 +20,11 @@ class StatisticsScreenContent extends StatelessWidget {
               color: Theme.of(context).colorScheme.error,
             ),
           StatisticsStateLoaded(:final activities) => Center(
-              child: Text('${activities.length} activities registered'),
+              child: ListView.builder(
+                itemCount: activities.length,
+                itemBuilder: (context, i) =>
+                    SavedActivityCard(activity: activities[i]),
+              ),
             ),
         };
       },
