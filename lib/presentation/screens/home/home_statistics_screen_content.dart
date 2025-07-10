@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/presentation/blocs/statistics_cubit.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
+import 'package:movna/presentation/screens/home/widgets/activities_statistics_chart.dart';
 import 'package:movna/presentation/screens/home/widgets/saved_activity_card.dart';
 
 class StatisticsScreenContent extends StatelessWidget {
@@ -9,25 +10,60 @@ class StatisticsScreenContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<StatisticsCubit, StatisticsState>(
-      builder: (context, state) {
-        return switch (state) {
-          StatisticsStateInitial() ||
-          StatisticsStateLoading() =>
-            LoadingIndicator(),
-          StatisticsStateError(/*:final fault*/) => Icon(
-              Icons.warning,
-              color: Theme.of(context).colorScheme.error,
-            ),
-          StatisticsStateLoaded(:final activities) => Center(
-              child: ListView.builder(
-                itemCount: activities.length,
-                itemBuilder: (context, i) =>
-                    SavedActivityCard(activity: activities[i]),
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          BlocBuilder<StatisticsCubit, StatisticsState>(
+        builder: (context, state) {
+          return ListView(
+            children: [
+              SizedBox(
+                height: constraints.maxHeight * 3 / 4,
+                child: switch (state) {
+                  StatisticsStateInitial() ||
+                  StatisticsStateLoading() =>
+                    LoadingIndicator(),
+                  StatisticsStateError(/*:final fault*/) => Icon(
+                      Icons.warning,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  StatisticsStateLoaded(:final activities) => Center(
+                      child: ListView.builder(
+                        itemCount: activities.length,
+                        itemBuilder: (context, i) =>
+                            SavedActivityCard(activity: activities[i]),
+                      ),
+                    ),
+                },
               ),
-            ),
-        };
-      },
+              Divider(
+                thickness: 4.0,
+                indent: 64,
+                endIndent: 64,
+              ),
+              SizedBox(
+                height: constraints.maxHeight * 3 / 4,
+                child: BlocBuilder<StatisticsCubit, StatisticsState>(
+                  builder: (context, state) {
+                    return switch (state) {
+                      StatisticsStateInitial() ||
+                      StatisticsStateLoading() =>
+                        LoadingIndicator(),
+                      StatisticsStateError(/*:final fault*/) => Icon(
+                          Icons.warning,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      StatisticsStateLoaded(:final activities) => Center(
+                          child:
+                              ActivitiesStatisticsChart(activities: activities),
+                        ),
+                    };
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
