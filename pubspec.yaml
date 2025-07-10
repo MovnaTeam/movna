@@ -12,6 +12,7 @@ environment:
 isar_version: &isar_version 3.1.8
 
 dependencies:
+  fl_chart: ^1.0.0
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
