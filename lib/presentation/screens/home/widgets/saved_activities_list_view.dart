@@ -37,7 +37,9 @@ class _SavedActivitiesListViewState extends State<SavedActivitiesListView> {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text('Sort by'), // TODO translate this
+            Text(
+              LocaleKeys.home.savedActivitiesListSortBy().translate(context),
+            ),
             SizedBox(
               width: 16.0,
             ),
