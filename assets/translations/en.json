@@ -2,7 +2,9 @@
   "activity": {
     "statistics": {
       "averageSpeed": "Average speed",
+      "date": "Date",
       "distance": "Distance",
+      "duration": "Duration",
       "speed": "Speed"
     }
   },

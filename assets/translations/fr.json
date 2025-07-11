@@ -2,7 +2,9 @@
   "activity": {
     "statistics": {
       "averageSpeed": "Vitesse moyenne",
+      "date": "Date",
       "distance": "Distance",
+      "duration": "Durée",
       "speed": "Vitesse"
     }
   },
