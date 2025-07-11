@@ -29,6 +29,7 @@
     "activityConfiguration": {
       "sport": "Sport"
     },
+    "savedActivitiesListSortBy": "Trier par",
     "startActivity": "Commencer l'activité"
   },
   "location": {
