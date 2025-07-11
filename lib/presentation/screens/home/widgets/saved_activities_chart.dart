@@ -1,17 +1,39 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:movna/core/logger.dart';
 import 'package:movna/domain/entities/activity.dart';
 import 'package:movna/jsons.dart';
+import 'package:movna/presentation/blocs/statistics_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
+import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
 
-class ActivitiesStatisticsChart extends StatelessWidget {
-  const ActivitiesStatisticsChart({required this.activities, super.key});
-  final List<Activity> activities;
+class SavedActivitiesChart extends StatelessWidget {
+  const SavedActivitiesChart({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<StatisticsCubit, StatisticsState>(
+      builder: (context, state) {
+        return switch (state) {
+          StatisticsStateInitial() ||
+          StatisticsStateLoading() =>
+            LoadingIndicator(),
+          StatisticsStateError(/*:final fault*/) => Icon(
+              Icons.warning,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          StatisticsStateLoaded(:final activities) => Center(
+              child: _buildActivitiesListView(context, activities),
+            ),
+        };
+      },
+    );
+  }
+
+  Widget _buildActivitiesListView(
+      BuildContext context, List<Activity> activities) {
     final Map<String, double> monthlySums = {};
 
     for (final activity in activities) {
