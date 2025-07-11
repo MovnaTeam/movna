@@ -29,6 +29,7 @@
     "activityConfiguration": {
       "sport": "Sport"
     },
+    "savedActivitiesListSortBy": "Sort by",
     "startActivity": "Start activity"
   },
   "location": {
