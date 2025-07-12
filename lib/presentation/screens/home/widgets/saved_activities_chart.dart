@@ -1,11 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
-import 'package:movna/core/logger.dart';
 import 'package:movna/domain/entities/activity.dart';
+import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/statistics_cubit.dart';
+import 'package:movna/presentation/extensions/sport_color_extension.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
 
@@ -25,47 +25,69 @@ class SavedActivitiesChart extends StatelessWidget {
               color: Theme.of(context).colorScheme.error,
             ),
           StatisticsStateLoaded(:final activities) => Center(
-              child: _buildActivitiesListView(context, activities),
+              child: _buildActivitiesChart(context, activities),
             ),
         };
       },
     );
   }
 
-  Widget _buildActivitiesListView(
-      BuildContext context, List<Activity> activities) {
-    final Map<String, double> monthlySums = {};
+  Widget _buildActivitiesChart(
+    BuildContext context,
+    List<Activity> activities,
+  ) {
+    // For each month (12*year+month), for each Sport, the sum of all distances.
+    final Map<int, Map<Sport, double>> monthlySumsMeters = {};
+    // What sports are concerned by this activity set.
+    final Set<Sport> presentSports = {};
 
     for (final activity in activities) {
-      final monthKey = DateFormat('yyyy-MM').format(activity.startTime);
-      monthlySums[monthKey] =
-          (monthlySums[monthKey] ?? 0) + (activity.distanceInMeters ?? 0);
-    }
-    // Convert to km.
-    monthlySums.updateAll((_, value) => value / 1_000);
-    logger.d(monthlySums);
+      final month = activity.startTime.year * DateTime.monthsPerYear +
+          (activity.startTime.month - 1);
+      final sport = activity.sport ?? Sport.other;
 
-    final sortedKeys = monthlySums.keys.toList()..sort();
+      presentSports.add(sport);
+
+      if (!monthlySumsMeters.containsKey(month)) monthlySumsMeters[month] = {};
+
+      monthlySumsMeters[month]![sport] =
+          (monthlySumsMeters[month]![sport] ?? 0) +
+              (activity.distanceInMeters ?? 0);
+    }
+
+    final sortedKeys = monthlySumsMeters.keys.toList()..sort();
     final spots = <BarChartGroupData>[];
     final labels = <int, String>{};
+    if (sortedKeys.isNotEmpty) {
+      for (int month = sortedKeys.first; month <= sortedKeys.last; month++) {
+        final sumsBySport = monthlySumsMeters[month];
 
-    for (int i = 0; i < sortedKeys.length; i++) {
-      final key = sortedKeys[i];
-      final sum = monthlySums[key]!;
-      spots.add(
-        BarChartGroupData(
-          x: i,
-          barRods: [
+        final rods = <BarChartRodData>[];
+        double y = 0;
+        for (final sport in presentSports) {
+          // Convert to km
+          final thisMonthThisSportSum = (sumsBySport?[sport] ?? 0) / 1_000;
+          rods.add(
             BarChartRodData(
-              toY: sum,
-              color: Theme.of(context).colorScheme.primary,
+              fromY: y,
+              toY: y + thisMonthThisSportSum,
+              color: sport.toColor(context),
               width: 16,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.all(Radius.circular(4.0)),
             ),
-          ],
-        ),
-      );
-      labels[i] = key;
+          );
+          y += thisMonthThisSportSum;
+        }
+
+        spots.add(
+          BarChartGroupData(
+            x: month,
+            barRods: rods,
+            groupVertically: true,
+          ),
+        );
+        labels[month] = (month % DateTime.monthsPerYear).toString();
+      }
     }
 
     return BarChart(
@@ -79,11 +101,12 @@ class SavedActivitiesChart extends StatelessWidget {
               interval: 1,
               getTitlesWidget: (value, meta) {
                 final label = labels[value.toInt()];
-                return Text(
-                  label != null
-                      ? DateFormat('MMM').format(DateTime.parse('$label-01'))
-                      : '',
-                  style: const TextStyle(fontSize: 10),
+                return SideTitleWidget(
+                  meta: meta,
+                  child: Text(
+                    label?.toString() ?? '',
+                    style: const TextStyle(fontSize: 10),
+                  ),
                 );
               },
             ),
@@ -93,7 +116,7 @@ class SavedActivitiesChart extends StatelessWidget {
                 Text('${LocaleKeys.activity.statistics.distance().translate(
                           context,
                         )}'
-                    ' (${LocaleKeys.units.kilometersPerHourShort().translate(
+                    ' (${LocaleKeys.units.kilometersShort().translate(
                           context,
                         )})'),
             sideTitles: SideTitles(showTitles: true),
