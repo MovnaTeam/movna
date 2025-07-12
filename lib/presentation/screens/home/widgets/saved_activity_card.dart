@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:movna/domain/entities/activity.dart';
@@ -82,7 +84,11 @@ class SavedActivityCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(child: Text(DateFormat.yMd().format(activity.startTime))),
+        Expanded(
+          child: Text(
+            DateFormat.yMd(Platform.localeName).format(activity.startTime),
+          ),
+        ),
         Expanded(child: Text(textAlign: TextAlign.center, durationString)),
         Expanded(child: Text(textAlign: TextAlign.right, distanceString)),
       ],
