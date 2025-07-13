@@ -92,13 +92,9 @@ class SavedActivitiesChart extends StatelessWidget {
 
           final year = (month / DateTime.monthsPerYear).toInt();
           final monthInYear = month.remainder(DateTime.monthsPerYear) + 1;
-          final displayYear =
-              monthInYear == 1 || month == sortedKeys.firstOrNull;
-          final label = (displayYear
-                  ? DateFormat.yMMM(Platform.localeName)
-                  : DateFormat.MMM(Platform.localeName))
+         
+          labels[month] = DateFormat.MMM(Platform.localeName)
               .format(DateTime(year, monthInYear));
-          labels[month] = label;
         }
 
         final color = colors[sportIndex];
@@ -135,6 +131,31 @@ class SavedActivitiesChart extends StatelessWidget {
       }
     }
 
+    // Add a year label in the background between every June and July.
+    final verticalLines = <VerticalLine>[];
+    for (int month = sortedKeys.first; month <= sortedKeys.last; month++) {
+      if (month.remainder(DateTime.monthsPerYear) != 0) continue;
+      verticalLines.add(
+        VerticalLine(
+          x: month.toDouble() + 0.5,
+          strokeWidth: 0.5,
+          color: Theme.of(context).colorScheme.secondary,
+          label: VerticalLineLabel(
+            style: DefaultTextStyle.of(context).style.apply(
+                  fontSizeFactor: 2.0,
+                  fontWeightDelta: 5,
+                  color: Theme.of(context).colorScheme.secondary.withAlpha(128),
+                ),
+            alignment: Alignment.centerRight,
+            show: true,
+            labelResolver: (line) =>
+                (line.x / DateTime.monthsPerYear).toInt().toString(),
+            direction: LabelDirection.vertical,
+          ),
+        ),
+      );
+    }
+
     final leftAxisTitle =
         '${LocaleKeys.activity.statistics.distance().translate(context)}'
         ' '
@@ -163,11 +184,12 @@ class SavedActivitiesChart extends StatelessWidget {
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
+                    minIncluded: false,
+                    maxIncluded: false,
                     getTitlesWidget: (value, meta) {
                       final label = labels[value.toInt()];
                       return SideTitleWidget(
                         meta: meta,
-                        angle: pi / 2,
                         child: Text(label ?? ''),
                       );
                     },
@@ -229,6 +251,10 @@ class SavedActivitiesChart extends StatelessWidget {
                         .toList();
                   },
                 ),
+              ),
+              extraLinesData: ExtraLinesData(
+                extraLinesOnTop: false,
+                verticalLines: verticalLines,
               ),
             ),
           ),
