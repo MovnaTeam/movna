@@ -21,21 +21,24 @@ class SavedActivitiesChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<StatisticsCubit, StatisticsState>(
-      builder: (context, state) {
-        return switch (state) {
-          StatisticsStateInitial() ||
-          StatisticsStateLoading() =>
-            LoadingIndicator(),
-          StatisticsStateError(/*:final fault*/) => Icon(
-              Icons.warning,
-              color: Theme.of(context).colorScheme.error,
-            ),
-          StatisticsStateLoaded(:final activities) => Center(
-              child: _buildStateLoaded(context, activities),
-            ),
-        };
-      },
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: BlocBuilder<StatisticsCubit, StatisticsState>(
+        builder: (context, state) {
+          return switch (state) {
+            StatisticsStateInitial() ||
+            StatisticsStateLoading() =>
+              LoadingIndicator(),
+            StatisticsStateError(/*:final fault*/) => Icon(
+                Icons.warning,
+                color: Theme.of(context).colorScheme.error,
+              ),
+            StatisticsStateLoaded(:final activities) => Center(
+                child: _buildStateLoaded(context, activities),
+              ),
+          };
+        },
+      ),
     );
   }
 
