@@ -30,7 +30,11 @@
       "sport": "Sport"
     },
     "savedActivitiesListSortBy": "Trier par",
-    "startActivity": "Commencer l'activité"
+    "startActivity": "Commencer l'activité",
+    "tabs": {
+      "home": "Accueil",
+      "progress": "Progrès"
+    }
   },
   "location": {
     "alert": {
