@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as dui;
@@ -31,7 +32,7 @@ class SavedActivitiesChart extends StatelessWidget {
               color: Theme.of(context).colorScheme.error,
             ),
           StatisticsStateLoaded(:final activities) => Center(
-              child: _buildActivitiesChart(context, activities),
+              child: _buildStateLoaded(context, activities),
             ),
         };
       },
@@ -41,30 +42,12 @@ class SavedActivitiesChart extends StatelessWidget {
   /// The width of one bar of the bar chart.
   static const barWidth = 16.0;
 
-  Widget _buildActivitiesChart(
+  Widget _buildStateLoaded(
     BuildContext context,
     List<Activity> activities,
   ) {
-    // For each month (12*year+month), for each Sport, the sum of all distances.
-    final Map<int, Map<Sport, double>> monthlySumsMeters = {};
-    // What sports are concerned by this activity set.
-    final Set<Sport> presentSports = {};
+    final (monthlySumBySport, presentSports) = _prepareActivityData(activities);
 
-    for (final activity in activities) {
-      final month = activity.startTime.year * DateTime.monthsPerYear +
-          (activity.startTime.month - 1);
-      final sport = activity.sport ?? Sport.other;
-
-      presentSports.add(sport);
-
-      if (!monthlySumsMeters.containsKey(month)) monthlySumsMeters[month] = {};
-
-      monthlySumsMeters[month]![sport] =
-          (monthlySumsMeters[month]![sport] ?? 0) +
-              (activity.distanceInMeters ?? 0);
-    }
-
-    final sortedKeys = monthlySumsMeters.keys.toList(growable: false)..sort();
     final lineBarsData = <LineChartBarData>[];
     final betweenBarsData = <BetweenBarsData>[];
     double maxY = 1.0;
@@ -74,19 +57,18 @@ class SavedActivitiesChart extends StatelessWidget {
       presentSports.length,
     );
 
-    if (sortedKeys.isNotEmpty) {
+    if (monthlySumBySport.isNotEmpty) {
       for (final (sportIndex, sport) in presentSports.indexed) {
         final spots = <FlSpot>[];
-        for (int month = sortedKeys.first; month <= sortedKeys.last; month++) {
-          final thisMonthThisSportSum = monthlySumsMeters[month]?[sport] ?? 0;
+        for (final (index, MapEntry(key: dateGroup, value: sumsBySport))
+            in monthlySumBySport.entries.indexed) {
+          final thisMonthThisSportSum = sumsBySport[sport] ?? 0;
           // Add height of previous graph to stack curves.
           final y = thisMonthThisSportSum +
               (sportIndex == 0
                   ? 0
-                  : lineBarsData[sportIndex - 1]
-                      .spots[month - sortedKeys.first]
-                      .y);
-          spots.add(FlSpot(month.toDouble(), y));
+                  : lineBarsData[sportIndex - 1].spots[index].y);
+          spots.add(FlSpot(_dateTimeToXValue(dateGroup), y));
           maxY = max(y, maxY);
         }
 
@@ -124,37 +106,14 @@ class SavedActivitiesChart extends StatelessWidget {
       }
     }
 
-    // Add a year label in the background between every June and July.
-    final verticalLines = <VerticalLine>[];
-    for (int month = sortedKeys.first; month <= sortedKeys.last; month++) {
-      if (month.remainder(DateTime.monthsPerYear) != 0) continue;
-      verticalLines.add(
-        VerticalLine(
-          x: month.toDouble() + 0.5,
-          strokeWidth: 0.5,
-          color: Theme.of(context).colorScheme.secondary,
-          label: VerticalLineLabel(
-            style: DefaultTextStyle.of(context).style.apply(
-                  fontSizeFactor: 2.0,
-                  fontWeightDelta: 5,
-                  color: Theme.of(context).colorScheme.secondary.withAlpha(128),
-                ),
-            alignment: Alignment.centerRight,
-            show: true,
-            labelResolver: (line) =>
-                (line.x / DateTime.monthsPerYear).toInt().toString(),
-            direction: LabelDirection.vertical,
-          ),
-        ),
-      );
-    }
-
     final leftAxisTitle =
         '${LocaleKeys.activity.statistics.distance().translate(context)}'
         ' '
         '(${LocaleKeys.units.kilometersShort().translate(context)})';
 
     const axisTitlesSpace = 8.0;
+    const magicReservedSizeForLabelsMultiplier = 1.1;
+    final maxXLabelSize = _xLabelMaximumSize(monthlySumBySport.keys);
 
     return Column(
       children: [
@@ -182,19 +141,15 @@ class SavedActivitiesChart extends StatelessWidget {
                     minIncluded: false,
                     maxIncluded: false,
                     getTitlesWidget: (value, meta) {
-                      final year = (value / DateTime.monthsPerYear).toInt();
-                      final monthInYear =
-                          (value.remainder(DateTime.monthsPerYear) + 1).toInt();
-
-                      final label = DateFormat.MMM(Platform.localeName)
-                          .format(DateTime(year, monthInYear));
                       return SideTitleWidget(
                         meta: meta,
                         space: axisTitlesSpace,
-                        child: Text(label),
+                        child: _xValueToLabel(value).$1,
                       );
                     },
-                    reservedSize: axisTitlesSpace + _getBottomSideTitlesSize(),
+                    reservedSize: axisTitlesSpace +
+                        maxXLabelSize.height *
+                            magicReservedSizeForLabelsMultiplier,
                   ),
                 ),
                 leftTitles: AxisTitles(
@@ -255,10 +210,6 @@ class SavedActivitiesChart extends StatelessWidget {
                   },
                 ),
               ),
-              extraLinesData: ExtraLinesData(
-                extraLinesOnTop: false,
-                verticalLines: verticalLines,
-              ),
             ),
           ),
         ),
@@ -299,29 +250,6 @@ class SavedActivitiesChart extends StatelessWidget {
     return textPainter.width;
   }
 
-  double _getBottomSideTitlesSize() {
-    // Return the maximum height of all chars possible.
-    return (TextPainter(
-          textDirection: dui.TextDirection.ltr,
-          text: TextSpan(
-            text: String.fromCharCodes(
-              Iterable.generate(26, (letter) => 'a'.codeUnitAt(0) + letter)
-                  .followedBy(
-                    Iterable.generate(
-                        26, (letter) => 'A'.codeUnitAt(0) + letter),
-                  )
-                  .followedBy(
-                    Iterable.generate(10, (digit) => '0'.codeUnitAt(0) + digit),
-                  ),
-            ),
-          ),
-        )..layout())
-            .height *
-        1.2;
-    // The final multiplier is here because of letters like j that go below
-    // line.
-  }
-
   /// Crate list of [count] colors that go from white to [target].
   List<Color> _createStepColors(Color target, int count) {
     final primary = HSVColor.fromColor(target);
@@ -332,5 +260,93 @@ class SavedActivitiesChart extends StatelessWidget {
           .withSaturation(primary.saturation * (i + 1) / count)
           .toColor(),
     );
+  }
+
+  /// Groups given activities by month, then by sport.
+  ///
+  /// Also ensures that there is no missing entry between two dates. For
+  /// instance if the keys `DateTime(1999, 1)` and `DateTime(1999, 4)` are
+  /// present, then so do `DateTime(1999, 2)` and `DateTime(1999, 3)`.
+  ///
+  /// Also returns the set of all encountered sports.
+  (SplayTreeMap<DateTime, Map<Sport, double>>, Set<Sport>) _prepareActivityData(
+    List<Activity> activities,
+  ) {
+    final monthlySumsMeters = SplayTreeMap<DateTime, Map<Sport, double>>();
+    // What sports are concerned by this activity set.
+    final presentSports = <Sport>{};
+
+    for (final activity in activities) {
+      final dateGroup =
+          DateTime(activity.startTime.year, activity.startTime.month);
+      final sport = activity.sport ?? Sport.other;
+
+      presentSports.add(sport);
+
+      if (monthlySumsMeters.isEmpty) {
+        monthlySumsMeters[dateGroup] = {};
+      } else if (!monthlySumsMeters.containsKey(dateGroup)) {
+        // Ensure all keys are present, there is no missing month.
+        if (dateGroup.isBefore(monthlySumsMeters.firstKey()!)) {
+          while (!monthlySumsMeters.containsKey(dateGroup)) {
+            final DateTime(year: firstYear, month: firstMonth) =
+                monthlySumsMeters.firstKey()!;
+            monthlySumsMeters[DateTime(
+              firstMonth == 1 ? firstYear - 1 : firstYear,
+              firstMonth == 1 ? DateTime.monthsPerYear : firstMonth - 1,
+            )] = {};
+          }
+        } else {
+          while (!monthlySumsMeters.containsKey(dateGroup)) {
+            final DateTime(year: lastYear, month: lastMonth) =
+                monthlySumsMeters.lastKey()!;
+            monthlySumsMeters[DateTime(
+              lastMonth == DateTime.monthsPerYear ? lastYear + 1 : lastYear,
+              lastMonth == DateTime.monthsPerYear ? 1 : lastMonth + 1,
+            )] = {};
+          }
+        }
+      }
+
+      monthlySumsMeters[dateGroup]![sport] =
+          (monthlySumsMeters[dateGroup]![sport] ?? 0) +
+              (activity.distanceInMeters ?? 0);
+    }
+    return (monthlySumsMeters, presentSports);
+  }
+
+  double _dateTimeToXValue(DateTime dateTime) =>
+      dateTime.millisecondsSinceEpoch.toDouble();
+  DateTime _xValueToDateTime(double x) =>
+      DateTime.fromMillisecondsSinceEpoch(x.toInt());
+
+  /// Convert a chart x value (representing a DateTime in milliseconds since
+  /// Epoch) in its Widget label, with the size it will take.
+  (Widget, Size) _xValueToLabel(double x) {
+    final text =
+        DateFormat.yMMM(Platform.localeName).format(_xValueToDateTime(x));
+    final painter = TextPainter(
+      textDirection: dui.TextDirection.ltr,
+      text: TextSpan(text: text),
+    )..layout();
+    return (
+      RotatedBox(
+        quarterTurns: 1,
+        child: Text(text),
+      ),
+      painter.size.flipped
+    );
+  }
+
+  Size _xLabelMaximumSize(Iterable<DateTime> dateTimes) {
+    var maxSize = Size(0, 0);
+    for (final dateTime in dateTimes) {
+      final size = _xValueToLabel(_dateTimeToXValue(dateTime)).$2;
+      maxSize = Size(
+        max(maxSize.width, size.width),
+        max(maxSize.height, size.height),
+      );
+    }
+    return maxSize;
   }
 }
