@@ -29,7 +29,11 @@
     "activityConfiguration": {
       "sport": "Sport"
     },
-    "startActivity": "Start activity"
+    "startActivity": "Start activity",
+    "tabs": {
+      "home": "Home",
+      "progress": "Progress"
+    }
   },
   "location": {
     "alert": {
