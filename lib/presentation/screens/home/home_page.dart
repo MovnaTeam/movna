@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movna/assets.dart';
+import 'package:movna/jsons.dart';
+import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/widgets/slide_indexed_stack.dart';
 import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
 import 'package:movna/presentation/screens/home/home_activity_screen.dart';
@@ -14,18 +16,25 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ValueNotifier<int> _selectedTab = ValueNotifier(0);
-  final destinations = [
-    NavigationDestination(icon: Icon(Icons.home), label: 'home'),
-    NavigationDestination(icon: Icon(Icons.bar_chart), label: 'progress'),
-  ];
-
-  final tabs = [
-    HomeActivityScreen(),
-    StatisticsScreen(),
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final destinations = [
+      NavigationDestination(
+        icon: Icon(Icons.home),
+        label: LocaleKeys.home.tabs.home().translate(context),
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.bar_chart),
+        label: LocaleKeys.home.tabs.progress().translate(context),
+      ),
+    ];
+
+    final tabs = [
+      HomeActivityScreen(),
+      StatisticsScreen(),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: SvgThemedWidget(svgAsset: Assets.movnaLogo)),
