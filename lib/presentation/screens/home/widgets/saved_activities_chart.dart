@@ -67,7 +67,6 @@ class SavedActivitiesChart extends StatelessWidget {
     final sortedKeys = monthlySumsMeters.keys.toList(growable: false)..sort();
     final lineBarsData = <LineChartBarData>[];
     final betweenBarsData = <BetweenBarsData>[];
-    final labels = <int, String>{};
     double maxY = 1.0;
 
     final colors = _createStepColors(
@@ -89,12 +88,6 @@ class SavedActivitiesChart extends StatelessWidget {
                       .y);
           spots.add(FlSpot(month.toDouble(), y));
           maxY = max(y, maxY);
-
-          final year = (month / DateTime.monthsPerYear).toInt();
-          final monthInYear = month.remainder(DateTime.monthsPerYear) + 1;
-         
-          labels[month] = DateFormat.MMM(Platform.localeName)
-              .format(DateTime(year, monthInYear));
         }
 
         final color = colors[sportIndex];
@@ -161,6 +154,8 @@ class SavedActivitiesChart extends StatelessWidget {
         ' '
         '(${LocaleKeys.units.kilometersShort().translate(context)})';
 
+    const axisTitlesSpace = 8.0;
+
     return Column(
       children: [
         presentSports.length > 1
@@ -187,25 +182,33 @@ class SavedActivitiesChart extends StatelessWidget {
                     minIncluded: false,
                     maxIncluded: false,
                     getTitlesWidget: (value, meta) {
-                      final label = labels[value.toInt()];
+                      final year = (value / DateTime.monthsPerYear).toInt();
+                      final monthInYear =
+                          (value.remainder(DateTime.monthsPerYear) + 1).toInt();
+
+                      final label = DateFormat.MMM(Platform.localeName)
+                          .format(DateTime(year, monthInYear));
                       return SideTitleWidget(
                         meta: meta,
-                        child: Text(label ?? ''),
+                        space: axisTitlesSpace,
+                        child: Text(label),
                       );
                     },
-                    reservedSize: _getBottomSideTitlesSize(labels.values),
+                    reservedSize: axisTitlesSpace + _getBottomSideTitlesSize(),
                   ),
                 ),
                 leftTitles: AxisTitles(
                   axisNameWidget: Text(leftAxisTitle),
                   sideTitles: SideTitles(
                     showTitles: true,
-                    reservedSize: _getLeftSideTitlesSize(maxY / 1_000),
-                    interval: _getGridInterval(maxY),
+                    reservedSize:
+                        axisTitlesSpace + _getLeftSideTitlesSize(maxY / 1_000),
+                    interval: _getYGridInterval(maxY),
                     maxIncluded: false,
                     minIncluded: false,
                     getTitlesWidget: (value, meta) => SideTitleWidget(
                       meta: meta,
+                      space: axisTitlesSpace,
                       child: Text((value / 1_000).toInt().toString()),
                     ),
                   ),
@@ -218,7 +221,7 @@ class SavedActivitiesChart extends StatelessWidget {
               gridData: FlGridData(
                 show: true,
                 drawVerticalLine: false,
-                horizontalInterval: _getGridInterval(maxY),
+                horizontalInterval: _getYGridInterval(maxY),
                 getDrawingHorizontalLine: (value) => FlLine(
                   color: Theme.of(context).colorScheme.secondary,
                   dashArray: [10, 0],
@@ -263,7 +266,7 @@ class SavedActivitiesChart extends StatelessWidget {
     );
   }
 
-  double _getGridInterval(double maxY) {
+  double _getYGridInterval(double maxY) {
     return _getTopY(maxY) / 10;
   }
 
@@ -293,23 +296,30 @@ class SavedActivitiesChart extends StatelessWidget {
       textDirection: dui.TextDirection.ltr,
     );
     textPainter.layout();
-    return textPainter.width * 1.2;
+    return textPainter.width;
   }
 
-  double _getBottomSideTitlesSize(Iterable<String> labels) {
-    return labels.isEmpty
-        ? 0
-        : labels
-            .map(
-              (label) => (TextPainter(
-                textDirection: dui.TextDirection.ltr,
-                text: TextSpan(
-                  text: label,
-                ),
-              )..layout())
-                  .width,
-            )
-            .reduce(max);
+  double _getBottomSideTitlesSize() {
+    // Return the maximum height of all chars possible.
+    return (TextPainter(
+          textDirection: dui.TextDirection.ltr,
+          text: TextSpan(
+            text: String.fromCharCodes(
+              Iterable.generate(26, (letter) => 'a'.codeUnitAt(0) + letter)
+                  .followedBy(
+                    Iterable.generate(
+                        26, (letter) => 'A'.codeUnitAt(0) + letter),
+                  )
+                  .followedBy(
+                    Iterable.generate(10, (digit) => '0'.codeUnitAt(0) + digit),
+                  ),
+            ),
+          ),
+        )..layout())
+            .height *
+        1.2;
+    // The final multiplier is here because of letters like j that go below
+    // line.
   }
 
   /// Crate list of [count] colors that go from white to [target].
