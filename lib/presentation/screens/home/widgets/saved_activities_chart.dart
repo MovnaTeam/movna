@@ -42,29 +42,75 @@ class SavedActivitiesChart extends StatelessWidget {
     );
   }
 
-  /// The width of one bar of the bar chart.
-  static const barWidth = 16.0;
-
   Widget _buildStateLoaded(
     BuildContext context,
     List<Activity> activities,
   ) {
     final (monthlySumBySport, presentSports) = _prepareActivityData(activities);
 
+    final sportToColor = Map.fromIterables(
+      presentSports,
+      _createStepColors(
+        Theme.of(context).colorScheme.primary,
+        presentSports.length,
+      ),
+    );
+
+    return Column(
+      children: [
+        Builder(
+          builder: (context) => _buildChartLegend(
+            context,
+            sportToColor,
+          ),
+        ),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) => _buildChart(
+              context,
+              monthlySumBySport,
+              sportToColor,
+              constraints,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChartLegend(
+    BuildContext context,
+    Map<Sport, Color> sportColorMapping,
+  ) {
+    return sportColorMapping.length > 1
+        ? LegendsListWidget(
+            legends: sportColorMapping.entries
+                .map(
+                  (sportToColor) => Legend(
+                    sportToColor.key.translatable().translate(context),
+                    sportToColor.value,
+                  ),
+                )
+                .toList(),
+          )
+        : const NoneWidget();
+  }
+
+  Widget _buildChart(
+    BuildContext context,
+    SplayTreeMap<DateTime, Map<Sport, double>> preparedData,
+    Map<Sport, Color> sportColorMapping,
+    BoxConstraints constraints,
+  ) {
     final lineBarsData = <LineChartBarData>[];
     final betweenBarsData = <BetweenBarsData>[];
     double maxY = 1.0;
 
-    final colors = _createStepColors(
-      Theme.of(context).colorScheme.primary,
-      presentSports.length,
-    );
-
-    if (monthlySumBySport.isNotEmpty) {
-      for (final (sportIndex, sport) in presentSports.indexed) {
+    if (preparedData.isNotEmpty) {
+      for (final (sportIndex, sport) in sportColorMapping.keys.indexed) {
         final spots = <FlSpot>[];
         for (final (index, MapEntry(key: dateGroup, value: sumsBySport))
-            in monthlySumBySport.entries.indexed) {
+            in preparedData.entries.indexed) {
           final thisMonthThisSportSum = sumsBySport[sport] ?? 0;
           // Add height of previous graph to stack curves.
           final y = thisMonthThisSportSum +
@@ -75,7 +121,7 @@ class SavedActivitiesChart extends StatelessWidget {
           maxY = max(y, maxY);
         }
 
-        final color = colors[sportIndex];
+        final color = sportColorMapping[sport]!;
         final colorUnderCurve = color.withAlpha(128);
 
         lineBarsData.add(
@@ -114,119 +160,98 @@ class SavedActivitiesChart extends StatelessWidget {
         ' '
         '(${LocaleKeys.units.kilometersShort().translate(context)})';
 
+    /// The space between the axises and their labels.
     const axisTitlesSpace = 8.0;
-    const magicReservedSizeForLabelsMultiplier = 1.1;
-    final maxXLabelSize = _xLabelMaximumSize(monthlySumBySport.keys);
 
-    return Column(
-      children: [
-        presentSports.length > 1
-            ? LegendsListWidget(
-                legends: presentSports.indexed
-                    .map(
-                      (sport) => Legend(
-                        sport.$2.translatable().translate(context),
-                        colors[sport.$1],
-                      ),
-                    )
-                    .toList(),
-              )
-            : const NoneWidget(),
-        Expanded(
-          child: LineChart(
-            LineChartData(
-              lineBarsData: lineBarsData,
-              betweenBarsData: betweenBarsData,
-              titlesData: FlTitlesData(
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    minIncluded: false,
-                    maxIncluded: false,
-                    getTitlesWidget: (value, meta) {
-                      return SideTitleWidget(
-                        meta: meta,
-                        space: axisTitlesSpace,
-                        child: _xValueToLabel(value).$1,
-                      );
-                    },
-                    reservedSize: axisTitlesSpace +
-                        maxXLabelSize.height *
-                            magicReservedSizeForLabelsMultiplier,
-                  ),
-                ),
-                leftTitles: AxisTitles(
-                  axisNameWidget: Text(leftAxisTitle),
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize:
-                        axisTitlesSpace + _getLeftSideTitlesSize(maxY / 1_000),
-                    interval: _getYGridInterval(maxY),
-                    maxIncluded: false,
-                    minIncluded: false,
-                    getTitlesWidget: (value, meta) => SideTitleWidget(
-                      meta: meta,
-                      space: axisTitlesSpace,
-                      child: Text((value / 1_000).toInt().toString()),
-                    ),
-                  ),
-                ),
-                topTitles:
-                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles:
-                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
+    /// Applied to the labels maximum size to reserve more space.
+    /// Do not ask me why this is necessary.
+    const magicReservedSizeForLabelsMultiplier = 1.1;
+
+    final maxXLabelSize = _xLabelMaximumSize(preparedData.keys);
+    final xLabelsReservedHeight = axisTitlesSpace +
+        maxXLabelSize.height * magicReservedSizeForLabelsMultiplier;
+
+    // Cheating here, as we know the y labels are numbers, the largest one is
+    // just the highest one, multiplied for security.
+    final maxYLabelSize = _yLabelMaximumSize([maxY * 10]);
+    final yLabelsReservedWidth = axisTitlesSpace +
+        maxYLabelSize.width * magicReservedSizeForLabelsMultiplier;
+
+    return LineChart(
+      LineChartData(
+        lineBarsData: lineBarsData,
+        betweenBarsData: betweenBarsData,
+        titlesData: FlTitlesData(
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              minIncluded: false,
+              maxIncluded: false,
+              getTitlesWidget: (value, meta) => SideTitleWidget(
+                meta: meta,
+                space: axisTitlesSpace,
+                child: _xValueToLabel(value).$1,
               ),
-              gridData: FlGridData(
-                show: true,
-                drawVerticalLine: false,
-                horizontalInterval: _getYGridInterval(maxY),
-                getDrawingHorizontalLine: (value) => FlLine(
-                  color: Theme.of(context).colorScheme.secondary,
-                  dashArray: [10, 0],
-                  strokeWidth: 0.5,
-                ),
-              ),
-              borderData: FlBorderData(show: false),
-              minY: 0,
-              maxY: _getTopY(maxY),
-              lineTouchData: LineTouchData(
-                enabled: true,
-                touchTooltipData: LineTouchTooltipData(
-                  fitInsideHorizontally: true,
-                  fitInsideVertically: true,
-                  getTooltipColor: (group) =>
-                      Theme.of(context).colorScheme.primaryContainer,
-                  getTooltipItems: (touchedSpots) {
-                    return touchedSpots.indexed
-                        .map(
-                          (pair) => LineTooltipItem(
-                            ((pair.$2.y -
-                                        (pair.$1 < touchedSpots.length - 1
-                                            ? touchedSpots[pair.$1 + 1].y
-                                            : 0)) /
-                                    1_000)
-                                .toStringAsFixed(3),
-                            TextStyle(color: pair.$2.bar.color),
-                          ),
-                        )
-                        .toList();
-                  },
-                ),
+              reservedSize: xLabelsReservedHeight,
+            ),
+          ),
+          leftTitles: AxisTitles(
+            axisNameWidget: Text(leftAxisTitle),
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: yLabelsReservedWidth,
+              interval: _getYGridInterval(maxY),
+              maxIncluded: false,
+              minIncluded: false,
+              getTitlesWidget: (value, meta) => SideTitleWidget(
+                meta: meta,
+                space: axisTitlesSpace,
+                child: Text((value / 1_000).toInt().toString()),
               ),
             ),
           ),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
-      ],
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: _getYGridInterval(maxY),
+          getDrawingHorizontalLine: (value) => FlLine(
+            color: Theme.of(context).colorScheme.secondary,
+            dashArray: [10, 0],
+            strokeWidth: 0.5,
+          ),
+        ),
+        borderData: FlBorderData(show: false),
+        minY: 0,
+        maxY: _getTopY(maxY),
+        lineTouchData: LineTouchData(
+          enabled: true,
+          touchTooltipData: LineTouchTooltipData(
+            fitInsideHorizontally: true,
+            fitInsideVertically: true,
+            getTooltipColor: (group) =>
+                Theme.of(context).colorScheme.primaryContainer,
+            getTooltipItems: (touchedSpots) {
+              return touchedSpots.indexed
+                  .map(
+                    (pair) => LineTooltipItem(
+                      ((pair.$2.y -
+                                  (pair.$1 < touchedSpots.length - 1
+                                      ? touchedSpots[pair.$1 + 1].y
+                                      : 0)) /
+                              1_000)
+                          .toStringAsFixed(3),
+                      TextStyle(color: pair.$2.bar.color),
+                    ),
+                  )
+                  .toList();
+            },
+          ),
+        ),
+      ),
     );
-  }
-
-  double _getYGridInterval(double maxY) {
-    return _getTopY(maxY) / 10;
-  }
-
-  double _getPreviousPowerOf10(double value) {
-    double log10(double v) => log(v) / log(10.0);
-    return pow(10.0, log10(value).toInt()).toDouble();
   }
 
   /// Returns the next multiple of the previous power of ten.
@@ -236,21 +261,19 @@ class SavedActivitiesChart extends StatelessWidget {
   /// - 259 -> 300
   /// - 4589 -> 5000
   double _getTopY(double maxY) {
-    final previousPowerOf10 = _getPreviousPowerOf10(maxY);
+    double getPreviousPowerOf10(double value) {
+      double log10(double v) => log(v) / log(10.0);
+      return pow(10.0, log10(value).toInt()).toDouble();
+    }
+
+    final previousPowerOf10 = getPreviousPowerOf10(maxY);
     final nextMultipleOfPreviousPowerOf10 =
         ((maxY / previousPowerOf10) + 1).toInt() * previousPowerOf10;
     return nextMultipleOfPreviousPowerOf10;
   }
 
-  double _getLeftSideTitlesSize(double maxY) {
-    // Compute width of next power of 10,
-    final textPainter = TextPainter(
-      text:
-          TextSpan(text: (_getPreviousPowerOf10(maxY) * 10).toInt().toString()),
-      textDirection: dui.TextDirection.ltr,
-    );
-    textPainter.layout();
-    return textPainter.width;
+  double _getYGridInterval(double maxY) {
+    return _getTopY(maxY) / 10;
   }
 
   /// Crate list of [count] colors that go from white to [target].
@@ -345,6 +368,27 @@ class SavedActivitiesChart extends StatelessWidget {
     var maxSize = Size(0, 0);
     for (final dateTime in dateTimes) {
       final size = _xValueToLabel(_dateTimeToXValue(dateTime)).$2;
+      maxSize = Size(
+        max(maxSize.width, size.width),
+        max(maxSize.height, size.height),
+      );
+    }
+    return maxSize;
+  }
+
+  (Widget, Size) _yValueToLabel(double y) {
+    final text = (y / 1_000).toInt().toString();
+    final painter = TextPainter(
+      textDirection: dui.TextDirection.ltr,
+      text: TextSpan(text: text),
+    )..layout();
+    return (Text(text), painter.size);
+  }
+
+  Size _yLabelMaximumSize(Iterable<double> yValues) {
+    var maxSize = Size(0, 0);
+    for (final y in yValues) {
+      final size = _yValueToLabel(y).$2;
       maxSize = Size(
         max(maxSize.width, size.width),
         max(maxSize.height, size.height),
