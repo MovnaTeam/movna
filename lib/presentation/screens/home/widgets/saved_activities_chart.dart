@@ -9,7 +9,6 @@ import 'package:movna/domain/entities/activity.dart';
 import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/statistics_cubit.dart';
-import 'package:movna/presentation/extensions/sport_color_extension.dart';
 import 'package:movna/presentation/extensions/sport_translation_extension.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
@@ -65,89 +64,101 @@ class SavedActivitiesChart extends StatelessWidget {
               (activity.distanceInMeters ?? 0);
     }
 
-    final sortedKeys = monthlySumsMeters.keys.toList()..sort();
-    final spots = <BarChartGroupData>[];
+    final sortedKeys = monthlySumsMeters.keys.toList(growable: false)..sort();
+    final lineBarsData = <LineChartBarData>[];
+    final betweenBarsData = <BetweenBarsData>[];
     final labels = <int, String>{};
     double maxY = 1.0;
+
+    final colors = _createStepColors(
+      Theme.of(context).colorScheme.primary,
+      presentSports.length,
+    );
+
     if (sortedKeys.isNotEmpty) {
-      for (int month = sortedKeys.first; month <= sortedKeys.last; month++) {
-        final sumsBySport = monthlySumsMeters[month];
+      for (final (sportIndex, sport) in presentSports.indexed) {
+        final spots = <FlSpot>[];
+        for (int month = sortedKeys.first; month <= sortedKeys.last; month++) {
+          final thisMonthThisSportSum = monthlySumsMeters[month]?[sport] ?? 0;
+          // Add height of previous graph to stack curves.
+          final y = thisMonthThisSportSum +
+              (sportIndex == 0
+                  ? 0
+                  : lineBarsData[sportIndex - 1]
+                      .spots[month - sortedKeys.first]
+                      .y);
+          spots.add(FlSpot(month.toDouble(), y));
+          maxY = max(y, maxY);
 
-        final rods = <BarChartRodData>[];
-        double y = 0;
-
-        // Determine which sport is on top of the rods in order to be able to
-        // round it.
-        Sport lastNonZeroSport = Sport.other;
-        for (final sport in presentSports) {
-          final thisMonthThisSportSum = sumsBySport?[sport] ?? 0;
-          if (thisMonthThisSportSum == 0) continue;
-          lastNonZeroSport = sport;
+          final year = (month / DateTime.monthsPerYear).toInt();
+          final monthInYear = month.remainder(DateTime.monthsPerYear) + 1;
+          final displayYear =
+              monthInYear == 1 || month == sortedKeys.firstOrNull;
+          final label = (displayYear
+                  ? DateFormat.yMMM(Platform.localeName)
+                  : DateFormat.MMM(Platform.localeName))
+              .format(DateTime(year, monthInYear));
+          labels[month] = label;
         }
 
-        for (final sport in presentSports) {
-          // Convert to km
-          final thisMonthThisSportSum = sumsBySport?[sport] ?? 0;
+        final color = colors[sportIndex];
+        final colorUnderCurve = color.withAlpha(128);
 
-          if (thisMonthThisSportSum == 0) continue;
-
-          rods.add(
-            BarChartRodData(
-              fromY: y,
-              toY: y + thisMonthThisSportSum,
-              color: sport.toColor(context),
-              width: barWidth,
-              borderRadius: sport == lastNonZeroSport
-                  ? BorderRadius.only(
-                      topLeft: Radius.circular(barWidth / 2),
-                      topRight: Radius.circular(barWidth / 2),
-                    )
-                  : BorderRadius.all(Radius.zero),
+        lineBarsData.add(
+          LineChartBarData(
+            spots: spots,
+            isCurved: true,
+            preventCurveOverShooting: true,
+            color: color,
+            barWidth: 2,
+            isStrokeCapRound: true,
+            dotData: FlDotData(
+              show: true,
+              checkToShowDot: (spot, barData) => spot.y != 0,
             ),
-          );
-          y += thisMonthThisSportSum;
-        }
-        maxY = max(maxY, y);
-
-        spots.add(
-          BarChartGroupData(
-            x: month,
-            barRods: rods,
-            groupVertically: true,
+            belowBarData: BarAreaData(
+              show: sportIndex == 0,
+              color: colorUnderCurve,
+            ),
           ),
         );
-        final year = (month / DateTime.monthsPerYear).toInt();
-        final monthInYear = month.remainder(DateTime.monthsPerYear) + 1;
-        final displayYear = monthInYear == 1 || month == sortedKeys.firstOrNull;
-        final label = (displayYear
-                ? DateFormat.yMMM(Platform.localeName)
-                : DateFormat.MMM(Platform.localeName))
-            .format(
-          DateTime(year, monthInYear),
-        );
-        labels[month] = label;
+
+        if (sportIndex > 0) {
+          betweenBarsData.add(
+            BetweenBarsData(
+              fromIndex: sportIndex - 1,
+              toIndex: sportIndex,
+              color: colorUnderCurve,
+            ),
+          );
+        }
       }
     }
+
+    final leftAxisTitle =
+        '${LocaleKeys.activity.statistics.distance().translate(context)}'
+        ' '
+        '(${LocaleKeys.units.kilometersShort().translate(context)})';
 
     return Column(
       children: [
         presentSports.length > 1
             ? LegendsListWidget(
-                legends: presentSports
+                legends: presentSports.indexed
                     .map(
                       (sport) => Legend(
-                        sport.translatable().translate(context),
-                        sport.toColor(context),
+                        sport.$2.translatable().translate(context),
+                        colors[sport.$1],
                       ),
                     )
                     .toList(),
               )
             : const NoneWidget(),
         Expanded(
-          child: BarChart(
-            BarChartData(
-              alignment: BarChartAlignment.spaceAround,
-              barGroups: spots,
+          child: LineChart(
+            LineChartData(
+              lineBarsData: lineBarsData,
+              betweenBarsData: betweenBarsData,
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
@@ -156,7 +167,7 @@ class SavedActivitiesChart extends StatelessWidget {
                       final label = labels[value.toInt()];
                       return SideTitleWidget(
                         meta: meta,
-                        angle: pi / 4,
+                        angle: pi / 2,
                         child: Text(label ?? ''),
                       );
                     },
@@ -164,18 +175,13 @@ class SavedActivitiesChart extends StatelessWidget {
                   ),
                 ),
                 leftTitles: AxisTitles(
-                  axisNameWidget: Text(
-                      '${LocaleKeys.activity.statistics.distance().translate(
-                            context,
-                          )}'
-                      ' (${LocaleKeys.units.kilometersShort().translate(
-                            context,
-                          )})'),
+                  axisNameWidget: Text(leftAxisTitle),
                   sideTitles: SideTitles(
                     showTitles: true,
                     reservedSize: _getLeftSideTitlesSize(maxY / 1_000),
                     interval: _getGridInterval(maxY),
                     maxIncluded: false,
+                    minIncluded: false,
                     getTitlesWidget: (value, meta) => SideTitleWidget(
                       meta: meta,
                       child: Text((value / 1_000).toInt().toString()),
@@ -200,20 +206,27 @@ class SavedActivitiesChart extends StatelessWidget {
               borderData: FlBorderData(show: false),
               minY: 0,
               maxY: _getTopY(maxY),
-              barTouchData: BarTouchData(
+              lineTouchData: LineTouchData(
                 enabled: true,
-                touchTooltipData: BarTouchTooltipData(
+                touchTooltipData: LineTouchTooltipData(
                   fitInsideHorizontally: true,
                   fitInsideVertically: true,
                   getTooltipColor: (group) =>
                       Theme.of(context).colorScheme.primaryContainer,
-                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                    return BarTooltipItem(
-                      ((rod.toY - rod.fromY) / 1_000).toStringAsFixed(3),
-                      TextStyle(
-                        color: rod.color,
-                      ),
-                    );
+                  getTooltipItems: (touchedSpots) {
+                    return touchedSpots.indexed
+                        .map(
+                          (pair) => LineTooltipItem(
+                            ((pair.$2.y -
+                                        (pair.$1 < touchedSpots.length - 1
+                                            ? touchedSpots[pair.$1 + 1].y
+                                            : 0)) /
+                                    1_000)
+                                .toStringAsFixed(3),
+                            TextStyle(color: pair.$2.bar.color),
+                          ),
+                        )
+                        .toList();
                   },
                 ),
               ),
@@ -271,5 +284,17 @@ class SavedActivitiesChart extends StatelessWidget {
                   .width,
             )
             .reduce(max);
+  }
+
+  /// Crate list of [count] colors that go from white to [target].
+  List<Color> _createStepColors(Color target, int count) {
+    final primary = HSVColor.fromColor(target);
+    return List.generate(
+      count,
+      (i) => primary
+          .withValue(1 - (primary.value * (i + 1) / count))
+          .withSaturation(primary.saturation * (i + 1) / count)
+          .toColor(),
+    );
   }
 }
