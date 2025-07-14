@@ -251,25 +251,36 @@ class SavedActivitiesChart extends StatelessWidget {
             fitInsideVertically: true,
             getTooltipColor: (group) =>
                 Theme.of(context).colorScheme.primaryContainer,
-            getTooltipItems: (touchedSpots) {
-              return touchedSpots.indexed
-                  .map(
-                    (pair) => LineTooltipItem(
-                      ((pair.$2.y -
-                                  (pair.$1 < touchedSpots.length - 1
-                                      ? touchedSpots[pair.$1 + 1].y
-                                      : 0)) /
-                              1_000)
-                          .toStringAsFixed(3),
-                      TextStyle(color: pair.$2.bar.color),
-                    ),
-                  )
-                  .toList();
-            },
+            getTooltipItems: _getTooltipItems,
           ),
         ),
       ),
     );
+  }
+
+  List<LineTooltipItem?> _getTooltipItems(List<LineBarSpot> touchedSpots) {
+    // Spots are given in some random order...
+    return (touchedSpots
+          ..sort(
+            (a, b) => b.barIndex - a.barIndex,
+          ))
+        .map(
+          (spot) => LineTooltipItem(
+            ((spot.y -
+                        (spot.barIndex == 0
+                            ? 0
+                            : touchedSpots
+                                .firstWhere(
+                                  (other) =>
+                                      other.barIndex == spot.barIndex - 1,
+                                )
+                                .y)) /
+                    1_000)
+                .toStringAsFixed(3),
+            TextStyle(color: spot.bar.color),
+          ),
+        )
+        .toList();
   }
 
   (Widget, Size) _getYAxisTitle(BuildContext context) {
