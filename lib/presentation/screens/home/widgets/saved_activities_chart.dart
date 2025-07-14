@@ -251,33 +251,56 @@ class SavedActivitiesChart extends StatelessWidget {
             fitInsideVertically: true,
             getTooltipColor: (group) =>
                 Theme.of(context).colorScheme.primaryContainer,
-            getTooltipItems: _getTooltipItems,
+            getTooltipItems: (touchedSpots) => _getTooltipItems(
+              context,
+              touchedSpots,
+            ),
           ),
         ),
       ),
     );
   }
 
-  List<LineTooltipItem?> _getTooltipItems(List<LineBarSpot> touchedSpots) {
-    // Spots are given in some random order...
+  List<LineTooltipItem?> _getTooltipItems(
+    BuildContext context,
+    List<LineBarSpot> touchedSpots,
+  ) {
+    // Spots are given in some random order AND there is no way to give the
+    // tooltip a title. This method is serious hack just to display a date.
     return (touchedSpots
           ..sort(
             (a, b) => b.barIndex - a.barIndex,
           ))
         .map(
           (spot) => LineTooltipItem(
-            ((spot.y -
-                        (spot.barIndex == 0
-                            ? 0
-                            : touchedSpots
-                                .firstWhere(
-                                  (other) =>
-                                      other.barIndex == spot.barIndex - 1,
-                                )
-                                .y)) /
-                    1_000)
-                .toStringAsFixed(3),
-            TextStyle(color: spot.bar.color),
+            spot.barIndex != touchedSpots.length - 1
+                ? ''
+                : '${DateFormat.yMMM(Platform.localeName).format(
+                    _xValueToDateTime(spot.x),
+                  )}\n',
+            DefaultTextStyle.of(context).style.apply(
+                  fontWeightDelta: 3,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+            children: [
+              TextSpan(
+                text: ((spot.y -
+                            (spot.barIndex == 0
+                                ? 0
+                                : touchedSpots
+                                    .firstWhere(
+                                      (other) =>
+                                          other.barIndex == spot.barIndex - 1,
+                                    )
+                                    .y)) /
+                        1_000)
+                    .toStringAsFixed(3),
+                style: DefaultTextStyle.of(context).style.apply(
+                      fontWeightDelta: 0,
+                      color: spot.bar.color,
+                    ),
+              ),
+            ],
           ),
         )
         .toList();
