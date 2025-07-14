@@ -177,6 +177,9 @@ class SavedActivitiesChart extends StatelessWidget {
     final yLabelsReservedWidth = axisTitlesSpace +
         maxYLabelSize.width * magicReservedSizeForLabelsMultiplier;
 
+    final (yAxisTitle, yAxisTitleSize) = _getYAxisTitle(context);
+    final yAxisTitleReservedWidth =
+        yAxisTitleSize.flipped.width * magicReservedSizeForLabelsMultiplier;
     return LineChart(
       LineChartData(
         lineBarsData: lineBarsData,
@@ -196,7 +199,8 @@ class SavedActivitiesChart extends StatelessWidget {
             ),
           ),
           leftTitles: AxisTitles(
-            axisNameWidget: Text(leftAxisTitle),
+            axisNameWidget: yAxisTitle,
+            axisNameSize: yAxisTitleReservedWidth,
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: yLabelsReservedWidth,
@@ -252,6 +256,18 @@ class SavedActivitiesChart extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  (Widget, Size) _getYAxisTitle(BuildContext context) {
+    final text =
+        '${LocaleKeys.activity.statistics.distance().translate(context)}'
+        ' '
+        '(${LocaleKeys.units.kilometersShort().translate(context)})';
+    final painter = TextPainter(
+      textDirection: dui.TextDirection.ltr,
+      text: TextSpan(text: text),
+    )..layout();
+    return (Text(text), painter.size);
   }
 
   /// Returns the next multiple of the previous power of ten.
