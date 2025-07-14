@@ -173,9 +173,11 @@ class SavedActivitiesChart extends StatelessWidget {
         maxYLabelSize.width * magicReservedSizeForLabelsMultiplier;
     final maxYLabelsCount =
         (constraints.maxHeight - xLabelsReservedHeight) / maxYLabelSize.height;
-    final yLabelsInterval =
-        (_getTopY(maxY) / (maxYLabelsCount / 2) / 1_000).toInt().toDouble() *
-            1_000;
+    final topY = _getTopY(maxY);
+    final yLabelsInterval = max(
+      1_000.0,
+      ((topY / (maxYLabelsCount / 2)) / 1_000).toInt().toDouble() * 1_000,
+    );
 
     final (yAxisTitle, yAxisTitleSize) = _getYAxisTitle(context);
     final yAxisTitleReservedWidth =
@@ -186,7 +188,9 @@ class SavedActivitiesChart extends StatelessWidget {
             yLabelsReservedWidth) /
         maxXLabelSize.width;
     final xLabelsInterval =
-        (preparedData.length / (maxXLabelsCount / 2)).toInt().toDouble() *
+        max(1.0, preparedData.length / (maxXLabelsCount / 2))
+                .toInt()
+                .toDouble() *
             _dateTimeToXValue(
               DateTime.fromMillisecondsSinceEpoch(
                 Duration(days: 31).inMilliseconds,
