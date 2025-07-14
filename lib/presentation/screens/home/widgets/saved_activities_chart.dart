@@ -155,17 +155,12 @@ class SavedActivitiesChart extends StatelessWidget {
       }
     }
 
-    final leftAxisTitle =
-        '${LocaleKeys.activity.statistics.distance().translate(context)}'
-        ' '
-        '(${LocaleKeys.units.kilometersShort().translate(context)})';
-
     /// The space between the axises and their labels.
     const axisTitlesSpace = 8.0;
 
     /// Applied to the labels maximum size to reserve more space.
     /// Do not ask me why this is necessary.
-    const magicReservedSizeForLabelsMultiplier = 1.1;
+    const magicReservedSizeForLabelsMultiplier = 1.2;
 
     final maxXLabelSize = _xLabelMaximumSize(preparedData.keys);
     final xLabelsReservedHeight = axisTitlesSpace +
@@ -180,6 +175,19 @@ class SavedActivitiesChart extends StatelessWidget {
     final (yAxisTitle, yAxisTitleSize) = _getYAxisTitle(context);
     final yAxisTitleReservedWidth =
         yAxisTitleSize.flipped.width * magicReservedSizeForLabelsMultiplier;
+
+    final maxXLabelsCount = (constraints.maxWidth -
+            yAxisTitleReservedWidth -
+            yLabelsReservedWidth) /
+        maxXLabelSize.width;
+    final xLabelsInterval =
+        (preparedData.length / (maxXLabelsCount / 2)).toInt().toDouble() *
+            _dateTimeToXValue(
+              DateTime.fromMillisecondsSinceEpoch(
+                Duration(days: 31).inMilliseconds,
+              ),
+            );
+
     return LineChart(
       LineChartData(
         lineBarsData: lineBarsData,
@@ -190,12 +198,13 @@ class SavedActivitiesChart extends StatelessWidget {
               showTitles: true,
               minIncluded: false,
               maxIncluded: false,
+              interval: xLabelsInterval,
+              reservedSize: xLabelsReservedHeight,
               getTitlesWidget: (value, meta) => SideTitleWidget(
                 meta: meta,
                 space: axisTitlesSpace,
                 child: _xValueToLabel(value).$1,
               ),
-              reservedSize: xLabelsReservedHeight,
             ),
           ),
           leftTitles: AxisTitles(
@@ -203,10 +212,10 @@ class SavedActivitiesChart extends StatelessWidget {
             axisNameSize: yAxisTitleReservedWidth,
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: yLabelsReservedWidth,
-              interval: _getYGridInterval(maxY),
-              maxIncluded: false,
               minIncluded: false,
+              maxIncluded: false,
+              interval: _getYGridInterval(maxY),
+              reservedSize: yLabelsReservedWidth,
               getTitlesWidget: (value, meta) => SideTitleWidget(
                 meta: meta,
                 space: axisTitlesSpace,
