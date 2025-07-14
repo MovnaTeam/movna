@@ -250,11 +250,13 @@ class SavedActivitiesChart extends StatelessWidget {
             fitInsideHorizontally: true,
             fitInsideVertically: true,
             getTooltipColor: (group) =>
-                Theme.of(context).colorScheme.primaryContainer,
+                Theme.of(context).colorScheme.surface,
             getTooltipItems: (touchedSpots) => _getTooltipItems(
               context,
               touchedSpots,
             ),
+              tooltipBorder:
+                  BorderSide(color: Theme.of(context).colorScheme.primary)
           ),
         ),
       ),
