@@ -249,14 +249,14 @@ class SavedActivitiesChart extends StatelessWidget {
           touchTooltipData: LineTouchTooltipData(
             fitInsideHorizontally: true,
             fitInsideVertically: true,
-            getTooltipColor: (group) =>
-                Theme.of(context).colorScheme.surface,
+            getTooltipColor: (group) => Theme.of(context).colorScheme.surface,
             getTooltipItems: (touchedSpots) => _getTooltipItems(
               context,
               touchedSpots,
+              sportColorMapping.keys.toList(),
             ),
-              tooltipBorder:
-                  BorderSide(color: Theme.of(context).colorScheme.primary)
+            tooltipBorder:
+                BorderSide(color: Theme.of(context).colorScheme.primary),
           ),
         ),
       ),
@@ -266,6 +266,7 @@ class SavedActivitiesChart extends StatelessWidget {
   List<LineTooltipItem?> _getTooltipItems(
     BuildContext context,
     List<LineBarSpot> touchedSpots,
+    List<Sport> sports,
   ) {
     // Spots are given in some random order AND there is no way to give the
     // tooltip a title. This method is serious hack just to display a date.
@@ -274,38 +275,41 @@ class SavedActivitiesChart extends StatelessWidget {
             (a, b) => b.barIndex - a.barIndex,
           ))
         .map(
-          (spot) => LineTooltipItem(
-            spot.barIndex != touchedSpots.length - 1
-                ? ''
-                : '${DateFormat.yMMM(Platform.localeName).format(
-                    _xValueToDateTime(spot.x),
-                  )}\n',
-            DefaultTextStyle.of(context).style.apply(
-                  fontWeightDelta: 3,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-            children: [
-              TextSpan(
-                text: ((spot.y -
-                            (spot.barIndex == 0
-                                ? 0
-                                : touchedSpots
-                                    .firstWhere(
-                                      (other) =>
-                                          other.barIndex == spot.barIndex - 1,
-                                    )
-                                    .y)) /
-                        1_000)
-                    .toStringAsFixed(3),
-                style: DefaultTextStyle.of(context).style.apply(
-                      fontWeightDelta: 0,
-                      color: spot.bar.color,
-                    ),
+      (spot) {
+        final distanceInKm = (spot.y -
+                (spot.barIndex == 0
+                    ? 0
+                    : touchedSpots
+                        .firstWhere(
+                          (other) => other.barIndex == spot.barIndex - 1,
+                        )
+                        .y)) /
+            1_000;
+        final sport = sports[spot.barIndex];
+        return LineTooltipItem(
+          spot.barIndex != touchedSpots.length - 1
+              ? ''
+              : '${DateFormat.yMMM(Platform.localeName).format(
+                  _xValueToDateTime(spot.x),
+                )}\n',
+          DefaultTextStyle.of(context).style.apply(
+                fontWeightDelta: 3,
+                color: Theme.of(context).colorScheme.primary,
               ),
-            ],
-          ),
-        )
-        .toList();
+          children: [
+            TextSpan(
+              text: '${sport.translatable().translate(context)}'
+                  ' : '
+                  '${distanceInKm.toStringAsFixed(3)}',
+              style: DefaultTextStyle.of(context).style.apply(
+                    fontWeightDelta: 0,
+                    color: spot.bar.color,
+                  ),
+            ),
+          ],
+        );
+      },
+    ).toList();
   }
 
   (Widget, Size) _getYAxisTitle(BuildContext context) {
