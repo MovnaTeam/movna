@@ -171,6 +171,11 @@ class SavedActivitiesChart extends StatelessWidget {
     final maxYLabelSize = _yLabelMaximumSize([maxY * 10]);
     final yLabelsReservedWidth = axisTitlesSpace +
         maxYLabelSize.width * magicReservedSizeForLabelsMultiplier;
+    final maxYLabelsCount =
+        (constraints.maxHeight - xLabelsReservedHeight) / maxYLabelSize.height;
+    final yLabelsInterval =
+        (_getTopY(maxY) / (maxYLabelsCount / 2) / 1_000).toInt().toDouble() *
+            1_000;
 
     final (yAxisTitle, yAxisTitleSize) = _getYAxisTitle(context);
     final yAxisTitleReservedWidth =
@@ -214,7 +219,7 @@ class SavedActivitiesChart extends StatelessWidget {
               showTitles: true,
               minIncluded: false,
               maxIncluded: false,
-              interval: _getYGridInterval(maxY),
+              interval: yLabelsInterval,
               reservedSize: yLabelsReservedWidth,
               getTitlesWidget: (value, meta) => SideTitleWidget(
                 meta: meta,
@@ -229,7 +234,7 @@ class SavedActivitiesChart extends StatelessWidget {
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          horizontalInterval: _getYGridInterval(maxY),
+          horizontalInterval: yLabelsInterval,
           getDrawingHorizontalLine: (value) => FlLine(
             color: Theme.of(context).colorScheme.secondary,
             dashArray: [10, 0],
@@ -295,10 +300,6 @@ class SavedActivitiesChart extends StatelessWidget {
     final nextMultipleOfPreviousPowerOf10 =
         ((maxY / previousPowerOf10) + 1).toInt() * previousPowerOf10;
     return nextMultipleOfPreviousPowerOf10;
-  }
-
-  double _getYGridInterval(double maxY) {
-    return _getTopY(maxY) / 10;
   }
 
   /// Crate list of [count] colors that go from white to [target].
