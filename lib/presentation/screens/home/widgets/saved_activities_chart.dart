@@ -243,7 +243,7 @@ class SavedActivitiesChart extends StatelessWidget {
         ),
         borderData: FlBorderData(show: false),
         minY: 0,
-        maxY: _getTopY(maxY),
+        maxY: _getNextMultipleOfPreviousPowerOfTen(maxY),
         lineTouchData: LineTouchData(
           enabled: true,
           touchTooltipData: LineTouchTooltipData(
@@ -301,11 +301,13 @@ class SavedActivitiesChart extends StatelessWidget {
   /// - 78 -> 80
   /// - 259 -> 300
   /// - 4589 -> 5000
-  double _getTopY(double maxY) {
+  double _getNextMultipleOfPreviousPowerOfTen(double maxY) {
     double getPreviousPowerOf10(double value) {
       double log10(double v) => log(v) / log(10.0);
       return pow(10.0, log10(value).toInt()).toDouble();
     }
+
+    if (maxY <= 0) return 0;
 
     final previousPowerOf10 = getPreviousPowerOf10(maxY);
     final nextMultipleOfPreviousPowerOf10 =
@@ -319,7 +321,9 @@ class SavedActivitiesChart extends StatelessWidget {
     return List.generate(
       count,
       (i) => primary
-          .withValue(1 - (primary.value * (i + 1) / count))
+          .withValue(
+            (primary.value * (i + 1) / count) + (1 - ((i + 1) / count)),
+          )
           .withSaturation(primary.saturation * (i + 1) / count)
           .toColor(),
     );
