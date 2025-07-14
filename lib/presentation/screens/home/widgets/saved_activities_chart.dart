@@ -56,6 +56,12 @@ class SavedActivitiesChart extends StatelessWidget {
       ),
     );
 
+    if (activities.isEmpty) {
+      return Center(
+        child: Text(LocaleKeys.home.tabs.progress.noData().translate(context)),
+      );
+    }
+
     return Column(
       children: [
         Builder(
