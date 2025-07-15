@@ -22,11 +22,11 @@ class _HomePageState extends State<HomePage> {
     final destinations = [
       NavigationDestination(
         icon: Icon(Icons.home),
-        label: LocaleKeys.home.tabs.home().translate(context),
+        label: LocaleKeys.home.tabs.home.title().translate(context),
       ),
       NavigationDestination(
         icon: Icon(Icons.bar_chart),
-        label: LocaleKeys.home.tabs.progress().translate(context),
+        label: LocaleKeys.home.tabs.progress.title().translate(context),
       ),
     ];
 

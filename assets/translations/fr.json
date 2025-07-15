@@ -32,8 +32,13 @@
     "savedActivitiesListSortBy": "Trier par",
     "startActivity": "Commencer l'activité",
     "tabs": {
-      "home": "Accueil",
-      "progress": "Progrès"
+      "home": {
+        "title": "Accueil"
+      },
+      "progress": {
+        "noData": "Aucune activité à afficher pour le moment ¯\\_(ツ)_/¯",
+        "title": "Progrès"
+      }
     }
   },
   "location": {
