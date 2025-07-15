@@ -198,13 +198,14 @@ class SavedActivitiesChart extends StatelessWidget {
         maxXLabelSize.width;
     final xLabelsInterval =
         max(1.0, preparedData.length / (maxXLabelsCount / 2))
-                .toInt()
-                .toDouble() *
-            _dateTimeToXValue(
-              DateTime.fromMillisecondsSinceEpoch(
-                Duration(days: 31).inMilliseconds,
-              ),
-            );
+            .toInt()
+            .toDouble();
+    final xLabelsShowMin =
+        _dateTimeToXValue(preparedData.keys.first).remainder(xLabelsInterval) ==
+            0;
+    final xLabelsShowMax =
+        _dateTimeToXValue(preparedData.keys.last).remainder(xLabelsInterval) ==
+            0;
 
     return LineChart(
       LineChartData(
@@ -214,8 +215,8 @@ class SavedActivitiesChart extends StatelessWidget {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              minIncluded: false,
-              maxIncluded: false,
+              minIncluded: xLabelsShowMin,
+              maxIncluded: xLabelsShowMax,
               interval: xLabelsInterval,
               reservedSize: xLabelsReservedHeight,
               getTitlesWidget: (value, meta) => SideTitleWidget(
@@ -425,9 +426,11 @@ class SavedActivitiesChart extends StatelessWidget {
   }
 
   double _dateTimeToXValue(DateTime dateTime) =>
-      dateTime.millisecondsSinceEpoch.toDouble();
-  DateTime _xValueToDateTime(double x) =>
-      DateTime.fromMillisecondsSinceEpoch(x.toInt());
+      (dateTime.year * DateTime.monthsPerYear + dateTime.month - 1).toDouble();
+  DateTime _xValueToDateTime(double x) => DateTime(
+        (x / DateTime.monthsPerYear).toInt(),
+        x.remainder(DateTime.monthsPerYear).toInt() + 1,
+      );
 
   /// Convert a chart x value (representing a DateTime in milliseconds since
   /// Epoch) in its Widget label, with the size it will take.
