@@ -32,8 +32,13 @@
     "savedActivitiesListSortBy": "Sort by",
     "startActivity": "Start activity",
     "tabs": {
-      "home": "Home",
-      "progress": "Progress"
+      "home": {
+        "title": "Home"
+      },
+      "progress": {
+        "noData": "No activity to display yet ¯\\_(ツ)_/¯",
+        "title": "Progress"
+      }
     }
   },
   "location": {
