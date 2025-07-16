@@ -6,6 +6,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:json_locale/json_locale.dart';
 import 'package:movna/domain/entities/activity.dart';
 import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/jsons.dart';
@@ -16,8 +17,67 @@ import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart
 import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 import 'package:movna/presentation/screens/home/widgets/legend_widget.dart';
 
-class SavedActivitiesChart extends StatelessWidget {
-  const SavedActivitiesChart({super.key});
+/// All time groups by which activities can be grouped by.
+enum _GroupBy {
+  day,
+  month,
+  year,
+}
+
+extension _GroupByTranslationExt on _GroupBy {
+  Translatable translatable() => switch (this) {
+        _GroupBy.day => LocaleKeys.units.day(),
+        _GroupBy.month => LocaleKeys.units.month(),
+        _GroupBy.year => LocaleKeys.units.year(),
+      };
+}
+
+class SavedActivitiesChartView extends StatefulWidget {
+  const SavedActivitiesChartView({super.key});
+
+  @override
+  State<SavedActivitiesChartView> createState() =>
+      SavedActivitiesChartViewState();
+}
+
+class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
+  final _groupBy = ValueNotifier<_GroupBy>(_GroupBy.month);
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ValueListenableBuilder(
+          valueListenable: _groupBy,
+          builder: (context, groupBy, _) => DropdownButton(
+            value: groupBy,
+            onChanged: (_GroupBy? value) {
+              if (value == null) return;
+              _groupBy.value = value;
+            },
+            items: _GroupBy.values.map<DropdownMenuItem<_GroupBy>>((value) {
+              return DropdownMenuItem(
+                value: value,
+                child: Text(
+                  value.translatable().translate(context),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        ValueListenableBuilder(
+          valueListenable: _groupBy,
+          builder: (context, groupBy, _) =>
+              Expanded(child: _SavedActivitiesChart(groupBy: groupBy)),
+        ),
+      ],
+    );
+  }
+}
+
+class _SavedActivitiesChart extends StatelessWidget {
+  const _SavedActivitiesChart({required this.groupBy});
+
+  final _GroupBy groupBy;
 
   @override
   Widget build(BuildContext context) {
@@ -387,8 +447,11 @@ class SavedActivitiesChart extends StatelessWidget {
     final presentSports = <Sport>{};
 
     for (final activity in activities) {
-      final dateGroup =
-          DateTime(activity.startTime.year, activity.startTime.month);
+      final dateGroup = DateTime(
+        activity.startTime.year,
+        groupBy != _GroupBy.year ? activity.startTime.month : 1,
+        groupBy == _GroupBy.day ? activity.startTime.day : 1,
+      );
       final sport = activity.sport ?? Sport.other;
 
       presentSports.add(sport);
@@ -396,24 +459,32 @@ class SavedActivitiesChart extends StatelessWidget {
       if (monthlySumsMeters.isEmpty) {
         monthlySumsMeters[dateGroup] = {};
       } else if (!monthlySumsMeters.containsKey(dateGroup)) {
-        // Ensure all keys are present, there is no missing month.
+        // Ensure all keys are present, there is no missing day/month/year.
         if (dateGroup.isBefore(monthlySumsMeters.firstKey()!)) {
           while (!monthlySumsMeters.containsKey(dateGroup)) {
-            final DateTime(year: firstYear, month: firstMonth) =
-                monthlySumsMeters.firstKey()!;
-            monthlySumsMeters[DateTime(
-              firstMonth == 1 ? firstYear - 1 : firstYear,
-              firstMonth == 1 ? DateTime.monthsPerYear : firstMonth - 1,
-            )] = {};
+            final nextKey = switch (groupBy) {
+              _GroupBy.day =>
+                DateUtils.addDaysToDate(monthlySumsMeters.firstKey()!, -1),
+              _GroupBy.month => DateUtils.addMonthsToMonthDate(
+                  monthlySumsMeters.firstKey()!,
+                  -1,
+                ),
+              _GroupBy.year => DateTime(monthlySumsMeters.firstKey()!.year - 1),
+            };
+            monthlySumsMeters[nextKey] = {};
           }
         } else {
           while (!monthlySumsMeters.containsKey(dateGroup)) {
-            final DateTime(year: lastYear, month: lastMonth) =
-                monthlySumsMeters.lastKey()!;
-            monthlySumsMeters[DateTime(
-              lastMonth == DateTime.monthsPerYear ? lastYear + 1 : lastYear,
-              lastMonth == DateTime.monthsPerYear ? 1 : lastMonth + 1,
-            )] = {};
+            final nextKey = switch (groupBy) {
+              _GroupBy.day =>
+                DateUtils.addDaysToDate(monthlySumsMeters.lastKey()!, 1),
+              _GroupBy.month => DateUtils.addMonthsToMonthDate(
+                  monthlySumsMeters.lastKey()!,
+                  1,
+                ),
+              _GroupBy.year => DateTime(monthlySumsMeters.lastKey()!.year + 1),
+            };
+            monthlySumsMeters[nextKey] = {};
           }
         }
       }
@@ -422,21 +493,53 @@ class SavedActivitiesChart extends StatelessWidget {
           (monthlySumsMeters[dateGroup]![sport] ?? 0) +
               (activity.distanceInMeters ?? 0);
     }
+
+    // Add empty data just before that in order to be able to display anything
+    if (monthlySumsMeters.length == 1) {
+      final previous = switch (groupBy) {
+        _GroupBy.day =>
+          DateUtils.addDaysToDate(monthlySumsMeters.firstKey()!, -1),
+        _GroupBy.month => DateUtils.addMonthsToMonthDate(
+            monthlySumsMeters.firstKey()!,
+            -1,
+          ),
+        _GroupBy.year => DateTime(monthlySumsMeters.firstKey()!.year - 1),
+      };
+      monthlySumsMeters[previous] = {};
+    }
+
     return (monthlySumsMeters, presentSports);
   }
 
-  double _dateTimeToXValue(DateTime dateTime) =>
-      (dateTime.year * DateTime.monthsPerYear + dateTime.month - 1).toDouble();
-  DateTime _xValueToDateTime(double x) => DateTime(
-        (x / DateTime.monthsPerYear).toInt(),
-        x.remainder(DateTime.monthsPerYear).toInt() + 1,
-      );
+  static const _millisecondsPerDay = 1_000 * 60 * 60 * 24;
+
+  double _dateTimeToXValue(DateTime dateTime) => switch (groupBy) {
+        _GroupBy.day => dateTime.millisecondsSinceEpoch / _millisecondsPerDay,
+        _GroupBy.month =>
+          (dateTime.year * DateTime.monthsPerYear + dateTime.month - 1)
+              .toDouble(),
+        _GroupBy.year => dateTime.year.toDouble()
+      };
+
+  DateTime _xValueToDateTime(double x) => switch (groupBy) {
+        _GroupBy.day =>
+          DateTime.fromMillisecondsSinceEpoch(x.toInt() * _millisecondsPerDay),
+        _GroupBy.month => DateTime(
+            (x / DateTime.monthsPerYear).toInt(),
+            x.remainder(DateTime.monthsPerYear).toInt() + 1,
+          ),
+        _GroupBy.year => DateTime(x.toInt()),
+      };
 
   /// Convert a chart x value (representing a DateTime in milliseconds since
   /// Epoch) in its Widget label, with the size it will take.
   (Widget, Size) _xValueToLabel(double x) {
-    final text =
-        DateFormat.yMMM(Platform.localeName).format(_xValueToDateTime(x));
+    final text = switch (groupBy) {
+      _GroupBy.day => DateFormat.yMMMd(Platform.localeName),
+      _GroupBy.month => DateFormat.yMMM(Platform.localeName),
+      _GroupBy.year => DateFormat.y(Platform.localeName),
+    }
+        .format(_xValueToDateTime(x));
     final painter = TextPainter(
       textDirection: dui.TextDirection.ltr,
       text: TextSpan(text: text),
