@@ -200,6 +200,11 @@ class _SavedActivitiesChart extends StatelessWidget {
             dotData: FlDotData(
               show: true,
               checkToShowDot: (spot, barData) => spot.y != 0,
+              getDotPainter: (p0, p1, p2, p3) => FlDotCirclePainter(
+                radius: 3,
+                color: color,
+                strokeColor: color,
+              ),
             ),
             belowBarData: BarAreaData(
               show: sportIndex == 0,
