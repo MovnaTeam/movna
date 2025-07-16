@@ -64,9 +64,15 @@
     }
   },
   "units": {
+    "day": "Jour",
+    "hour": "Heure",
     "kilometersPerHourShort": "km/h",
     "kilometersShort": "km",
     "metersPerSecondShort": "m/s",
-    "metersShort": "m"
+    "metersShort": "m",
+    "minute": "Minute",
+    "month": "Mois",
+    "second": "Seconde",
+    "year": "Année"
   }
 }
