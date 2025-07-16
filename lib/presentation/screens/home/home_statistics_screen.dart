@@ -57,7 +57,7 @@ class _StatisticsScreenContentState extends State<StatisticsScreenContent>
             controller: _tabController,
             children: [
               SavedActivitiesListView(),
-              SavedActivitiesChart(),
+              SavedActivitiesChartView(),
             ],
           ),
         ),
