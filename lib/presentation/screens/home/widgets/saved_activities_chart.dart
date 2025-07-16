@@ -193,8 +193,7 @@ class _SavedActivitiesChart extends StatelessWidget {
         lineBarsData.add(
           LineChartBarData(
             spots: spots,
-            isCurved: true,
-            preventCurveOverShooting: true,
+            isCurved: false,
             color: color,
             barWidth: 2,
             isStrokeCapRound: true,
