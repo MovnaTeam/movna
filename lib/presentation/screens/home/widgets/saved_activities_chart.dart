@@ -44,32 +44,46 @@ class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
   final _groupBy = ValueNotifier<_GroupBy>(_GroupBy.month);
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ValueListenableBuilder(
-          valueListenable: _groupBy,
-          builder: (context, groupBy, _) => DropdownButton(
-            value: groupBy,
-            onChanged: (_GroupBy? value) {
-              if (value == null) return;
-              _groupBy.value = value;
-            },
-            items: _GroupBy.values.map<DropdownMenuItem<_GroupBy>>((value) {
-              return DropdownMenuItem(
-                value: value,
-                child: Text(
-                  value.translatable().translate(context),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(
+                LocaleKeys.home.tabs.progress.savedActivitiesChart
+                    .groupBy()
+                    .translate(context),
+              ),
+              SizedBox(width: 16.0),
+              ValueListenableBuilder(
+                valueListenable: _groupBy,
+                builder: (context, groupBy, _) => DropdownButton(
+                  value: groupBy,
+                  onChanged: (_GroupBy? value) {
+                    if (value == null) return;
+                    _groupBy.value = value;
+                  },
+                  items:
+                      _GroupBy.values.map<DropdownMenuItem<_GroupBy>>((value) {
+                    return DropdownMenuItem(
+                      value: value,
+                      child: Text(
+                        value.translatable().translate(context),
+                      ),
+                    );
+                  }).toList(),
                 ),
-              );
-            }).toList(),
+              ),
+            ],
           ),
-        ),
-        ValueListenableBuilder(
-          valueListenable: _groupBy,
-          builder: (context, groupBy, _) =>
-              Expanded(child: _SavedActivitiesChart(groupBy: groupBy)),
-        ),
-      ],
+          ValueListenableBuilder(
+            valueListenable: _groupBy,
+            builder: (context, groupBy, _) =>
+                Expanded(child: _SavedActivitiesChart(groupBy: groupBy)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -81,24 +95,21 @@ class _SavedActivitiesChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: BlocBuilder<StatisticsCubit, StatisticsState>(
-        builder: (context, state) {
-          return switch (state) {
-            StatisticsStateInitial() ||
-            StatisticsStateLoading() =>
-              LoadingIndicator(),
-            StatisticsStateError(/*:final fault*/) => Icon(
-                Icons.warning,
-                color: Theme.of(context).colorScheme.error,
-              ),
-            StatisticsStateLoaded(:final activities) => Center(
-                child: _buildStateLoaded(context, activities),
-              ),
-          };
-        },
-      ),
+    return BlocBuilder<StatisticsCubit, StatisticsState>(
+      builder: (context, state) {
+        return switch (state) {
+          StatisticsStateInitial() ||
+          StatisticsStateLoading() =>
+            LoadingIndicator(),
+          StatisticsStateError(/*:final fault*/) => Icon(
+              Icons.warning,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          StatisticsStateLoaded(:final activities) => Center(
+              child: _buildStateLoaded(context, activities),
+            ),
+        };
+      },
     );
   }
 
