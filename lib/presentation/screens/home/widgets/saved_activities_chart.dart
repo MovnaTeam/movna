@@ -32,6 +32,19 @@ extension _GroupByTranslationExt on _GroupBy {
       };
 }
 
+/// What can be displayed on the graph.
+enum _DisplayOption {
+  distance,
+  duration,
+}
+
+extension _DisplayOptionTranslationExt on _DisplayOption {
+  Translatable translatable() => switch (this) {
+        _DisplayOption.distance => LocaleKeys.activity.statistics.distance(),
+        _DisplayOption.duration => LocaleKeys.activity.statistics.duration(),
+      };
+}
+
 class SavedActivitiesChartView extends StatefulWidget {
   const SavedActivitiesChartView({super.key});
 
@@ -42,45 +55,95 @@ class SavedActivitiesChartView extends StatefulWidget {
 
 class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
   final _groupBy = ValueNotifier<_GroupBy>(_GroupBy.month);
+  final _displayOption = ValueNotifier<_DisplayOption>(_DisplayOption.distance);
+
+  late final Listenable _chartConfig;
+
+  @override
+  void initState() {
+    _chartConfig = Listenable.merge([_groupBy, _displayOption]);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Row(
+          Wrap(
+            spacing: 16.0,
             children: [
-              Text(
-                LocaleKeys.home.tabs.progress.savedActivitiesChart
-                    .groupBy()
-                    .translate(context),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    LocaleKeys.home.tabs.progress.savedActivitiesChart
+                        .groupBy()
+                        .translate(context),
+                  ),
+                  SizedBox(width: 8.0),
+                  ValueListenableBuilder(
+                    valueListenable: _groupBy,
+                    builder: (context, groupBy, _) => DropdownButton(
+                      value: groupBy,
+                      onChanged: (_GroupBy? value) {
+                        if (value == null) return;
+                        _groupBy.value = value;
+                      },
+                      items: _GroupBy.values
+                          .map<DropdownMenuItem<_GroupBy>>((value) {
+                        return DropdownMenuItem(
+                          value: value,
+                          child: Text(
+                            value.translatable().translate(context),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(width: 16.0),
-              ValueListenableBuilder(
-                valueListenable: _groupBy,
-                builder: (context, groupBy, _) => DropdownButton(
-                  value: groupBy,
-                  onChanged: (_GroupBy? value) {
-                    if (value == null) return;
-                    _groupBy.value = value;
-                  },
-                  items:
-                      _GroupBy.values.map<DropdownMenuItem<_GroupBy>>((value) {
-                    return DropdownMenuItem(
-                      value: value,
-                      child: Text(
-                        value.translatable().translate(context),
-                      ),
-                    );
-                  }).toList(),
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    LocaleKeys.home.tabs.progress.savedActivitiesChart
+                        .displayOption()
+                        .translate(context),
+                  ),
+                  SizedBox(width: 8.0),
+                  ValueListenableBuilder(
+                    valueListenable: _displayOption,
+                    builder: (context, displayOption, _) => DropdownButton(
+                      value: displayOption,
+                      onChanged: (_DisplayOption? value) {
+                        if (value == null) return;
+                        _displayOption.value = value;
+                      },
+                      items: _DisplayOption.values
+                          .map<DropdownMenuItem<_DisplayOption>>((value) {
+                        return DropdownMenuItem(
+                          value: value,
+                          child: Text(
+                            value.translatable().translate(context),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          ValueListenableBuilder(
-            valueListenable: _groupBy,
-            builder: (context, groupBy, _) =>
-                Expanded(child: _SavedActivitiesChart(groupBy: groupBy)),
+          ListenableBuilder(
+            listenable: _chartConfig,
+            builder: (context, _) => Expanded(
+              child: _SavedActivitiesChart(
+                displayOption: _displayOption.value,
+                groupBy: _groupBy.value,
+              ),
+            ),
           ),
         ],
       ),
@@ -89,8 +152,12 @@ class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
 }
 
 class _SavedActivitiesChart extends StatelessWidget {
-  const _SavedActivitiesChart({required this.groupBy});
+  const _SavedActivitiesChart({
+    required this.displayOption,
+    required this.groupBy,
+  });
 
+  final _DisplayOption displayOption;
   final _GroupBy groupBy;
 
   @override
@@ -243,25 +310,24 @@ class _SavedActivitiesChart extends StatelessWidget {
     /// Do not ask me why this is necessary.
     const magicReservedSizeForLabelsMultiplier = 1.2;
 
+    final topY = _getTopY(maxY);
+    final minYInterval = switch (displayOption) {
+      _DisplayOption.duration => Duration(minutes: 5).inMilliseconds.toDouble(),
+      _DisplayOption.distance => 1_000.0,
+    };
+
     final maxXLabelSize = _xLabelMaximumSize(preparedData.keys);
+    final maxYLabelSize = _yLabelMaximumSize(
+      Iterable.generate(
+        (topY / minYInterval).ceil(),
+        (i) => (i * minYInterval).toDouble(),
+      ),
+    );
+
     final xLabelsReservedHeight = axisTitlesSpace +
         maxXLabelSize.height * magicReservedSizeForLabelsMultiplier;
-
-    // Cheating here, as we know the y labels are numbers, the largest one is
-    // just the highest one, multiplied for security.
-    final maxYLabelSize = _yLabelMaximumSize([maxY * 10]);
     final yLabelsReservedWidth = axisTitlesSpace +
         maxYLabelSize.width * magicReservedSizeForLabelsMultiplier;
-    final maxYLabelsCount =
-        (constraints.maxHeight - xLabelsReservedHeight) / maxYLabelSize.height;
-    final topY = _getNextMultipleOfPreviousPowerOfTen(maxY);
-    final yLabelsInterval = max(
-          1.0,
-          _getNextMultipleOfPreviousPowerOfTen(
-            (topY / (maxYLabelsCount / 2)) / 1_000,
-          ).toInt().toDouble(),
-        ) *
-        1_000;
 
     final (yAxisTitle, yAxisTitleSize) = _getYAxisTitle(context);
     final yAxisTitleReservedWidth =
@@ -271,16 +337,36 @@ class _SavedActivitiesChart extends StatelessWidget {
             yAxisTitleReservedWidth -
             yLabelsReservedWidth) /
         maxXLabelSize.width;
-    final xLabelsInterval =
-        max(1.0, preparedData.length / (maxXLabelsCount / 2))
-            .toInt()
-            .toDouble();
+    final maxYLabelsCount =
+        (constraints.maxHeight - xLabelsReservedHeight) ~/ maxYLabelSize.height;
+
+    final maxXLabelsInterval = preparedData.length / (maxXLabelsCount / 2);
+    final maxYLabelsInterval = topY / (maxYLabelsCount / 2);
+
+    final xLabelsInterval = max(1.0, maxXLabelsInterval).toInt().toDouble();
+    var yLabelsInterval = max(minYInterval, maxYLabelsInterval);
+    yLabelsInterval = switch (displayOption) {
+      _DisplayOption.duration => Duration(
+          minutes: _getNextMultipleOfPreviousPowerOfTen(
+            Duration(milliseconds: yLabelsInterval.toInt())
+                .inMinutes
+                .toDouble(),
+          ).toInt(),
+        ).inMilliseconds.toDouble(),
+      _DisplayOption.distance =>
+        _getNextMultipleOfPreviousPowerOfTen(yLabelsInterval)
+    };
+
     final xLabelsShowMin =
         _dateTimeToXValue(preparedData.keys.first).remainder(xLabelsInterval) ==
             0;
+    const yLabelShowMin = false;
+
     final xLabelsShowMax =
         _dateTimeToXValue(preparedData.keys.last).remainder(xLabelsInterval) ==
             0;
+    final yLabelsShowMax =
+        topY.remainder(yLabelsInterval) == 0 || topY < yLabelsInterval;
 
     return LineChart(
       LineChartData(
@@ -306,14 +392,14 @@ class _SavedActivitiesChart extends StatelessWidget {
             axisNameSize: yAxisTitleReservedWidth,
             sideTitles: SideTitles(
               showTitles: true,
-              minIncluded: false,
-              maxIncluded: false,
+              minIncluded: yLabelShowMin,
+              maxIncluded: yLabelsShowMax,
               interval: yLabelsInterval,
               reservedSize: yLabelsReservedWidth,
               getTitlesWidget: (value, meta) => SideTitleWidget(
                 meta: meta,
                 space: axisTitlesSpace,
-                child: Text((value / 1_000).toInt().toString()),
+                child: _yValueToLabel(value).$1,
               ),
             ),
           ),
@@ -352,6 +438,14 @@ class _SavedActivitiesChart extends StatelessWidget {
     );
   }
 
+  /// Returns the highest value to display on the Y axis
+  double _getTopY(double maxY) => switch (displayOption) {
+        _DisplayOption.distance => _getNextMultipleOfPreviousPowerOfTen(maxY),
+        _DisplayOption.duration => Duration(
+            milliseconds: _getNextMultipleOfPreviousPowerOfTen(maxY).toInt(),
+          ).inMilliseconds.toDouble()
+      };
+
   List<LineTooltipItem?> _getTooltipItems(
     BuildContext context,
     List<LineBarSpot> touchedSpots,
@@ -365,15 +459,21 @@ class _SavedActivitiesChart extends StatelessWidget {
           ))
         .map(
       (spot) {
-        final distanceInKm = (spot.y -
-                (spot.barIndex == 0
-                    ? 0
-                    : touchedSpots
-                        .firstWhere(
-                          (other) => other.barIndex == spot.barIndex - 1,
-                        )
-                        .y)) /
-            1_000;
+        final value = spot.y -
+            (spot.barIndex == 0
+                ? 0
+                : touchedSpots
+                    .firstWhere(
+                      (other) => other.barIndex == spot.barIndex - 1,
+                    )
+                    .y);
+        final distanceText = (value / 1_000).toStringAsFixed(3);
+        final durationText = Duration(milliseconds: value.toInt()).toString();
+        final text = switch (displayOption) {
+          _DisplayOption.distance => distanceText,
+          _DisplayOption.duration =>
+            durationText.substring(0, durationText.length - '.mmmmmm'.length)
+        };
         final sport = sports[spot.barIndex];
         return LineTooltipItem(
           spot.barIndex != touchedSpots.length - 1
@@ -389,7 +489,7 @@ class _SavedActivitiesChart extends StatelessWidget {
             TextSpan(
               text: '${sport.translatable().translate(context)}'
                   ' : '
-                  '${distanceInKm.toStringAsFixed(3)}',
+                  '$text',
               style: DefaultTextStyle.of(context).style.apply(
                     fontWeightDelta: 0,
                     color: spot.bar.color,
@@ -402,10 +502,13 @@ class _SavedActivitiesChart extends StatelessWidget {
   }
 
   (Widget, Size) _getYAxisTitle(BuildContext context) {
-    final text =
+    final text = switch (displayOption) {
+      _DisplayOption.distance =>
         '${LocaleKeys.activity.statistics.distance().translate(context)}'
-        ' '
-        '(${LocaleKeys.units.kilometersShort().translate(context)})';
+            ' (${LocaleKeys.units.kilometersShort().translate(context)})',
+      _DisplayOption.duration =>
+        LocaleKeys.activity.statistics.duration().translate(context)
+    };
     final painter = TextPainter(
       textDirection: dui.TextDirection.ltr,
       text: TextSpan(text: text),
@@ -507,7 +610,11 @@ class _SavedActivitiesChart extends StatelessWidget {
 
       sumsByDateGroup[dateGroup]![sport] =
           (sumsByDateGroup[dateGroup]![sport] ?? 0) +
-              (activity.distanceInMeters ?? 0);
+              switch (displayOption) {
+                _DisplayOption.distance => (activity.distanceInMeters ?? 0.0),
+                _DisplayOption.duration =>
+                  activity.duration.inMilliseconds.toDouble()
+              };
     }
 
     // Add empty data just before that in order to be able to display anything
@@ -582,7 +689,13 @@ class _SavedActivitiesChart extends StatelessWidget {
   }
 
   (Widget, Size) _yValueToLabel(double y) {
-    final text = (y / 1_000).toInt().toString();
+    final asDistanceInMeters = y;
+    final asDurationText = Duration(milliseconds: y.toInt()).toString();
+    final text = switch (displayOption) {
+      _DisplayOption.duration =>
+        asDurationText.substring(0, asDurationText.length - '.mmmmmm'.length),
+      _DisplayOption.distance => (asDistanceInMeters / 1_000).toInt().toString()
+    };
     final painter = TextPainter(
       textDirection: dui.TextDirection.ltr,
       text: TextSpan(text: text),
