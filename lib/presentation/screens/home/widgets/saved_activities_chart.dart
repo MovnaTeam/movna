@@ -117,7 +117,7 @@ class _SavedActivitiesChart extends StatelessWidget {
     BuildContext context,
     List<Activity> activities,
   ) {
-    final (monthlySumBySport, presentSports) = _prepareActivityData(activities);
+    final (sumsByDateGroup, presentSports) = _prepareActivityData(activities);
 
     final sportToColor = Map.fromIterables(
       presentSports,
@@ -145,7 +145,7 @@ class _SavedActivitiesChart extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) => _buildChart(
               context,
-              monthlySumBySport,
+              sumsByDateGroup,
               sportToColor,
               constraints,
             ),
@@ -447,17 +447,18 @@ class _SavedActivitiesChart extends StatelessWidget {
     );
   }
 
-  /// Groups given activities by month, then by sport.
+  /// Groups given activities by either year/month/day, then by sport.
   ///
   /// Also ensures that there is no missing entry between two dates. For
-  /// instance if the keys `DateTime(1999, 1)` and `DateTime(1999, 4)` are
-  /// present, then so do `DateTime(1999, 2)` and `DateTime(1999, 3)`.
+  /// instance if grouping by month and the keys `DateTime(1999, 1)` and
+  /// `DateTime(1999, 4)` are present, then so do `DateTime(1999, 2)` and
+  /// `DateTime(1999, 3)`.
   ///
   /// Also returns the set of all encountered sports.
   (SplayTreeMap<DateTime, Map<Sport, double>>, Set<Sport>) _prepareActivityData(
     List<Activity> activities,
   ) {
-    final monthlySumsMeters = SplayTreeMap<DateTime, Map<Sport, double>>();
+    final sumsByDateGroup = SplayTreeMap<DateTime, Map<Sport, double>>();
     // What sports are concerned by this activity set.
     final presentSports = <Sport>{};
 
@@ -471,59 +472,59 @@ class _SavedActivitiesChart extends StatelessWidget {
 
       presentSports.add(sport);
 
-      if (monthlySumsMeters.isEmpty) {
-        monthlySumsMeters[dateGroup] = {};
-      } else if (!monthlySumsMeters.containsKey(dateGroup)) {
+      if (sumsByDateGroup.isEmpty) {
+        sumsByDateGroup[dateGroup] = {};
+      } else if (!sumsByDateGroup.containsKey(dateGroup)) {
         // Ensure all keys are present, there is no missing day/month/year.
-        if (dateGroup.isBefore(monthlySumsMeters.firstKey()!)) {
-          while (!monthlySumsMeters.containsKey(dateGroup)) {
+        if (dateGroup.isBefore(sumsByDateGroup.firstKey()!)) {
+          while (!sumsByDateGroup.containsKey(dateGroup)) {
             final nextKey = switch (groupBy) {
               _GroupBy.day =>
-                DateUtils.addDaysToDate(monthlySumsMeters.firstKey()!, -1),
+                DateUtils.addDaysToDate(sumsByDateGroup.firstKey()!, -1),
               _GroupBy.month => DateUtils.addMonthsToMonthDate(
-                  monthlySumsMeters.firstKey()!,
+                  sumsByDateGroup.firstKey()!,
                   -1,
                 ),
-              _GroupBy.year => DateTime(monthlySumsMeters.firstKey()!.year - 1),
+              _GroupBy.year => DateTime(sumsByDateGroup.firstKey()!.year - 1),
             };
-            monthlySumsMeters[nextKey] = {};
+            sumsByDateGroup[nextKey] = {};
           }
         } else {
-          while (!monthlySumsMeters.containsKey(dateGroup)) {
+          while (!sumsByDateGroup.containsKey(dateGroup)) {
             final nextKey = switch (groupBy) {
               _GroupBy.day =>
-                DateUtils.addDaysToDate(monthlySumsMeters.lastKey()!, 1),
+                DateUtils.addDaysToDate(sumsByDateGroup.lastKey()!, 1),
               _GroupBy.month => DateUtils.addMonthsToMonthDate(
-                  monthlySumsMeters.lastKey()!,
+                  sumsByDateGroup.lastKey()!,
                   1,
                 ),
-              _GroupBy.year => DateTime(monthlySumsMeters.lastKey()!.year + 1),
+              _GroupBy.year => DateTime(sumsByDateGroup.lastKey()!.year + 1),
             };
-            monthlySumsMeters[nextKey] = {};
+            sumsByDateGroup[nextKey] = {};
           }
         }
       }
 
-      monthlySumsMeters[dateGroup]![sport] =
-          (monthlySumsMeters[dateGroup]![sport] ?? 0) +
+      sumsByDateGroup[dateGroup]![sport] =
+          (sumsByDateGroup[dateGroup]![sport] ?? 0) +
               (activity.distanceInMeters ?? 0);
     }
 
     // Add empty data just before that in order to be able to display anything
-    if (monthlySumsMeters.length == 1) {
+    if (sumsByDateGroup.length == 1) {
       final previous = switch (groupBy) {
         _GroupBy.day =>
-          DateUtils.addDaysToDate(monthlySumsMeters.firstKey()!, -1),
+          DateUtils.addDaysToDate(sumsByDateGroup.firstKey()!, -1),
         _GroupBy.month => DateUtils.addMonthsToMonthDate(
-            monthlySumsMeters.firstKey()!,
+            sumsByDateGroup.firstKey()!,
             -1,
           ),
-        _GroupBy.year => DateTime(monthlySumsMeters.firstKey()!.year - 1),
+        _GroupBy.year => DateTime(sumsByDateGroup.firstKey()!.year - 1),
       };
-      monthlySumsMeters[previous] = {};
+      sumsByDateGroup[previous] = {};
     }
 
-    return (monthlySumsMeters, presentSports);
+    return (sumsByDateGroup, presentSports);
   }
 
   static const _millisecondsPerDay = 1_000 * 60 * 60 * 24;
