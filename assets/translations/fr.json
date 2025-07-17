@@ -37,6 +37,11 @@
       },
       "progress": {
         "noData": "Aucune activité à afficher pour le moment ¯\\_(ツ)_/¯",
+        "savedActivitiesChart": {
+          "cumulative": "Cumulé",
+          "displayOption": "Afficher",
+          "groupBy": "Grouper par"
+        },
         "title": "Progrès"
       }
     }
