@@ -1,11 +1,9 @@
 import 'dart:collection';
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as dui;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:movna/core/logger.dart';
 import 'package:movna/domain/entities/activity.dart';
 import 'package:movna/domain/entities/sport.dart';
@@ -499,23 +497,13 @@ class _SavedActivitiesChart extends StatelessWidget {
                       (other) => other.barIndex == spot.barIndex - 1,
                     )
                     .y);
-        final distanceText = (value / 1_000).toStringAsFixed(3);
-        final durationText = Duration(milliseconds: value.toInt()).toString();
-        final text = switch (displayOption) {
-          ActivityDisplayMetric.distance => distanceText,
-          ActivityDisplayMetric.duration =>
-            durationText.substring(0, durationText.length - '.mmmmmm'.length)
-        };
         final sport = sports[spot.barIndex];
         return LineTooltipItem(
           spot.barIndex != touchedSpots.length - 1
               ? ''
-              : '${switch (groupBy) {
-                  ActivitiesGroupBy.day => DateFormat.yMMMd,
-                  ActivitiesGroupBy.month => DateFormat.yMMM,
-                  ActivitiesGroupBy.year => DateFormat.y,
-                }(Platform.localeName).format(
+              : '${dateTimeToText(
                   DoubleToDateConverter(groupBy).to(spot.x),
+                  groupBy,
                 )}\n',
           DefaultTextStyle.of(context).style.apply(
                 fontWeightDelta: 3,
@@ -525,7 +513,7 @@ class _SavedActivitiesChart extends StatelessWidget {
             TextSpan(
               text: '${sport.translatable().translate(context)}'
                   ' : '
-                  '$text',
+                  '${_yValueToText(value, true)}',
               style: DefaultTextStyle.of(context).style.apply(
                     fontWeightDelta: 0,
                     color: spot.bar.color,
@@ -603,19 +591,27 @@ class _SavedActivitiesChart extends StatelessWidget {
   }
 
   (Widget, Size) _yValueToLabel(double y) {
-    final asDistanceInMeters = y;
-    final asDurationText = Duration(milliseconds: y.toInt()).toString();
-    final text = switch (displayOption) {
-      ActivityDisplayMetric.duration =>
-        asDurationText.substring(0, asDurationText.length - '.mmmmmm'.length),
-      ActivityDisplayMetric.distance =>
-        (asDistanceInMeters / 1_000).toInt().toString()
-    };
+    final text = _yValueToText(y);
     final painter = TextPainter(
       textDirection: dui.TextDirection.ltr,
       text: TextSpan(text: text),
     )..layout();
     return (Text(text), painter.size);
+  }
+
+  String _yValueToText(double y, [bool verbose = false]) {
+    switch (displayOption) {
+      case ActivityDisplayMetric.duration:
+        final asDurationText = Duration(milliseconds: y.toInt()).toString();
+        return asDurationText.substring(
+          0,
+          asDurationText.length - '.mmmmmm'.length,
+        );
+      case ActivityDisplayMetric.distance:
+        return verbose
+            ? (y / 1_000).toStringAsFixed(3)
+            : (y ~/ 1_000).toString();
+    }
   }
 
   Size _yLabelMaximumSize(Iterable<double> yValues) {
