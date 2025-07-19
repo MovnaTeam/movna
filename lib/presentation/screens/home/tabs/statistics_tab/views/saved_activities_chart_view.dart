@@ -6,7 +6,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:json_locale/json_locale.dart';
 import 'package:movna/core/logger.dart';
 import 'package:movna/domain/entities/activity.dart';
 import 'package:movna/domain/entities/sport.dart';
@@ -16,35 +15,8 @@ import 'package:movna/presentation/extensions/sport_translation_extension.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
 import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/home/tabs/statistics_tab/views/saved_activity_view_options.dart';
 import 'package:movna/presentation/screens/home/tabs/statistics_tab/widgets/legend_widget.dart';
-
-/// All time groups by which activities can be grouped by.
-enum _GroupBy {
-  day,
-  month,
-  year,
-}
-
-extension _GroupByTranslationExt on _GroupBy {
-  Translatable translatable() => switch (this) {
-        _GroupBy.day => LocaleKeys.units.day(),
-        _GroupBy.month => LocaleKeys.units.month(),
-        _GroupBy.year => LocaleKeys.units.year(),
-      };
-}
-
-/// What can be displayed on the graph.
-enum _DisplayOption {
-  distance,
-  duration,
-}
-
-extension _DisplayOptionTranslationExt on _DisplayOption {
-  Translatable translatable() => switch (this) {
-        _DisplayOption.distance => LocaleKeys.activity.statistics.distance(),
-        _DisplayOption.duration => LocaleKeys.activity.statistics.duration(),
-      };
-}
 
 class SavedActivitiesChartView extends StatefulWidget {
   const SavedActivitiesChartView({super.key});
@@ -55,8 +27,8 @@ class SavedActivitiesChartView extends StatefulWidget {
 }
 
 class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
-  final _groupBy = ValueNotifier(_GroupBy.month);
-  final _displayOption = ValueNotifier(_DisplayOption.distance);
+  final _groupBy = ValueNotifier(ActivitiesGroupBy.month);
+  final _displayOption = ValueNotifier(ActivityDisplayMetric.distance);
   final _cumulative = ValueNotifier(false);
 
   late final Listenable _chartConfig;
@@ -90,12 +62,12 @@ class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
                     valueListenable: _groupBy,
                     builder: (context, groupBy, _) => DropdownButton(
                       value: groupBy,
-                      onChanged: (_GroupBy? value) {
+                      onChanged: (ActivitiesGroupBy? value) {
                         if (value == null) return;
                         _groupBy.value = value;
                       },
-                      items: _GroupBy.values
-                          .map<DropdownMenuItem<_GroupBy>>((value) {
+                      items: ActivitiesGroupBy.values
+                          .map<DropdownMenuItem<ActivitiesGroupBy>>((value) {
                         return DropdownMenuItem(
                           value: value,
                           child: Text(
@@ -120,12 +92,13 @@ class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
                     valueListenable: _displayOption,
                     builder: (context, displayOption, _) => DropdownButton(
                       value: displayOption,
-                      onChanged: (_DisplayOption? value) {
+                      onChanged: (ActivityDisplayMetric? value) {
                         if (value == null) return;
                         _displayOption.value = value;
                       },
-                      items: _DisplayOption.values
-                          .map<DropdownMenuItem<_DisplayOption>>((value) {
+                      items: ActivityDisplayMetric.values
+                          .map<DropdownMenuItem<ActivityDisplayMetric>>(
+                              (value) {
                         return DropdownMenuItem(
                           value: value,
                           child: Text(
@@ -183,8 +156,8 @@ class _SavedActivitiesChart extends StatelessWidget {
     required this.cumulative,
   });
 
-  final _DisplayOption displayOption;
-  final _GroupBy groupBy;
+  final ActivityDisplayMetric displayOption;
+  final ActivitiesGroupBy groupBy;
   final bool cumulative;
 
   @override
@@ -349,8 +322,9 @@ class _SavedActivitiesChart extends StatelessWidget {
 
     final topY = _getTopY(maxY);
     final minYInterval = switch (displayOption) {
-      _DisplayOption.duration => Duration(minutes: 1).inMilliseconds.toDouble(),
-      _DisplayOption.distance => 1_000.0,
+      ActivityDisplayMetric.duration =>
+        Duration(minutes: 1).inMilliseconds.toDouble(),
+      ActivityDisplayMetric.distance => 1_000.0,
     };
 
     final maxXLabelSize = _xLabelMaximumSize(preparedData.keys);
@@ -395,14 +369,14 @@ class _SavedActivitiesChart extends StatelessWidget {
     final xLabelsInterval = max(1, maxXLabelsInterval.ceil()).toDouble();
     var yLabelsInterval = max(minYInterval, maxYLabelsInterval);
     yLabelsInterval = switch (displayOption) {
-      _DisplayOption.duration => Duration(
+      ActivityDisplayMetric.duration => Duration(
           minutes: _getNextMultipleOfPreviousPowerOfTen(
             Duration(milliseconds: yLabelsInterval.toInt())
                 .inMinutes
                 .toDouble(),
           ).toInt(),
         ).inMilliseconds.toDouble(),
-      _DisplayOption.distance =>
+      ActivityDisplayMetric.distance =>
         _getNextMultipleOfPreviousPowerOfTen(yLabelsInterval)
     };
 
@@ -489,8 +463,9 @@ class _SavedActivitiesChart extends StatelessWidget {
 
   /// Returns the highest value to display on the Y axis
   double _getTopY(double maxY) => switch (displayOption) {
-        _DisplayOption.distance => _getNextMultipleOfPreviousPowerOfTen(maxY),
-        _DisplayOption.duration => Duration(
+        ActivityDisplayMetric.distance =>
+          _getNextMultipleOfPreviousPowerOfTen(maxY),
+        ActivityDisplayMetric.duration => Duration(
             milliseconds: _getNextMultipleOfPreviousPowerOfTen(maxY).toInt(),
           ).inMilliseconds.toDouble()
       };
@@ -519,8 +494,8 @@ class _SavedActivitiesChart extends StatelessWidget {
         final distanceText = (value / 1_000).toStringAsFixed(3);
         final durationText = Duration(milliseconds: value.toInt()).toString();
         final text = switch (displayOption) {
-          _DisplayOption.distance => distanceText,
-          _DisplayOption.duration =>
+          ActivityDisplayMetric.distance => distanceText,
+          ActivityDisplayMetric.duration =>
             durationText.substring(0, durationText.length - '.mmmmmm'.length)
         };
         final sport = sports[spot.barIndex];
@@ -528,9 +503,9 @@ class _SavedActivitiesChart extends StatelessWidget {
           spot.barIndex != touchedSpots.length - 1
               ? ''
               : '${switch (groupBy) {
-                  _GroupBy.day => DateFormat.yMMMd,
-                  _GroupBy.month => DateFormat.yMMM,
-                  _GroupBy.year => DateFormat.y,
+                  ActivitiesGroupBy.day => DateFormat.yMMMd,
+                  ActivitiesGroupBy.month => DateFormat.yMMM,
+                  ActivitiesGroupBy.year => DateFormat.y,
                 }(Platform.localeName).format(
                   _xValueToDateTime(spot.x),
                 )}\n',
@@ -556,10 +531,10 @@ class _SavedActivitiesChart extends StatelessWidget {
 
   (Widget, Size) _getYAxisTitle(BuildContext context) {
     final text = switch (displayOption) {
-      _DisplayOption.distance =>
+      ActivityDisplayMetric.distance =>
         '${LocaleKeys.activity.statistics.distance().translate(context)}'
             ' (${LocaleKeys.units.kilometersShort().translate(context)})',
-      _DisplayOption.duration =>
+      ActivityDisplayMetric.duration =>
         LocaleKeys.activity.statistics.duration().translate(context)
     };
     final painter = TextPainter(
@@ -621,8 +596,8 @@ class _SavedActivitiesChart extends StatelessWidget {
     for (final activity in activities) {
       final dateGroup = DateTime(
         activity.startTime.year,
-        groupBy != _GroupBy.year ? activity.startTime.month : 1,
-        groupBy == _GroupBy.day ? activity.startTime.day : 1,
+        groupBy != ActivitiesGroupBy.year ? activity.startTime.month : 1,
+        groupBy == ActivitiesGroupBy.day ? activity.startTime.day : 1,
       );
       final sport = activity.sport ?? Sport.other;
 
@@ -635,26 +610,28 @@ class _SavedActivitiesChart extends StatelessWidget {
         if (dateGroup.isBefore(sumsByDateGroup.firstKey()!)) {
           while (!sumsByDateGroup.containsKey(dateGroup)) {
             final nextKey = switch (groupBy) {
-              _GroupBy.day =>
+              ActivitiesGroupBy.day =>
                 DateUtils.addDaysToDate(sumsByDateGroup.firstKey()!, -1),
-              _GroupBy.month => DateUtils.addMonthsToMonthDate(
+              ActivitiesGroupBy.month => DateUtils.addMonthsToMonthDate(
                   sumsByDateGroup.firstKey()!,
                   -1,
                 ),
-              _GroupBy.year => DateTime(sumsByDateGroup.firstKey()!.year - 1),
+              ActivitiesGroupBy.year =>
+                DateTime(sumsByDateGroup.firstKey()!.year - 1),
             };
             sumsByDateGroup[nextKey] = {};
           }
         } else {
           while (!sumsByDateGroup.containsKey(dateGroup)) {
             final nextKey = switch (groupBy) {
-              _GroupBy.day =>
+              ActivitiesGroupBy.day =>
                 DateUtils.addDaysToDate(sumsByDateGroup.lastKey()!, 1),
-              _GroupBy.month => DateUtils.addMonthsToMonthDate(
+              ActivitiesGroupBy.month => DateUtils.addMonthsToMonthDate(
                   sumsByDateGroup.lastKey()!,
                   1,
                 ),
-              _GroupBy.year => DateTime(sumsByDateGroup.lastKey()!.year + 1),
+              ActivitiesGroupBy.year =>
+                DateTime(sumsByDateGroup.lastKey()!.year + 1),
             };
             sumsByDateGroup[nextKey] = {};
           }
@@ -664,8 +641,9 @@ class _SavedActivitiesChart extends StatelessWidget {
       sumsByDateGroup[dateGroup]![sport] =
           (sumsByDateGroup[dateGroup]![sport] ?? 0) +
               switch (displayOption) {
-                _DisplayOption.distance => (activity.distanceInMeters ?? 0.0),
-                _DisplayOption.duration =>
+                ActivityDisplayMetric.distance =>
+                  (activity.distanceInMeters ?? 0.0),
+                ActivityDisplayMetric.duration =>
                   activity.duration.inMilliseconds.toDouble()
               };
     }
@@ -673,13 +651,14 @@ class _SavedActivitiesChart extends StatelessWidget {
     // Add empty data just before that in order to be able to display anything
     if (sumsByDateGroup.length == 1) {
       final previous = switch (groupBy) {
-        _GroupBy.day =>
+        ActivitiesGroupBy.day =>
           DateUtils.addDaysToDate(sumsByDateGroup.firstKey()!, -1),
-        _GroupBy.month => DateUtils.addMonthsToMonthDate(
+        ActivitiesGroupBy.month => DateUtils.addMonthsToMonthDate(
             sumsByDateGroup.firstKey()!,
             -1,
           ),
-        _GroupBy.year => DateTime(sumsByDateGroup.firstKey()!.year - 1),
+        ActivitiesGroupBy.year =>
+          DateTime(sumsByDateGroup.firstKey()!.year - 1),
       };
       sumsByDateGroup[previous] = {};
     }
@@ -690,30 +669,31 @@ class _SavedActivitiesChart extends StatelessWidget {
   static const _millisecondsPerDay = 1_000 * 60 * 60 * 24;
 
   double _dateTimeToXValue(DateTime dateTime) => switch (groupBy) {
-        _GroupBy.day => dateTime.millisecondsSinceEpoch / _millisecondsPerDay,
-        _GroupBy.month =>
+        ActivitiesGroupBy.day =>
+          dateTime.millisecondsSinceEpoch / _millisecondsPerDay,
+        ActivitiesGroupBy.month =>
           (dateTime.year * DateTime.monthsPerYear + dateTime.month - 1)
               .toDouble(),
-        _GroupBy.year => dateTime.year.toDouble()
+        ActivitiesGroupBy.year => dateTime.year.toDouble()
       };
 
   DateTime _xValueToDateTime(double x) => switch (groupBy) {
-        _GroupBy.day =>
+        ActivitiesGroupBy.day =>
           DateTime.fromMillisecondsSinceEpoch(x.toInt() * _millisecondsPerDay),
-        _GroupBy.month => DateTime(
+        ActivitiesGroupBy.month => DateTime(
             (x / DateTime.monthsPerYear).toInt(),
             x.remainder(DateTime.monthsPerYear).toInt() + 1,
           ),
-        _GroupBy.year => DateTime(x.toInt()),
+        ActivitiesGroupBy.year => DateTime(x.toInt()),
       };
 
   /// Convert a chart x value (representing a DateTime in milliseconds since
   /// Epoch) in its Widget label, with the size it will take.
   (Widget, Size) _xValueToLabel(double x) {
     final text = switch (groupBy) {
-      _GroupBy.day => DateFormat.yMMMd(Platform.localeName),
-      _GroupBy.month => DateFormat.yMMM(Platform.localeName),
-      _GroupBy.year => DateFormat.y(Platform.localeName),
+      ActivitiesGroupBy.day => DateFormat.yMMMd(Platform.localeName),
+      ActivitiesGroupBy.month => DateFormat.yMMM(Platform.localeName),
+      ActivitiesGroupBy.year => DateFormat.y(Platform.localeName),
     }
         .format(_xValueToDateTime(x));
     final painter = TextPainter(
@@ -745,9 +725,10 @@ class _SavedActivitiesChart extends StatelessWidget {
     final asDistanceInMeters = y;
     final asDurationText = Duration(milliseconds: y.toInt()).toString();
     final text = switch (displayOption) {
-      _DisplayOption.duration =>
+      ActivityDisplayMetric.duration =>
         asDurationText.substring(0, asDurationText.length - '.mmmmmm'.length),
-      _DisplayOption.distance => (asDistanceInMeters / 1_000).toInt().toString()
+      ActivityDisplayMetric.distance =>
+        (asDistanceInMeters / 1_000).toInt().toString()
     };
     final painter = TextPainter(
       textDirection: dui.TextDirection.ltr,

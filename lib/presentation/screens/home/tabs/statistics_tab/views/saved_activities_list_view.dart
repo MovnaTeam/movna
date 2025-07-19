@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:json_locale/json_locale.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/statistics_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
+import 'package:movna/presentation/screens/home/tabs/statistics_tab/views/saved_activity_view_options.dart';
 import 'package:movna/presentation/screens/home/tabs/statistics_tab/widgets/saved_activity_card.dart';
 
 /// Display of the activities provided by a parent [StatisticsCubit].
@@ -18,7 +18,7 @@ class SavedActivitiesListView extends StatefulWidget {
 
 class _SavedActivitiesListViewState extends State<SavedActivitiesListView> {
   final _sortProperty =
-      ValueNotifier<_ActivitiesSortProperty>(_ActivitiesSortProperty.startDate);
+      ValueNotifier<ActivitiesSortBy>(ActivitiesSortBy.startDate);
   final _sortOrderAscending = ValueNotifier<bool>(false);
 
   late final Listenable _sort;
@@ -47,13 +47,13 @@ class _SavedActivitiesListViewState extends State<SavedActivitiesListView> {
               valueListenable: _sortProperty,
               builder: (context, sortBy, _) => DropdownButton(
                 value: sortBy,
-                onChanged: (_ActivitiesSortProperty? value) {
+                onChanged: (ActivitiesSortBy? value) {
                   if (value == null) return;
                   _sortProperty.value = value;
                 },
-                items: _ActivitiesSortProperty.values
-                    .map<DropdownMenuItem<_ActivitiesSortProperty>>(
-                        (_ActivitiesSortProperty value) {
+                items: ActivitiesSortBy.values
+                    .map<DropdownMenuItem<ActivitiesSortBy>>(
+                        (ActivitiesSortBy value) {
                   return DropdownMenuItem(
                     value: value,
                     child: Text(
@@ -98,12 +98,11 @@ class _SavedActivitiesListViewState extends State<SavedActivitiesListView> {
                 final sortedActivities = List.from(activities, growable: false)
                   ..sort((a, b) {
                     return (switch (_sortProperty.value) {
-                          _ActivitiesSortProperty.startDate =>
+                          ActivitiesSortBy.startDate =>
                             a.startTime.millisecondsSinceEpoch <
                                 b.startTime.millisecondsSinceEpoch,
-                          _ActivitiesSortProperty.duration =>
-                            a.duration < b.duration,
-                          _ActivitiesSortProperty.distance =>
+                          ActivitiesSortBy.duration => a.duration < b.duration,
+                          ActivitiesSortBy.distance =>
                             (a.distanceInMeters ?? 0) <
                                 (b.distanceInMeters ?? 0),
                         }
@@ -122,22 +121,4 @@ class _SavedActivitiesListViewState extends State<SavedActivitiesListView> {
       },
     );
   }
-}
-
-/// The property by which Activities can be sorted.
-enum _ActivitiesSortProperty {
-  startDate,
-  duration,
-  distance,
-}
-
-extension _ActivitiesSortPropertyTranslatable on _ActivitiesSortProperty {
-  Translatable translatable() => switch (this) {
-        _ActivitiesSortProperty.distance =>
-          LocaleKeys.activity.statistics.distance(),
-        _ActivitiesSortProperty.startDate =>
-          LocaleKeys.activity.statistics.date(),
-        _ActivitiesSortProperty.duration =>
-          LocaleKeys.activity.statistics.duration(),
-      };
 }
