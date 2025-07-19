@@ -9,7 +9,7 @@ import 'package:movna/presentation/blocs/permissions_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/views/map/activity_map_view.dart';
 import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
-import 'package:movna/presentation/screens/home/start_activity_popup.dart';
+import 'package:movna/presentation/screens/home/tabs/start_activity_tab/start_activity_popup.dart';
 
 /// This is the HomePage tab containing the start activity button.
 class HomeActivityScreen extends StatelessWidget {

@@ -5,7 +5,7 @@ import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/statistics_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
-import 'package:movna/presentation/screens/home/widgets/saved_activity_card.dart';
+import 'package:movna/presentation/screens/home/tabs/statistics_tab/widgets/saved_activity_card.dart';
 
 /// Display of the activities provided by a parent [StatisticsCubit].
 class SavedActivitiesListView extends StatefulWidget {
