@@ -54,14 +54,15 @@ class SavedActivitiesChartView extends StatefulWidget {
 }
 
 class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
-  final _groupBy = ValueNotifier<_GroupBy>(_GroupBy.month);
-  final _displayOption = ValueNotifier<_DisplayOption>(_DisplayOption.distance);
+  final _groupBy = ValueNotifier(_GroupBy.month);
+  final _displayOption = ValueNotifier(_DisplayOption.distance);
+  final _cumulative = ValueNotifier(false);
 
   late final Listenable _chartConfig;
 
   @override
   void initState() {
-    _chartConfig = Listenable.merge([_groupBy, _displayOption]);
+    _chartConfig = Listenable.merge([_groupBy, _displayOption, _cumulative]);
     super.initState();
   }
 
@@ -72,6 +73,7 @@ class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
       child: Column(
         children: [
           Wrap(
+            alignment: WrapAlignment.spaceBetween,
             spacing: 16.0,
             children: [
               Row(
@@ -134,6 +136,27 @@ class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
                   ),
                 ],
               ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    LocaleKeys.home.tabs.progress.savedActivitiesChart
+                        .cumulative()
+                        .translate(context),
+                  ),
+                  SizedBox(width: 8.0),
+                  ValueListenableBuilder(
+                    valueListenable: _cumulative,
+                    builder: (context, cumulative, _) => Checkbox(
+                      value: cumulative,
+                      onChanged: (value) {
+                        if (value == null) return;
+                        _cumulative.value = value;
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           ListenableBuilder(
@@ -142,6 +165,7 @@ class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
               child: _SavedActivitiesChart(
                 displayOption: _displayOption.value,
                 groupBy: _groupBy.value,
+                cumulative: _cumulative.value,
               ),
             ),
           ),
@@ -155,10 +179,12 @@ class _SavedActivitiesChart extends StatelessWidget {
   const _SavedActivitiesChart({
     required this.displayOption,
     required this.groupBy,
+    required this.cumulative,
   });
 
   final _DisplayOption displayOption;
   final _GroupBy groupBy;
+  final bool cumulative;
 
   @override
   Widget build(BuildContext context) {
@@ -255,12 +281,22 @@ class _SavedActivitiesChart extends StatelessWidget {
         final spots = <FlSpot>[];
         for (final (index, MapEntry(key: dateGroup, value: sumsBySport))
             in preparedData.entries.indexed) {
-          final thisMonthThisSportSum = sumsBySport[sport] ?? 0;
+          final thisDateGroupThisSportSum = sumsBySport[sport] ?? 0;
           // Add height of previous graph to stack curves.
-          final y = thisMonthThisSportSum +
-              (sportIndex == 0
-                  ? 0
-                  : lineBarsData[sportIndex - 1].spots[index].y);
+          final y = cumulative
+              ? thisDateGroupThisSportSum +
+                  ((index > 0 ? spots[index - 1].y : 0) +
+                      (sportIndex > 0
+                          ? lineBarsData[sportIndex - 1].spots[index].y
+                          : 0) -
+                      (sportIndex > 0 && index > 0
+                          ? lineBarsData[sportIndex - 1].spots[index - 1].y
+                          : 0))
+              : (thisDateGroupThisSportSum +
+                  (sportIndex == 0
+                      ? 0
+                      : lineBarsData[sportIndex - 1].spots[index].y));
+
           spots.add(FlSpot(_dateTimeToXValue(dateGroup), y));
           maxY = max(y, maxY);
         }
@@ -312,7 +348,7 @@ class _SavedActivitiesChart extends StatelessWidget {
 
     final topY = _getTopY(maxY);
     final minYInterval = switch (displayOption) {
-      _DisplayOption.duration => Duration(minutes: 5).inMilliseconds.toDouble(),
+      _DisplayOption.duration => Duration(minutes: 1).inMilliseconds.toDouble(),
       _DisplayOption.distance => 1_000.0,
     };
 
@@ -478,7 +514,11 @@ class _SavedActivitiesChart extends StatelessWidget {
         return LineTooltipItem(
           spot.barIndex != touchedSpots.length - 1
               ? ''
-              : '${DateFormat.yMMM(Platform.localeName).format(
+              : '${switch (groupBy) {
+                  _GroupBy.day => DateFormat.yMMMd,
+                  _GroupBy.month => DateFormat.yMMM,
+                  _GroupBy.year => DateFormat.y,
+                }(Platform.localeName).format(
                   _xValueToDateTime(spot.x),
                 )}\n',
           DefaultTextStyle.of(context).style.apply(
