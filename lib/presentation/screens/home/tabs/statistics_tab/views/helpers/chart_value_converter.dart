@@ -41,6 +41,8 @@ class DoubleToDateConverter {
       };
 }
 
+/// Converts given [dateTime] to displayable text according to the type of
+/// dateTime groups [groupBy] used by the chart.
 String dateTimeToText(DateTime dateTime, ActivitiesGroupBy groupBy) {
   return switch (groupBy) {
     ActivitiesGroupBy.day => DateFormat.yMMMd,
