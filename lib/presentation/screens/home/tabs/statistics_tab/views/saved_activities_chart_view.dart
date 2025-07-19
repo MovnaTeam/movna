@@ -145,8 +145,8 @@ class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
 }
 
 /// Intermediate widget that, given data prepared according to user
-/// display config ([displayOption], [groupBy], [cumulative]), displays chart legend and chart content using state from
-/// [StatisticsCubit].
+/// display config ([displayOption], [groupBy], [cumulative]), displays chart
+/// legend and chart content using state from [StatisticsCubit].
 class _SavedActivitiesChart extends StatelessWidget {
   const _SavedActivitiesChart({
     required this.displayOption,

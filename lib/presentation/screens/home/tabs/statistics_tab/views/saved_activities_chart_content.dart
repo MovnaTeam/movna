@@ -260,7 +260,8 @@ class SavedActivitiesChartContent extends StatelessWidget {
     );
   }
 
-  /// Returns the highest value to display on the Y axis
+  /// Returns the highest value to label on the Y axis, given the maximum y
+  /// value [maxY] from the dataset.
   double _getTopY(double maxY) => switch (displayOption) {
         ActivityDisplayMetric.distance =>
           _getNextMultipleOfPreviousPowerOfTen(maxY),
@@ -269,6 +270,7 @@ class SavedActivitiesChartContent extends StatelessWidget {
           ).inMilliseconds.toDouble()
       };
 
+  /// Callback to display the tooltip when touching a dot on the chart.
   List<LineTooltipItem?> _getTooltipItems(
     BuildContext context,
     List<LineBarSpot> touchedSpots,
@@ -318,6 +320,7 @@ class SavedActivitiesChartContent extends StatelessWidget {
     ).toList();
   }
 
+  /// Returns the title of the Y-axis with the size it will take.
   (Widget, Size) _getYAxisTitle(BuildContext context) {
     final text = switch (displayOption) {
       ActivityDisplayMetric.distance =>
@@ -333,28 +336,27 @@ class SavedActivitiesChartContent extends StatelessWidget {
     return (Text(text), painter.size);
   }
 
-  /// Returns the next multiple of the previous power of ten.
+  /// Returns the next multiple of the previous power of ten of [value].
   /// Examples :
   /// - 15 -> 20
   /// - 78 -> 80
   /// - 259 -> 300
   /// - 4589 -> 5000
-  double _getNextMultipleOfPreviousPowerOfTen(double maxY) {
-    double getPreviousPowerOf10(double value) {
-      double log10(double v) => log(v) / log(10.0);
-      return pow(10.0, log10(value).toInt()).toDouble();
+  double _getNextMultipleOfPreviousPowerOfTen(double value) {
+    double getPreviousPowerOf10(double b) {
+      double log10(double a) => log(a) / log(10.0);
+      return pow(10.0, log10(b).toInt()).toDouble();
     }
 
-    if (maxY <= 0) return 0;
+    if (value <= 0) return 0;
 
-    final previousPowerOf10 = getPreviousPowerOf10(maxY);
+    final previousPowerOf10 = getPreviousPowerOf10(value);
     final nextMultipleOfPreviousPowerOf10 =
-        (maxY / previousPowerOf10).ceil() * previousPowerOf10;
+        (value / previousPowerOf10).ceil() * previousPowerOf10;
     return nextMultipleOfPreviousPowerOf10;
   }
 
-  /// Convert a chart x value (representing a DateTime in milliseconds since
-  /// Epoch) in its Widget label, with the size it will take.
+  /// Convert a chart [x] value in its Widget label, with the size it will take.
   (Widget, Size) _xValueToLabel(double x) {
     final text = dateTimeToText(DoubleToDateConverter(groupBy).to(x), groupBy);
     final painter = TextPainter(
@@ -370,6 +372,8 @@ class SavedActivitiesChartContent extends StatelessWidget {
     );
   }
 
+  /// Computes the maximum size an X-label can take with the [dateTimes] values
+  /// to represent.
   Size _xLabelMaximumSize(Iterable<DateTime> dateTimes) {
     var maxSize = Size(0, 0);
     for (final dateTime in dateTimes) {
@@ -383,6 +387,7 @@ class SavedActivitiesChartContent extends StatelessWidget {
     return maxSize;
   }
 
+  /// Convert a chart [y] value in its Widget label, with the size it will take.
   (Widget, Size) _yValueToLabel(double y) {
     final text = _yValueToText(y);
     final painter = TextPainter(
@@ -392,6 +397,7 @@ class SavedActivitiesChartContent extends StatelessWidget {
     return (Text(text), painter.size);
   }
 
+  /// Convert a chart [y] value in a displayable text.
   String _yValueToText(double y, [bool verbose = false]) {
     switch (displayOption) {
       case ActivityDisplayMetric.duration:
@@ -407,9 +413,11 @@ class SavedActivitiesChartContent extends StatelessWidget {
     }
   }
 
-  Size _yLabelMaximumSize(Iterable<double> yValues) {
+  /// Computes the maximum size an Y-label can take with the [values]
+  /// to represent.
+  Size _yLabelMaximumSize(Iterable<double> values) {
     var maxSize = Size(0, 0);
-    for (final y in yValues) {
+    for (final y in values) {
       final size = _yValueToLabel(y).$2;
       maxSize = Size(
         max(maxSize.width, size.width),
