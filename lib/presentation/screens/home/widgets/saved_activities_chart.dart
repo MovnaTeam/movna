@@ -376,10 +376,13 @@ class _SavedActivitiesChart extends StatelessWidget {
     final maxYLabelsCount =
         (constraints.maxHeight - xLabelsReservedHeight) ~/ maxYLabelSize.height;
 
-    final maxXLabelsInterval = preparedData.length / (maxXLabelsCount / 2);
-    final maxYLabelsInterval = topY / (maxYLabelsCount / 2);
+    const labelFillAxisProportion = 3 / 4;
+    final maxXLabelsInterval =
+        preparedData.length / (maxXLabelsCount * labelFillAxisProportion);
+    final maxYLabelsInterval =
+        topY / (maxYLabelsCount * labelFillAxisProportion);
 
-    final xLabelsInterval = max(1.0, maxXLabelsInterval).toInt().toDouble();
+    final xLabelsInterval = max(1, maxXLabelsInterval.ceil()).toDouble();
     var yLabelsInterval = max(minYInterval, maxYLabelsInterval);
     yLabelsInterval = switch (displayOption) {
       _DisplayOption.duration => Duration(
@@ -572,7 +575,7 @@ class _SavedActivitiesChart extends StatelessWidget {
 
     final previousPowerOf10 = getPreviousPowerOf10(maxY);
     final nextMultipleOfPreviousPowerOf10 =
-        ((maxY / previousPowerOf10) + 1).toInt() * previousPowerOf10;
+        (maxY / previousPowerOf10).ceil() * previousPowerOf10;
     return nextMultipleOfPreviousPowerOf10;
   }
 
