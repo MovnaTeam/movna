@@ -1,6 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
-import 'dart:ui' as dui;
+import 'dart:ui';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,6 +19,8 @@ import 'package:movna/presentation/screens/home/tabs/statistics_tab/views/helper
 import 'package:movna/presentation/screens/home/tabs/statistics_tab/views/saved_activity_view_options.dart';
 import 'package:movna/presentation/screens/home/tabs/statistics_tab/widgets/legend_widget.dart';
 
+/// Widget that helps visualize saved activities provided by a [StatisticsCubit]
+/// as a chart, with all chart options given to the user as well.
 class SavedActivitiesChartView extends StatefulWidget {
   const SavedActivitiesChartView({super.key});
 
@@ -150,6 +152,9 @@ class SavedActivitiesChartViewState extends State<SavedActivitiesChartView> {
   }
 }
 
+/// Intermediate widget that, given data prepared according to user
+/// display config ([displayOption], [groupBy], [cumulative]), displays chart legend and chart content using state from
+/// [StatisticsCubit].
 class _SavedActivitiesChart extends StatelessWidget {
   const _SavedActivitiesChart({
     required this.displayOption,
@@ -159,6 +164,8 @@ class _SavedActivitiesChart extends StatelessWidget {
 
   final ActivityDisplayMetric displayOption;
   final ActivitiesGroupBy groupBy;
+
+  /// True if the graphs are cumulated relative to time.
   final bool cumulative;
 
   @override
@@ -188,7 +195,7 @@ class _SavedActivitiesChart extends StatelessWidget {
     final (sumsByDateGroup, presentSports) =
         ActivityDataPreparer.process(activities, groupBy, displayOption);
 
-    final sportToColor = Map.fromIterables(
+    final sportColorMapping = Map.fromIterables(
       presentSports,
       ColorSteps.create(
         Theme.of(context).colorScheme.primary,
@@ -204,48 +211,48 @@ class _SavedActivitiesChart extends StatelessWidget {
 
     return Column(
       children: [
-        Builder(
-          builder: (context) => _buildChartLegend(
-            context,
-            sportToColor,
-          ),
-        ),
+        SavedActivitiesChartLegend(sportColorMapping: sportColorMapping),
         Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) => _buildChart(
-              context,
-              sumsByDateGroup,
-              sportToColor,
-              constraints,
-            ),
+          child: SavedActivitiesChartContent(
+            sportColorMapping: sportColorMapping,
+            preparedData: sumsByDateGroup,
+            cumulative: cumulative,
+            displayOption: displayOption,
+            groupBy: groupBy,
           ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildChartLegend(
-    BuildContext context,
-    Map<Sport, Color> sportColorMapping,
-  ) {
-    return sportColorMapping.length > 1
-        ? LegendsListWidget(
-            legends: sportColorMapping.entries
-                .map(
-                  (sportToColor) => Legend(
-                    sportToColor.key.translatable().translate(context),
-                    sportToColor.value,
-                  ),
-                )
-                .toList(),
-          )
-        : const NoneWidget();
+/// Actual chart representing the saved activities data.
+class SavedActivitiesChartContent extends StatelessWidget {
+  const SavedActivitiesChartContent({
+    required this.sportColorMapping,
+    required this.preparedData,
+    required this.displayOption,
+    required this.groupBy,
+    required this.cumulative,
+    super.key,
+  });
+
+  final Map<Sport, Color> sportColorMapping;
+  final SplayTreeMap<DateTime, Map<Sport, double>> preparedData;
+
+  final ActivityDisplayMetric displayOption;
+  final ActivitiesGroupBy groupBy;
+
+  /// True if the graphs are cumulated relative to time.
+  final bool cumulative;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: _buildChart);
   }
 
   Widget _buildChart(
     BuildContext context,
-    SplayTreeMap<DateTime, Map<Sport, double>> preparedData,
-    Map<Sport, Color> sportColorMapping,
     BoxConstraints constraints,
   ) {
     final lineBarsData = <LineChartBarData>[];
@@ -534,7 +541,7 @@ class _SavedActivitiesChart extends StatelessWidget {
         LocaleKeys.activity.statistics.duration().translate(context)
     };
     final painter = TextPainter(
-      textDirection: dui.TextDirection.ltr,
+      textDirection: TextDirection.ltr,
       text: TextSpan(text: text),
     )..layout();
     return (Text(text), painter.size);
@@ -565,7 +572,7 @@ class _SavedActivitiesChart extends StatelessWidget {
   (Widget, Size) _xValueToLabel(double x) {
     final text = dateTimeToText(DoubleToDateConverter(groupBy).to(x), groupBy);
     final painter = TextPainter(
-      textDirection: dui.TextDirection.ltr,
+      textDirection: TextDirection.ltr,
       text: TextSpan(text: text),
     )..layout();
     return (
@@ -593,7 +600,7 @@ class _SavedActivitiesChart extends StatelessWidget {
   (Widget, Size) _yValueToLabel(double y) {
     final text = _yValueToText(y);
     final painter = TextPainter(
-      textDirection: dui.TextDirection.ltr,
+      textDirection: TextDirection.ltr,
       text: TextSpan(text: text),
     )..layout();
     return (Text(text), painter.size);
@@ -624,5 +631,32 @@ class _SavedActivitiesChart extends StatelessWidget {
       );
     }
     return maxSize;
+  }
+}
+
+/// Legend widget for the [SavedActivitiesChartContent] widget.
+/// These two widget must be constructed from the same data.
+class SavedActivitiesChartLegend extends StatelessWidget {
+  const SavedActivitiesChartLegend({
+    required this.sportColorMapping,
+    super.key,
+  });
+
+  final Map<Sport, Color> sportColorMapping;
+
+  @override
+  Widget build(BuildContext context) {
+    return sportColorMapping.length > 1
+        ? LegendsListWidget(
+            legends: sportColorMapping.entries
+                .map(
+                  (sportToColor) => Legend(
+                    sportToColor.key.translatable().translate(context),
+                    sportToColor.value,
+                  ),
+                )
+                .toList(),
+          )
+        : const NoneWidget();
   }
 }
