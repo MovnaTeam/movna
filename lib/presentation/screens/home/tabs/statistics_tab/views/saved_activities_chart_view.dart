@@ -16,6 +16,7 @@ import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
 import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 import 'package:movna/presentation/screens/home/tabs/statistics_tab/views/helpers/activity_data_preparer.dart';
+import 'package:movna/presentation/screens/home/tabs/statistics_tab/views/helpers/chart_value_converter.dart';
 import 'package:movna/presentation/screens/home/tabs/statistics_tab/views/helpers/color_steps.dart';
 import 'package:movna/presentation/screens/home/tabs/statistics_tab/views/saved_activity_view_options.dart';
 import 'package:movna/presentation/screens/home/tabs/statistics_tab/widgets/legend_widget.dart';
@@ -274,7 +275,9 @@ class _SavedActivitiesChart extends StatelessWidget {
                       ? 0
                       : lineBarsData[sportIndex - 1].spots[index].y));
 
-          spots.add(FlSpot(_dateTimeToXValue(dateGroup), y));
+          spots.add(
+            FlSpot(DoubleToDateConverter(groupBy).from(dateGroup), y),
+          );
           maxY = max(y, maxY);
         }
 
@@ -383,14 +386,16 @@ class _SavedActivitiesChart extends StatelessWidget {
         _getNextMultipleOfPreviousPowerOfTen(yLabelsInterval)
     };
 
-    final xLabelsShowMin =
-        _dateTimeToXValue(preparedData.keys.first).remainder(xLabelsInterval) ==
-            0;
+    final xLabelsShowMin = DoubleToDateConverter(groupBy)
+            .from(preparedData.keys.first)
+            .remainder(xLabelsInterval) ==
+        0;
     const yLabelShowMin = false;
 
-    final xLabelsShowMax =
-        _dateTimeToXValue(preparedData.keys.last).remainder(xLabelsInterval) ==
-            0;
+    final xLabelsShowMax = DoubleToDateConverter(groupBy)
+            .from(preparedData.keys.last)
+            .remainder(xLabelsInterval) ==
+        0;
     final yLabelsShowMax =
         topY.remainder(yLabelsInterval) == 0 || topY < yLabelsInterval;
 
@@ -510,7 +515,7 @@ class _SavedActivitiesChart extends StatelessWidget {
                   ActivitiesGroupBy.month => DateFormat.yMMM,
                   ActivitiesGroupBy.year => DateFormat.y,
                 }(Platform.localeName).format(
-                  _xValueToDateTime(spot.x),
+                  DoubleToDateConverter(groupBy).to(spot.x),
                 )}\n',
           DefaultTextStyle.of(context).style.apply(
                 fontWeightDelta: 3,
@@ -567,36 +572,10 @@ class _SavedActivitiesChart extends StatelessWidget {
     return nextMultipleOfPreviousPowerOf10;
   }
 
-  static const _millisecondsPerDay = 1_000 * 60 * 60 * 24;
-
-  double _dateTimeToXValue(DateTime dateTime) => switch (groupBy) {
-        ActivitiesGroupBy.day =>
-          dateTime.millisecondsSinceEpoch / _millisecondsPerDay,
-        ActivitiesGroupBy.month =>
-          (dateTime.year * DateTime.monthsPerYear + dateTime.month - 1)
-              .toDouble(),
-        ActivitiesGroupBy.year => dateTime.year.toDouble()
-      };
-
-  DateTime _xValueToDateTime(double x) => switch (groupBy) {
-        ActivitiesGroupBy.day =>
-          DateTime.fromMillisecondsSinceEpoch(x.toInt() * _millisecondsPerDay),
-        ActivitiesGroupBy.month => DateTime(
-            (x / DateTime.monthsPerYear).toInt(),
-            x.remainder(DateTime.monthsPerYear).toInt() + 1,
-          ),
-        ActivitiesGroupBy.year => DateTime(x.toInt()),
-      };
-
   /// Convert a chart x value (representing a DateTime in milliseconds since
   /// Epoch) in its Widget label, with the size it will take.
   (Widget, Size) _xValueToLabel(double x) {
-    final text = switch (groupBy) {
-      ActivitiesGroupBy.day => DateFormat.yMMMd(Platform.localeName),
-      ActivitiesGroupBy.month => DateFormat.yMMM(Platform.localeName),
-      ActivitiesGroupBy.year => DateFormat.y(Platform.localeName),
-    }
-        .format(_xValueToDateTime(x));
+    final text = dateTimeToText(DoubleToDateConverter(groupBy).to(x), groupBy);
     final painter = TextPainter(
       textDirection: dui.TextDirection.ltr,
       text: TextSpan(text: text),
@@ -613,7 +592,8 @@ class _SavedActivitiesChart extends StatelessWidget {
   Size _xLabelMaximumSize(Iterable<DateTime> dateTimes) {
     var maxSize = Size(0, 0);
     for (final dateTime in dateTimes) {
-      final size = _xValueToLabel(_dateTimeToXValue(dateTime)).$2;
+      final size =
+          _xValueToLabel(DoubleToDateConverter(groupBy).from(dateTime)).$2;
       maxSize = Size(
         max(maxSize.width, size.width),
         max(maxSize.height, size.height),
