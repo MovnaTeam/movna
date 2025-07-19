@@ -15,6 +15,8 @@ import 'package:movna/presentation/extensions/sport_translation_extension.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
 import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/home/tabs/statistics_tab/views/helpers/activity_data_preparer.dart';
+import 'package:movna/presentation/screens/home/tabs/statistics_tab/views/helpers/color_steps.dart';
 import 'package:movna/presentation/screens/home/tabs/statistics_tab/views/saved_activity_view_options.dart';
 import 'package:movna/presentation/screens/home/tabs/statistics_tab/widgets/legend_widget.dart';
 
@@ -184,11 +186,12 @@ class _SavedActivitiesChart extends StatelessWidget {
     BuildContext context,
     List<Activity> activities,
   ) {
-    final (sumsByDateGroup, presentSports) = _prepareActivityData(activities);
+    final (sumsByDateGroup, presentSports) =
+        ActivityDataPreparer.process(activities, groupBy, displayOption);
 
     final sportToColor = Map.fromIterables(
       presentSports,
-      _createStepColors(
+      ColorSteps.create(
         Theme.of(context).colorScheme.primary,
         presentSports.length,
       ),
@@ -562,108 +565,6 @@ class _SavedActivitiesChart extends StatelessWidget {
     final nextMultipleOfPreviousPowerOf10 =
         (maxY / previousPowerOf10).ceil() * previousPowerOf10;
     return nextMultipleOfPreviousPowerOf10;
-  }
-
-  /// Crate list of [count] colors that go from white to [target].
-  List<Color> _createStepColors(Color target, int count) {
-    final primary = HSVColor.fromColor(target);
-    return List.generate(
-      count,
-      (i) => primary
-          .withValue(
-            (primary.value * (i + 1) / count) + (1 - ((i + 1) / count)),
-          )
-          .withSaturation(primary.saturation * (i + 1) / count)
-          .toColor(),
-    );
-  }
-
-  /// Groups given activities by either year/month/day, then by sport.
-  ///
-  /// Also ensures that there is no missing entry between two dates. For
-  /// instance if grouping by month and the keys `DateTime(1999, 1)` and
-  /// `DateTime(1999, 4)` are present, then so do `DateTime(1999, 2)` and
-  /// `DateTime(1999, 3)`.
-  ///
-  /// Also returns the set of all encountered sports.
-  (SplayTreeMap<DateTime, Map<Sport, double>>, Set<Sport>) _prepareActivityData(
-    List<Activity> activities,
-  ) {
-    final sumsByDateGroup = SplayTreeMap<DateTime, Map<Sport, double>>();
-    // What sports are concerned by this activity set.
-    final presentSports = <Sport>{};
-
-    for (final activity in activities) {
-      final dateGroup = DateTime(
-        activity.startTime.year,
-        groupBy != ActivitiesGroupBy.year ? activity.startTime.month : 1,
-        groupBy == ActivitiesGroupBy.day ? activity.startTime.day : 1,
-      );
-      final sport = activity.sport ?? Sport.other;
-
-      presentSports.add(sport);
-
-      if (sumsByDateGroup.isEmpty) {
-        sumsByDateGroup[dateGroup] = {};
-      } else if (!sumsByDateGroup.containsKey(dateGroup)) {
-        // Ensure all keys are present, there is no missing day/month/year.
-        if (dateGroup.isBefore(sumsByDateGroup.firstKey()!)) {
-          while (!sumsByDateGroup.containsKey(dateGroup)) {
-            final nextKey = switch (groupBy) {
-              ActivitiesGroupBy.day =>
-                DateUtils.addDaysToDate(sumsByDateGroup.firstKey()!, -1),
-              ActivitiesGroupBy.month => DateUtils.addMonthsToMonthDate(
-                  sumsByDateGroup.firstKey()!,
-                  -1,
-                ),
-              ActivitiesGroupBy.year =>
-                DateTime(sumsByDateGroup.firstKey()!.year - 1),
-            };
-            sumsByDateGroup[nextKey] = {};
-          }
-        } else {
-          while (!sumsByDateGroup.containsKey(dateGroup)) {
-            final nextKey = switch (groupBy) {
-              ActivitiesGroupBy.day =>
-                DateUtils.addDaysToDate(sumsByDateGroup.lastKey()!, 1),
-              ActivitiesGroupBy.month => DateUtils.addMonthsToMonthDate(
-                  sumsByDateGroup.lastKey()!,
-                  1,
-                ),
-              ActivitiesGroupBy.year =>
-                DateTime(sumsByDateGroup.lastKey()!.year + 1),
-            };
-            sumsByDateGroup[nextKey] = {};
-          }
-        }
-      }
-
-      sumsByDateGroup[dateGroup]![sport] =
-          (sumsByDateGroup[dateGroup]![sport] ?? 0) +
-              switch (displayOption) {
-                ActivityDisplayMetric.distance =>
-                  (activity.distanceInMeters ?? 0.0),
-                ActivityDisplayMetric.duration =>
-                  activity.duration.inMilliseconds.toDouble()
-              };
-    }
-
-    // Add empty data just before that in order to be able to display anything
-    if (sumsByDateGroup.length == 1) {
-      final previous = switch (groupBy) {
-        ActivitiesGroupBy.day =>
-          DateUtils.addDaysToDate(sumsByDateGroup.firstKey()!, -1),
-        ActivitiesGroupBy.month => DateUtils.addMonthsToMonthDate(
-            sumsByDateGroup.firstKey()!,
-            -1,
-          ),
-        ActivitiesGroupBy.year =>
-          DateTime(sumsByDateGroup.firstKey()!.year - 1),
-      };
-      sumsByDateGroup[previous] = {};
-    }
-
-    return (sumsByDateGroup, presentSports);
   }
 
   static const _millisecondsPerDay = 1_000 * 60 * 60 * 24;
