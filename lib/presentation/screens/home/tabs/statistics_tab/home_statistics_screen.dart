@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/presentation/blocs/statistics_cubit.dart';
-import 'package:movna/presentation/screens/home/widgets/saved_activities_chart.dart';
-import 'package:movna/presentation/screens/home/widgets/saved_activities_list_view.dart';
+import 'package:movna/presentation/screens/home/tabs/statistics_tab/widgets/saved_activities_chart.dart';
+import 'package:movna/presentation/screens/home/tabs/statistics_tab/widgets/saved_activities_list_view.dart';
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});

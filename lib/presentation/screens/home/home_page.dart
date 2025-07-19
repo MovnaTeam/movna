@@ -4,8 +4,8 @@ import 'package:movna/jsons.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/widgets/slide_indexed_stack.dart';
 import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
-import 'package:movna/presentation/screens/home/home_activity_screen.dart';
-import 'package:movna/presentation/screens/home/home_statistics_screen.dart';
+import 'package:movna/presentation/screens/home/tabs/start_activity_tab/home_activity_screen.dart';
+import 'package:movna/presentation/screens/home/tabs/statistics_tab/home_statistics_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

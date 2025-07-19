@@ -16,7 +16,7 @@ import 'package:movna/presentation/extensions/sport_translation_extension.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
 import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
-import 'package:movna/presentation/screens/home/widgets/legend_widget.dart';
+import 'package:movna/presentation/screens/home/tabs/statistics_tab/widgets/legend_widget.dart';
 
 /// All time groups by which activities can be grouped by.
 enum _GroupBy {
