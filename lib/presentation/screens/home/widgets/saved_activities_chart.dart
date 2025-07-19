@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:json_locale/json_locale.dart';
+import 'package:movna/core/logger.dart';
 import 'package:movna/domain/entities/activity.dart';
 import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/jsons.dart';
@@ -369,12 +370,21 @@ class _SavedActivitiesChart extends StatelessWidget {
     final yAxisTitleReservedWidth =
         yAxisTitleSize.flipped.width * magicReservedSizeForLabelsMultiplier;
 
-    final maxXLabelsCount = (constraints.maxWidth -
-            yAxisTitleReservedWidth -
-            yLabelsReservedWidth) /
-        maxXLabelSize.width;
-    final maxYLabelsCount =
-        (constraints.maxHeight - xLabelsReservedHeight) ~/ maxYLabelSize.height;
+    final maxXLabelsCount = constraints.maxWidth > yLabelsReservedWidth
+        ? (constraints.maxWidth -
+                yAxisTitleReservedWidth -
+                yLabelsReservedWidth) /
+            maxXLabelSize.width
+        : 0;
+    final maxYLabelsCount = constraints.maxHeight > xLabelsReservedHeight
+        ? (constraints.maxHeight - xLabelsReservedHeight) ~/
+            maxYLabelSize.height
+        : 0;
+
+    if (maxXLabelsCount == 0 || maxYLabelsCount == 0) {
+      logger.w('Not enough room to display anything');
+      return NoneWidget();
+    }
 
     const labelFillAxisProportion = 3 / 4;
     final maxXLabelsInterval =
