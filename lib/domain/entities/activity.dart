@@ -26,8 +26,8 @@ abstract class Activity with _$Activity {
     Sport? sport,
 
     /// The name of this activity.
-    /// Null when not specified by user.
-    String? name,
+    /// Empty when not specified by user.
+    @Default('') String name,
 
     /// The total distance traveled during this activity in meters.
     /// Null when info is not available.
@@ -50,7 +50,7 @@ abstract class Activity with _$Activity {
     double? averageHeartBeatPerMinute,
 
     /// Additional user notes about this activity.
-    String? notes,
+    @Default('') String notes,
 
     /// The activity continuous track segments,
     /// with a pause between each segment.

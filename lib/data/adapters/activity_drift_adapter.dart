@@ -5,7 +5,6 @@ import 'package:movna/data/models/activity_drift_model.dart';
 import 'package:movna/domain/entities/activity.dart';
 import 'package:movna/domain/entities/gps_coordinates.dart';
 import 'package:movna/domain/entities/location.dart';
-import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/domain/entities/track_point.dart';
 import 'package:movna/domain/entities/track_segment.dart';
 import 'package:uuid/uuid.dart';
@@ -36,18 +35,17 @@ class ActivityDriftAdapter extends BaseAdapter<Activity, ActivityDriftModel> {
 
   @override
   ActivityDriftModel entityToModel(Activity e) => ActivityDriftModel(
-        // TODO fix this nullable mess
         id: e.id.isEmpty ? Uuid().v7() : e.id,
-        name: e.name ?? '',
-        sport: e.sport ?? Sport.other,
+        name: e.name,
+        sport: e.sport,
         startTime: e.startTime,
         stopTime: e.stopTime,
-        distanceInMeters: e.distanceInMeters ?? 0,
+        distanceInMeters: e.distanceInMeters,
         durationInMicroSeconds: e.duration.inMicroseconds,
-        averageSpeedInMetersPerSecond: e.averageSpeedInMetersPerSecond ?? 0,
-        maxSpeedInMetersPerSecond: e.maxSpeedInMetersPerSecond ?? 0,
+        averageSpeedInMetersPerSecond: e.averageSpeedInMetersPerSecond,
+        maxSpeedInMetersPerSecond: e.maxSpeedInMetersPerSecond,
         averageHeartBeatPerMinute: e.averageHeartBeatPerMinute,
-        notes: e.notes ?? '',
+        notes: e.notes,
         trackSegments: trackSegmentDriftAdapter.entitiesToModels(
           e.trackSegments,
         ),

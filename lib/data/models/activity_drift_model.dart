@@ -17,17 +17,17 @@ class ActivityDriftModels extends Table {
   DateTimeColumn get stopTime => dateTime().nullable()();
 
   /// The sport practiced during activity, stored as a string.
-  TextColumn get sport => textEnum<Sport>()();
+  TextColumn get sport => textEnum<Sport>().nullable()();
 
   TextColumn get name => text()();
 
-  RealColumn get distanceInMeters => real()();
+  RealColumn get distanceInMeters => real().nullable()();
 
   IntColumn get durationInMicroSeconds => integer()();
 
-  RealColumn get maxSpeedInMetersPerSecond => real()();
+  RealColumn get maxSpeedInMetersPerSecond => real().nullable()();
 
-  RealColumn get averageSpeedInMetersPerSecond => real()();
+  RealColumn get averageSpeedInMetersPerSecond => real().nullable()();
 
   RealColumn get averageHeartBeatPerMinute => real().nullable()();
 
