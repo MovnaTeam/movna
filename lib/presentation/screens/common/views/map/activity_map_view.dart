@@ -13,14 +13,17 @@ import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/usecases/get_default_zoom_level.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/domain/usecases/set_default_zoom_level.dart';
+import 'package:movna/gen/assets.gen.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/blocs/location_cubit.dart';
 import 'package:movna/presentation/extensions/gps_coordinates_extensions.dart';
 import 'package:movna/presentation/screens/common/views/map/constants.dart';
 import 'package:movna/presentation/screens/common/views/map/widgets/activity_map_layer.dart';
 import 'package:movna/presentation/screens/common/views/map/widgets/user_location_marker.dart';
+import 'package:movna/presentation/screens/common/widgets/continuously_animated_rotation.dart';
 import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
 import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
 import 'package:movna/presentation/screens/common/widgets/visible_if_bloc_available.dart';
 
 /// Displays a map with location information about the current activity.
@@ -34,6 +37,18 @@ class ActivityMapView extends StatefulWidget {
   State<ActivityMapView> createState() => _ActivityMapViewState();
 }
 
+/// How the map should follow user movements.
+enum FollowUserBehavior {
+  /// Do not follow user.
+  disabled,
+
+  /// Only follow use location.
+  location,
+
+  /// Follow user location and heading direction.
+  locationRotation,
+}
+
 class _ActivityMapViewState extends State<ActivityMapView>
     with TickerProviderStateMixin {
   /// Controller use to modify and animate the [FlutterMap].
@@ -43,13 +58,21 @@ class _ActivityMapViewState extends State<ActivityMapView>
     curve: MapConstants.mapAnimationsCurve,
   );
 
-  /// This determines whether the map should be centered on location.
+  /// This determines whether the map should follow user location and heading
+  /// direction.
   ///
-  /// If value is `false`, location updates will move the marker but not the map
-  /// view.
-  /// If value is `true`, location updates will move the marker on the map and
-  /// the map view will move to be centered on the marker.
-  final ValueNotifier<bool> _centerOnLocation = ValueNotifier(true);
+  /// If value is `disabled`, location updates will move the marker but not the
+  /// map view.
+  /// If value is `location`, location updates will move the marker on the map
+  /// and the map view will move to be centered on the marker.
+  /// If value is `locationRotation`, location updates will move the marker on
+  /// the map and the map view will move to be centered on the marker and
+  /// rotation so that the user heading direction is up.
+  final ValueNotifier<FollowUserBehavior> _followUserBehavior =
+      ValueNotifier(FollowUserBehavior.location);
+
+  /// The current map rotation in degrees.
+  final ValueNotifier<double> _mapRotationDegrees = ValueNotifier(0.0);
 
   /// The last known location, used to center map immediately when user clicks
   /// on the center button
@@ -69,20 +92,23 @@ class _ActivityMapViewState extends State<ActivityMapView>
     // Listen to map events to detect user gestures
     _mapEventSubscription = _controller.mapController.mapEventStream.listen(
       (event) {
-        // Update center on location flag if user starts certain gestures
-        _centerOnLocation.value = switch (event) {
-          MapEventFlingAnimationStart() ||
-          MapEventMoveStart() ||
-          MapEventDoubleTapZoomStart() ||
-          MapEventRotateStart() =>
-            false,
-          _ => _centerOnLocation.value,
-        };
+        // Update flags if user starts certain gestures
+        if (event is MapEventFlingAnimationStart ||
+            event is MapEventMoveStart ||
+            event is MapEventDoubleTapZoomStart ||
+            event is MapEventRotateStart) {
+          _followUserBehavior.value = FollowUserBehavior.disabled;
+        }
+
         if (event is MapEventDoubleTapZoomEnd ||
             event is MapEventMoveEnd ||
             event is MapEventScrollWheelZoom) {
           _zoomLevel = event.camera.zoom;
           injector<SetDefaultZoomLevel>()(_zoomLevel);
+        }
+
+        if (event is MapEventRotate) {
+          _mapRotationDegrees.value = event.camera.rotation;
         }
       },
     );
@@ -93,7 +119,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
   void dispose() {
     _controller.dispose();
     _mapEventSubscription.cancel();
-    _centerOnLocation.dispose();
+    _followUserBehavior.dispose();
     super.dispose();
   }
 
@@ -109,11 +135,23 @@ class _ActivityMapViewState extends State<ActivityMapView>
           LocationCubitStateLoaded(:final currentLocation) => currentLocation,
           _ => null,
         };
-        if (timedLocation != null && _centerOnLocation.value) {
-          _lastLocation = timedLocation.location;
-          _controller.animateTo(
-            dest: timedLocation.location.gpsCoordinates.toLatLng(),
-          );
+        if (timedLocation == null) return;
+
+        _lastLocation = timedLocation.location;
+        final destination =
+            _followUserBehavior.value != FollowUserBehavior.disabled
+                ? timedLocation.location.gpsCoordinates.toLatLng()
+                : null;
+        final orientation =
+            _followUserBehavior.value == FollowUserBehavior.locationRotation
+                ? -timedLocation.location.headingInDegrees
+                : null;
+        _controller.animateTo(
+          dest: destination,
+          rotation: orientation,
+        );
+        if (orientation != null) {
+          _mapRotationDegrees.value = orientation;
         }
       },
       child: FlutterMap(
@@ -162,34 +200,108 @@ class _ActivityMapViewState extends State<ActivityMapView>
               };
             },
           ),
-          ValueListenableBuilder(
-            valueListenable: _centerOnLocation,
-            builder: (context, centerOnLocation, fab) {
-              if (centerOnLocation) {
-                return const NoneWidget();
-              }
-              return fab!;
-            },
-            child: Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: FloatingActionButton.small(
-                  onPressed: () {
-                    final location = _lastLocation;
-                    if (location != null) {
-                      _centerOnLocation.value = true;
-                      _controller.animateTo(
-                        dest: location.gpsCoordinates.toLatLng(),
-                      );
-                    }
-                  },
-                  child: const Icon(Icons.my_location),
-                ),
+          Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  _buildMapCompass(context),
+                  _buildMapFollowUserFloatingActionButtons(context),
+                ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMapFollowUserFloatingActionButtons(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: _followUserBehavior,
+      builder: (context, followUserBehavior, _) {
+        const String tag = 'followUserBehavior';
+        return AnimatedSwitcher(
+          transitionBuilder: (Widget child, Animation<double> animation) =>
+              ScaleTransition(scale: animation, child: child),
+          duration: Duration(milliseconds: 100),
+          child: switch (followUserBehavior) {
+            FollowUserBehavior.disabled => FloatingActionButton.small(
+                heroTag: tag,
+                key: Key('$followUserBehavior'),
+                onPressed: () {
+                  final location = _lastLocation;
+                  if (location != null) {
+                    _followUserBehavior.value = FollowUserBehavior.location;
+                    _controller.animateTo(
+                      dest: location.gpsCoordinates.toLatLng(),
+                    );
+                  }
+                },
+                child: Icon(
+                  Icons.my_location,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            FollowUserBehavior.location => FloatingActionButton.small(
+                heroTag: tag,
+                key: Key('$followUserBehavior'),
+                onPressed: () {
+                  final location = _lastLocation;
+                  if (location != null) {
+                    _followUserBehavior.value =
+                        FollowUserBehavior.locationRotation;
+                    _controller.animateTo(
+                      dest: location.gpsCoordinates.toLatLng(),
+                      rotation: -location.headingInDegrees,
+                    );
+                  }
+                },
+                child: Icon(
+                  Icons.navigation,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            _ => const NoneWidget(),
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildMapCompass(BuildContext context) {
+    return FloatingActionButton.small(
+      heroTag: 'compass',
+      onPressed: () {
+        _controller.animateTo(rotation: 0.0);
+        if (_followUserBehavior.value == FollowUserBehavior.locationRotation) {
+          _followUserBehavior.value = FollowUserBehavior.location;
+        }
+      },
+      child: ValueListenableBuilder(
+        valueListenable: _mapRotationDegrees,
+        builder: (context, rotation, child) => ContinuouslyAnimatedRotation(
+          duration: Duration(milliseconds: 100),
+          turns: rotation / 360,
+          child: child!,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgThemedWidget(
+              svgAsset: Assets.images.movnaIconBody,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            Transform.flip(
+              flipY: true,
+              child: SvgThemedWidget(
+                svgAsset: Assets.images.movnaIconBody,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -15,14 +15,15 @@ extension HexColorString on Color {
 
 const String svgThemedImagePrimary = 'fe0013';
 
-/// This widget replace the default color by [primaryColor] from the theme of
-/// the application.
+/// This widget replace the default color by given [color] or by [primaryColor]
+/// from the theme of the application.
 ///
 /// [svgThemedImagePrimary] is the hexadecimal primary color to replace.
 class SvgThemedWidget extends StatelessWidget {
   const SvgThemedWidget({
     required this.svgAsset,
     this.width,
+    this.color,
     this.fit = BoxFit.contain,
     super.key,
   });
@@ -30,6 +31,7 @@ class SvgThemedWidget extends StatelessWidget {
   final double? width;
   final String svgAsset;
   final BoxFit fit;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,9 @@ class SvgThemedWidget extends StatelessWidget {
         if (data.hasData) {
           // Converts ARGB color into RGB color string
           final primaryColorHexString =
-              Theme.of(context).colorScheme.primary.toHexString().substring(3);
+              (color ?? Theme.of(context).colorScheme.primary)
+                  .toHexString()
+                  .substring(3);
 
           return SvgPicture.string(
             data.data!.replaceAll(
