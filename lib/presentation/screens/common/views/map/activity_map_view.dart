@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/core/logger.dart';
 import 'package:movna/domain/entities/app_metadata.dart';
 import 'package:movna/domain/entities/gps_coordinates.dart';
 import 'package:movna/domain/entities/location.dart';
@@ -13,11 +14,14 @@ import 'package:movna/domain/usecases/get_default_zoom_level.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/domain/usecases/set_default_zoom_level.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
+import 'package:movna/presentation/blocs/location_cubit.dart';
 import 'package:movna/presentation/extensions/gps_coordinates_extensions.dart';
-import 'package:movna/presentation/screens/activity/views/map/constants.dart';
-import 'package:movna/presentation/screens/activity/views/map/widgets/user_location_marker.dart';
-import 'package:movna/presentation/widgets/loading_indicator.dart';
-import 'package:movna/presentation/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/views/map/constants.dart';
+import 'package:movna/presentation/screens/common/views/map/widgets/activity_map_layer.dart';
+import 'package:movna/presentation/screens/common/views/map/widgets/user_location_marker.dart';
+import 'package:movna/presentation/screens/common/widgets/loading_indicator.dart';
+import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/visible_if_bloc_available.dart';
 
 /// Displays a map with location information about the current activity.
 ///
@@ -39,7 +43,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
     curve: MapConstants.mapAnimationsCurve,
   );
 
-  /// This determines wether the map should be centered on location.
+  /// This determines whether the map should be centered on location.
   ///
   /// If value is `false`, location updates will move the marker but not the map
   /// view.
@@ -51,32 +55,16 @@ class _ActivityMapViewState extends State<ActivityMapView>
   /// on the center button
   Location? _lastLocation;
 
+  /// Last used zoom level, particularly handy on first render.
+  late double _zoomLevel;
+
   /// Subscription to the [_controller.mapEventStream].
   late StreamSubscription<MapEvent> _mapEventSubscription;
 
   @override
   void initState() {
-    final zoomLevelResult = injector<GetDefaultZoomLevel>()();
-    // Get last location and set controller to the given coordinates or to Paris
-    injector<GetLastKnownLocation>()().then(
-      (value) {
-        value.fold(
-          (lastLocation) {
-            _lastLocation = lastLocation.location;
-            _controller.animateTo(
-              dest: lastLocation.location.gpsCoordinates.toLatLng(),
-              zoom: zoomLevelResult.getOrDefault(16),
-            );
-          },
-          (f) {
-            _controller.animateTo(
-              dest: GpsCoordinates.paris.toLatLng(),
-              zoom: 6,
-            );
-          },
-        );
-      },
-    );
+    _zoomLevel = injector<GetDefaultZoomLevel>()()
+        .getOrDefault(MapConstants.defaultZoom);
 
     // Listen to map events to detect user gestures
     _mapEventSubscription = _controller.mapController.mapEventStream.listen(
@@ -93,7 +81,8 @@ class _ActivityMapViewState extends State<ActivityMapView>
         if (event is MapEventDoubleTapZoomEnd ||
             event is MapEventMoveEnd ||
             event is MapEventScrollWheelZoom) {
-          injector<SetDefaultZoomLevel>()(event.camera.zoom);
+          _zoomLevel = event.camera.zoom;
+          injector<SetDefaultZoomLevel>()(_zoomLevel);
         }
       },
     );
@@ -110,18 +99,20 @@ class _ActivityMapViewState extends State<ActivityMapView>
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ActivityCubit, ActivityState>(
+    return BlocListener<LocationCubit, LocationCubitState>(
       listener: (context, state) {
         // Listen to location changes and animate the map to the location
         // (do not change zoom level)
-        final location = switch (state) {
-          ActivityLoaded(:final currentLocation) => currentLocation,
+        final timedLocation = switch (state) {
+          LocationCubitStateLoading(:final lastKnownLocation) =>
+            lastKnownLocation,
+          LocationCubitStateLoaded(:final currentLocation) => currentLocation,
           _ => null,
         };
-        if (location != null && _centerOnLocation.value) {
-          _lastLocation = location;
+        if (timedLocation != null && _centerOnLocation.value) {
+          _lastLocation = timedLocation.location;
           _controller.animateTo(
-            dest: location.gpsCoordinates.toLatLng(),
+            dest: timedLocation.location.gpsCoordinates.toLatLng(),
           );
         }
       },
@@ -129,7 +120,7 @@ class _ActivityMapViewState extends State<ActivityMapView>
         mapController: _controller.mapController,
         options: MapOptions(
           initialCenter: GpsCoordinates.paris.toLatLng(),
-          initialZoom: 6,
+          initialZoom: _zoomLevel,
           maxZoom: MapConstants.maxZoom,
           interactionOptions: const InteractionOptions(
             enableMultiFingerGestureRace: true,
@@ -137,7 +128,13 @@ class _ActivityMapViewState extends State<ActivityMapView>
           backgroundColor: Theme.of(context).colorScheme.surface,
         ),
         children: [
+          // Actual map layer
           TileLayer(
+            errorTileCallback: (tile, error, stackTrace) => logger.e(
+              'Error getting map tile',
+              error: error,
+              stackTrace: stackTrace,
+            ),
             urlTemplate: MapConstants.urlTemplate,
             userAgentPackageName: injector<AppMetadata>().packageName,
             tileProvider: injector<FMTCTileProvider>(),
@@ -146,17 +143,23 @@ class _ActivityMapViewState extends State<ActivityMapView>
               Brightness.light => null,
             },
           ),
-          const UserLocationMarker<ActivityCubit, ActivityState>(),
-          BlocBuilder<ActivityCubit, ActivityState>(
+          const VisibleIfBlocAvailable<ActivityCubit>(
+            child: ActivityMapLayer(),
+          ),
+          // User Marker layer
+          const VisibleIfBlocAvailable<LocationCubit>(
+            child: UserLocationMarker(),
+          ),
+          // Loading indicator layer.
+          BlocBuilder<LocationCubit, LocationCubitState>(
             buildWhen: (prev, next) => prev.runtimeType != next.runtimeType,
             builder: (context, state) {
-              if (state case ActivityLoading()) {
-                return const Center(
-                  child: LoadingIndicator(),
-                );
-              } else {
-                return const NoneWidget();
-              }
+              return switch (state) {
+                LocationCubitStateInitial() ||
+                LocationCubitStateLoading() =>
+                  const Center(child: LoadingIndicator()),
+                _ => const NoneWidget(),
+              };
             },
           ),
           ValueListenableBuilder(

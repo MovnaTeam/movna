@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/permissions_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
-import 'package:movna/presentation/screens/activity/views/alerts/activity_alert_widget.dart';
-import 'package:movna/presentation/screens/activity/views/alerts/alert_transition_widget.dart';
-import 'package:movna/presentation/widgets/app_lifecycle_watcher.dart';
-import 'package:movna/presentation/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/views/alerts/alert_transition_widget.dart';
+import 'package:movna/presentation/screens/common/views/alerts/alert_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/app_lifecycle_watcher.dart';
+import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 
 enum PermissionType {
   notifications(Icons.notifications),
@@ -31,11 +31,11 @@ enum PermissionType {
 /// See also:
 ///   * [AppLifecycleWatcher] The widget that allows for registering callbacks
 ///   on app lifecycle change.
-///   * [ActivityAlertWidget] The widget laying out and
+///   * [AlertWidget] The widget laying out and
 ///   rendering the displayed card.
 ///   * [PermissionsCubit] The cubit managing app permissions.
-class ActivityPermissionAlertWidget extends StatelessWidget {
-  const ActivityPermissionAlertWidget({
+class PermissionAlertWidget extends StatelessWidget {
+  const PermissionAlertWidget({
     required this.title,
     required this.body,
     required this.permissionType,
@@ -74,7 +74,7 @@ class ActivityPermissionAlertWidget extends StatelessWidget {
             if (isPermissionGranted) {
               return AlertTransitionWidget(child: NoneWidget());
             }
-            return ActivityAlertWidget(
+            return AlertWidget(
               title: title,
               body: body,
               icon: permissionType.icon,

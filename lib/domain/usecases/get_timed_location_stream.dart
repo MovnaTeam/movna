@@ -8,6 +8,9 @@ import 'package:result_dart/result_dart.dart';
 
 /// Returns a stream of device current [TimedLocation] or a [Fault] if an error
 /// occurs while the stream is active.
+/// 
+/// If a [NotificationConfig] is provided, the service will try to run in the
+/// background.
 ///
 /// See [LocationRepository.getTimedLocationStream] for more details.
 @injectable
@@ -18,7 +21,7 @@ class GetLocationStream
   final TimedLocationRepository repository;
 
   @override
-  Stream<ResultDart<TimedLocation, Fault>> call(NotificationConfig config) {
+  Stream<ResultDart<TimedLocation, Fault>> call([NotificationConfig? config]) {
     return repository.getTimedLocationStream(config);
   }
 }

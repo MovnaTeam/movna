@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movna/assets.dart';
-import 'package:movna/presentation/widgets/svg_themed_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
 
 /// The loading indicator used by the application
 class LoadingIndicator extends StatelessWidget {

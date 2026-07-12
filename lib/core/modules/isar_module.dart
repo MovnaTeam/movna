@@ -33,6 +33,8 @@ abstract class IsarModule {
   @preResolve
   Future<Directory> get isarDirectory async {
     final appDirectory = await getApplicationDocumentsDirectory();
-    return Directory(path.join(appDirectory.path, 'isar'));
+    final isarDirectory = Directory(path.join(appDirectory.path, 'isar'));
+    await isarDirectory.create();
+    return isarDirectory;
   }
 }

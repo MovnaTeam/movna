@@ -4,9 +4,23 @@
     "button": "Restart the app",
     "label": "It looks like the app crashed while launching, you can try to restart it."
   },
+  "enums": {
+    "sport": {
+      "biking": "Biking",
+      "hiking": "Hiking",
+      "other": "Other",
+      "running": "Running"
+    }
+  },
   "foreground_notification": {
     "text": "Movna keeps track of your location from the background.",
     "title": "Movna app is running..."
+  },
+  "home": {
+    "activityConfiguration": {
+      "sport": "Sport"
+    },
+    "startActivity": "Start activity"
   },
   "location": {
     "alert": {

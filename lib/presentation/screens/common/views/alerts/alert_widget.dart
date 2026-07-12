@@ -11,8 +11,8 @@ import 'package:flutter/material.dart';
 /// alert.
 ///
 /// An optional [action] can be set if user input is needed.
-class ActivityAlertWidget extends StatelessWidget {
-  const ActivityAlertWidget({
+class AlertWidget extends StatelessWidget {
+  const AlertWidget({
     required this.title,
     required this.body,
     required this.icon,

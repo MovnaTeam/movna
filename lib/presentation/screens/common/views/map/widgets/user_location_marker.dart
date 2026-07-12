@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:movna/domain/entities/location.dart';
-import 'package:movna/presentation/blocs/abstract_location_cubit.dart';
-import 'package:movna/presentation/screens/activity/views/map/constants.dart';
-import 'package:movna/presentation/widgets/none_widget.dart';
+import 'package:movna/presentation/blocs/location_cubit.dart';
+import 'package:movna/presentation/screens/common/views/map/constants.dart';
+import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 
 /// Displays a location marker at the current device location or nothing if no
 /// location is available.
@@ -15,16 +15,15 @@ import 'package:movna/presentation/widgets/none_widget.dart';
 ///   * [Flutter map location marker package](https://pub.dev/packages/flutter_map_location_marker)
 ///   the plugin used to display and animate the marker from one location to the
 ///   next.
-class UserLocationMarker<B extends AbstractLocationCubit<S>,
-    S extends AbstractLocationState> extends StatelessWidget {
+class UserLocationMarker extends StatelessWidget {
   const UserLocationMarker({super.key});
 
   @override
   Widget build(BuildContext context) {
     // Use a bloc selector to rebuild only when the location changes
-    return BlocSelector<B, S, Location?>(
+    return BlocSelector<LocationCubit, LocationCubitState, Location?>(
       selector: (state) {
-        return state.location;
+        return state.location?.location;
       },
       builder: (context, location) {
         if (location == null) {
