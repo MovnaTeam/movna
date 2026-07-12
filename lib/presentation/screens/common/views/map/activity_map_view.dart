@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:movna/assets.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/logger.dart';
 import 'package:movna/domain/entities/app_metadata.dart';
@@ -14,6 +13,7 @@ import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/usecases/get_default_zoom_level.dart';
 import 'package:movna/domain/usecases/get_last_location.dart';
 import 'package:movna/domain/usecases/set_default_zoom_level.dart';
+import 'package:movna/gen/assets.gen.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/blocs/location_cubit.dart';
 import 'package:movna/presentation/extensions/gps_coordinates_extensions.dart';
@@ -290,13 +290,13 @@ class _ActivityMapViewState extends State<ActivityMapView>
           mainAxisSize: MainAxisSize.min,
           children: [
             SvgThemedWidget(
-              svgAsset: Assets.movnaIconBody,
+              svgAsset: Assets.images.movnaIconBody,
               color: Theme.of(context).colorScheme.primary,
             ),
             Transform.flip(
               flipY: true,
               child: SvgThemedWidget(
-                svgAsset: Assets.movnaIconBody,
+                svgAsset: Assets.images.movnaIconBody,
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
