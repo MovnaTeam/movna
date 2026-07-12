@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:movna/data/models/activity_drift_model.dart';
 import 'package:movna/domain/entities/sport.dart';
+import 'package:uuid/uuid.dart';
 
 part 'drift_database.g.dart';
 

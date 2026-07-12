@@ -3,11 +3,14 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:movna/domain/entities/sport.dart';
+import 'package:uuid/uuid.dart';
 
 part 'activity_drift_model.g.dart';
 
 class ActivityDriftModels extends Table {
-  IntColumn get id => integer().autoIncrement().nullable()();
+  TextColumn get id => text().clientDefault(() => const Uuid().v7())();
+  @override
+  Set<Column> get primaryKey => {id};
 
   DateTimeColumn get startTime => dateTime()();
 
@@ -33,6 +36,7 @@ class ActivityDriftModels extends Table {
   TextColumn get trackSegments =>
       text().map(const TrackSegmentsDriftModelConverter())();
 }
+
 class TrackSegmentsDriftModelConverter
     extends TypeConverter<List<TrackSegmentDriftModel>, String> {
   const TrackSegmentsDriftModelConverter();
@@ -40,10 +44,11 @@ class TrackSegmentsDriftModelConverter
   @override
   List<TrackSegmentDriftModel> fromSql(String fromDb) =>
       (jsonDecode(fromDb) as List)
-      .map((item) =>
-          TrackSegmentDriftModel.fromJson(item as Map<String, dynamic>),
-      )
-      .toList();
+          .map(
+            (item) =>
+                TrackSegmentDriftModel.fromJson(item as Map<String, dynamic>),
+          )
+          .toList();
 
   @override
   String toSql(List<TrackSegmentDriftModel> value) =>

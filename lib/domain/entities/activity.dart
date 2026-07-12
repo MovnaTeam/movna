@@ -15,7 +15,7 @@ abstract class Activity with _$Activity {
     required DateTime startTime,
 
     /// Unique identifier of this activity.
-    int? id,
+    @Default('') String id,
 
     /// The time at which this activity ended.
     /// Null while activity has not ended.

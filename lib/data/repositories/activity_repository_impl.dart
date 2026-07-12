@@ -31,7 +31,7 @@ class ActivityRepositoryImpl
   Future<ResultDart<Unit, Fault>> deleteActivity(Activity activity) async {
     try {
       final model = _activityAdapter.entityToModel(activity);
-      if (model.id != null) _source.deleteActivity(model.id!);
+      if (model.id.isNotEmpty) _source.deleteActivity(model.id);
       return unit.toSuccess();
     } catch (e) {
       return const Fault.entityNotDeleted().toFailure();

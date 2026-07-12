@@ -8,6 +8,7 @@ import 'package:movna/domain/entities/location.dart';
 import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/domain/entities/track_point.dart';
 import 'package:movna/domain/entities/track_segment.dart';
+import 'package:uuid/uuid.dart';
 
 @injectable
 class ActivityDriftAdapter extends BaseAdapter<Activity, ActivityDriftModel> {
@@ -36,7 +37,7 @@ class ActivityDriftAdapter extends BaseAdapter<Activity, ActivityDriftModel> {
   @override
   ActivityDriftModel entityToModel(Activity e) => ActivityDriftModel(
         // TODO fix this nullable mess
-        id: e.id,
+        id: e.id.isEmpty ? Uuid().v7() : e.id,
         name: e.name ?? '',
         sport: e.sport ?? Sport.other,
         startTime: e.startTime,

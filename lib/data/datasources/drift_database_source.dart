@@ -17,15 +17,13 @@ class DriftDataBaseSource {
   /// Save activity to database.
   /// Throws a [DatabaseAccessException] if something goes wrong.
   void saveActivity(ActivityDriftModel model) async {
-    final id =
-        await _database.into(_database.activityDriftModels).insert(model);
-    if (model.id != null && id != model.id) throw DatabaseAccessException();
+    await _database.into(_database.activityDriftModels).insert(model);
   }
 
   /// Delete activity with ID [id] from database.
   /// Throws a [DatabaseAccessException] if something goes wrong
   /// during deletion.
-  void deleteActivity(int id) async {
+  void deleteActivity(String id) async {
     (_database.delete(_database.activityDriftModels)
           ..where((e) => e.id.equals(id)))
         .go();
