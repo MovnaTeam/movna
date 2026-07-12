@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
-import 'package:movna/assets.dart';
-
+import 'package:movna/gen/fonts.gen.dart';
 part 'color_scheme.dart';
 part 'colors.dart';
 part 'text_theme.dart';
@@ -24,7 +23,7 @@ class AppTheme {
         Brightness.dark => _darkColorScheme,
         Brightness.light => _lightColorScheme,
       },
-      fontFamily: Fonts.poppins,
+      fontFamily: FontFamily.poppins,
       textTheme: _textTheme,
       extensions: [
         switch (brightness) {

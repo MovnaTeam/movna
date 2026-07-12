@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movna/assets.dart';
+import 'package:movna/gen/assets.gen.dart';
 import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
 
 /// The loading indicator used by the application
@@ -64,14 +64,14 @@ class _IconSpinnerState extends State<IconSpinner>
           RotationTransition(
             turns: _animation,
             child: SvgThemedWidget(
-              svgAsset: Assets.movnaIconBody,
+              svgAsset: Assets.images.movnaIconBody,
               width: widget.width,
             ),
           ),
           RotationTransition(
             turns: ReverseAnimation(_animation),
             child: SvgThemedWidget(
-              svgAsset: Assets.movnaIconHat,
+              svgAsset: Assets.images.movnaIconHat,
               width: widget.width,
             ),
           ),

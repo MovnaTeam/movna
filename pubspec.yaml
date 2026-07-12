@@ -7,57 +7,56 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 0.0.0+0
 
 environment:
-  sdk: '>=3.0.5 <4.0.0'
+  sdk: '^3.8.0'
 
 dependencies:
-  drift: ^2.27.0
-  drift_flutter: ^0.2.4
+  drift: ^2.34.1
+  drift_flutter: ^0.3.1
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
-  flutter_i18n: ^0.36.3
+  flutter_i18n: ^0.37.1
   flutter_localizations:
     sdk: flutter
-  flutter_map: ^8.1.1
-  flutter_map_animations: ^0.9.0
-  flutter_map_location_marker: ^10.1.0
+  flutter_map: ^8.3.1
+  flutter_map_animations: ^0.10.0
+  flutter_map_location_marker: ^10.2.0
   flutter_map_tile_caching: ^10.1.1
-  flutter_svg: ^2.2.0
+  flutter_svg: ^2.3.0
   freezed_annotation: ^3.1.0
-  geolocator: ^14.0.2
-  get_it: ^8.0.3
-  go_router: ^16.0.0
-  injectable: ^2.5.0
+  geolocator: ^14.0.3
+  get_it: ^9.2.1
+  go_router: ^17.3.0
+  injectable: ^3.0.0
   intl: ^0.20.2
-  json_annotation: ^4.9.0
+  json_annotation: ^4.12.0
   json_locale: ^1.0.2
   latlong2: ^0.9.1
-  logger: ^2.6.0
-  meta: ^1.16.0
+  logger: ^2.7.0
+  meta: ^1.17.0
   mutex: ^3.1.0
-  package_info_plus: ^8.3.0
+  package_info_plus: ^10.2.0
   path: ^1.9.1
-  path_provider: ^2.1.5
-  permission_handler: ^12.0.1
-  restart_app: ^1.3.2
-  result_dart: ^2.1.1
-  shared_preferences: ^2.5.3
+  path_provider: ^2.1.6
+  permission_handler: ^12.0.3
+  restart_app: ^1.8.3
+  result_dart: ^2.2.0
+  shared_preferences: ^2.5.5
   uuid: ^4.5.3
 
 dev_dependencies:
-  analyzer: ^7.5.4
-  build_runner: ^2.5.4
-  drift_dev: ^2.27.0
+  build_runner: ^2.15.1
+  drift_dev: ^2.34.0
+  flutter_gen_runner: ^5.14.1
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  freezed: ^3.1.0
-  go_router_builder: ^2.9.0
-  injectable_generator: ^2.7.0
-  json_locale_generator: ^1.1.0
-  json_serializable: ^6.9.5
-  r_flutter: ^0.9.0
-  test: ^1.25.15
+  freezed: ^3.2.5
+  go_router_builder: ^4.3.0
+  injectable_generator: ^3.0.2
+  json_locale_generator: ^1.3.0
+  json_serializable: ^6.14.0
+  test: ^1.26.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -139,3 +138,8 @@ json_to_dart:
     - source: assets/translations/en.json
       class_name: LocaleKeys
       plural_matcher: "-[0-9]+$"
+
+flutter_gen:
+  fonts:
+    outputs:
+      package_parameter_enabled: true

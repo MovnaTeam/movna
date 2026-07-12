@@ -6,7 +6,7 @@ import 'package:movna/presentation/screens/home/home_page.dart';
 part 'router.g.dart';
 
 @TypedGoRoute<HomeRoute>(path: '/')
-class HomeRoute extends GoRouteData {
+class HomeRoute extends GoRouteData with $HomeRoute {
   const HomeRoute();
 
   @override
@@ -16,14 +16,12 @@ class HomeRoute extends GoRouteData {
 }
 
 @TypedGoRoute<ActivityRoute>(path: '/activity')
-class ActivityRoute extends GoRouteData {
+class ActivityRoute extends GoRouteData with $ActivityRoute {
   const ActivityRoute(this.$extra);
   final ActivityScreenParams $extra;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ActivityScreen(
-      parameters: $extra,
-    );
+    return ActivityScreen(parameters: $extra);
   }
 }
