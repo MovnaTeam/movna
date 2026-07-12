@@ -37,12 +37,22 @@ class ActivityCubit extends Cubit<ActivityState> {
     this._saveActivity,
   ) : super(const ActivityState.initial()) {
     _initLocationCubitSubscription();
+
+    emit(
+      ActivityState.loaded(
+        activity: Activity(
+          startTime: DateTime.now(),
+          sport: _params.sport,
+        ),
+      ),
+    );
   }
 
   final SaveActivity _saveActivity;
   final ActivityCubitParams _params;
 
   late final StreamSubscription<LocationCubitState>? _locationCubitSubscription;
+  StreamSubscription<DateTime>? _tickerSubscription;
 
   /// Listens to changes in the [LocationCubit].
   void _initLocationCubitSubscription() {
@@ -81,8 +91,7 @@ class ActivityCubit extends Cubit<ActivityState> {
         final newDistanceInMeters = (activity.distanceInMeters ?? 0) +
             (activity.trackPoints.lastOrNull == null
                 ? 0
-                : 
-            timedLocation.location.gpsCoordinates.distanceToInMeters(
+                : timedLocation.location.gpsCoordinates.distanceToInMeters(
                     activity.trackPoints.last.location!.gpsCoordinates,
                   ));
         final newMaxSpeed = activity.maxSpeedInMetersPerSecond == null
@@ -134,13 +143,31 @@ class ActivityCubit extends Cubit<ActivityState> {
     }
   }
 
+  void listenToDateTime() {
+    _tickerSubscription?.cancel();
+    _tickerSubscription =
+        Stream.periodic(Duration(seconds: 1), (i) => DateTime.now())
+            .listen((now) {
+      if (state case ActivityLoaded(:final activity)) {
+        // This will need refactor when pause is implemented
+        emit(
+          ActivityState.loaded(
+            activity: activity.copyWith(
+              duration: now.difference(activity.startTime),
+            ),
+          ),
+        );
+      }
+    });
+  }
+
   void stopActivity() {
+    _closeSubscriptions();
     if (state case ActivityLoaded(:final activity)) {
       emit(
         ActivityState.loaded(
           activity: activity.copyWith(
-            stopTime:
-                activity.trackPoints.lastOrNull?.timestamp ?? DateTime.now(),
+            stopTime: DateTime.now(),
           ),
         ),
       );
@@ -151,6 +178,7 @@ class ActivityCubit extends Cubit<ActivityState> {
 
   Future<void> _closeSubscriptions() async {
     await _locationCubitSubscription?.cancel();
+    await _tickerSubscription?.cancel();
   }
 
   @override
@@ -161,8 +189,7 @@ class ActivityCubit extends Cubit<ActivityState> {
 }
 
 @freezed
-sealed class ActivityState
-    with _$ActivityState {
+sealed class ActivityState with _$ActivityState {
   const ActivityState._();
 
   const factory ActivityState.loaded({

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/router/router.dart';
+import 'package:movna/presentation/screens/activity/views/activity_real_time_stats_view.dart';
 import 'package:movna/presentation/screens/common/views/alerts/alerts_view.dart';
 import 'package:movna/presentation/screens/common/views/map/activity_map_view.dart';
 
@@ -25,11 +26,21 @@ class ActivityScreenContent extends StatelessWidget {
         onPopInvokedWithResult: (didPop, result) async {
           context.read<ActivityCubit>().stopActivity();
         },
-        child: const Stack(
-          children: [
-            ActivityMapView(),
-            AlertsView(),
-          ],
+        child: Scaffold(
+          body: SafeArea(
+            bottom: false,
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    ActivityRealTimeStatsView(),
+                    Expanded(child: ActivityMapView()),
+                  ],
+                ),
+                AlertsView(),
+              ],
+            ),
+          ),
         ),
       ),
     );
