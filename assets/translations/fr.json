@@ -1,4 +1,13 @@
 {
+  "activity": {
+    "statistics": {
+      "averageSpeed": "Vitesse moyenne",
+      "date": "Date",
+      "distance": "Distance",
+      "duration": "Durée",
+      "speed": "Vitesse"
+    }
+  },
   "appTitle": "Movna",
   "broken_app": {
     "button": "Redémarrer l'application",
@@ -20,7 +29,22 @@
     "activityConfiguration": {
       "sport": "Sport"
     },
-    "startActivity": "Commencer l'activité"
+    "savedActivitiesListSortBy": "Trier par",
+    "startActivity": "Commencer l'activité",
+    "tabs": {
+      "home": {
+        "title": "Accueil"
+      },
+      "progress": {
+        "noData": "Aucune activité à afficher pour le moment ¯\\_(ツ)_/¯",
+        "savedActivitiesChart": {
+          "cumulative": "Cumulé",
+          "displayOption": "Afficher",
+          "groupBy": "Grouper par"
+        },
+        "title": "Progrès"
+      }
+    }
   },
   "location": {
     "alert": {
@@ -43,5 +67,17 @@
         "title": "Autoriser l'affichage de notifications"
       }
     }
+  },
+  "units": {
+    "day": "Jour",
+    "hour": "Heure",
+    "kilometersPerHourShort": "km/h",
+    "kilometersShort": "km",
+    "metersPerSecondShort": "m/s",
+    "metersShort": "m",
+    "minute": "Minute",
+    "month": "Mois",
+    "second": "Seconde",
+    "year": "Année"
   }
 }

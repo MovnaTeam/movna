@@ -1,103 +1,78 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/assets.dart';
-import 'package:movna/core/injection.dart';
-import 'package:movna/domain/entities/notification_config.dart';
 import 'package:movna/jsons.dart';
-import 'package:movna/presentation/blocs/location_cubit.dart';
-import 'package:movna/presentation/blocs/location_service_cubit.dart';
-import 'package:movna/presentation/blocs/permissions_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
-import 'package:movna/presentation/screens/common/views/map/activity_map_view.dart';
-import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
+import 'package:movna/presentation/screens/common/widgets/slide_indexed_stack.dart';
 import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
-import 'package:movna/presentation/screens/home/start_activity_popup.dart';
+import 'package:movna/presentation/screens/home/tabs/start_activity_tab/home_activity_screen.dart';
+import 'package:movna/presentation/screens/home/tabs/statistics_tab/home_statistics_screen.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final ValueNotifier<int> _selectedTab = ValueNotifier(0);
+
+  @override
   Widget build(BuildContext context) {
+    final destinations = [
+      NavigationDestination(
+        icon: Icon(Icons.home),
+        label: LocaleKeys.home.tabs.home.title().translate(context),
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.bar_chart),
+        label: LocaleKeys.home.tabs.progress.title().translate(context),
+      ),
+    ];
+
+    final tabs = [
+      HomeActivityScreen(),
+      StatisticsScreen(),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: SvgThemedWidget(svgAsset: Assets.movnaLogo)),
       ),
-      body: SafeArea(
-        bottom: false,
-        child: Stack(
-          children: [
-            _buildMapWidget(context),
-            SafeArea(
-              bottom: true,
-              child: Column(
-                children: [
-                  Expanded(child: const NoneWidget()),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () => showModalBottomSheet<void>(
-                        context: context,
-                        builder: (context) => const StartActivityPopup(),
-                      ),
-                      child: Text(
-                        LocaleKeys.home.startActivity().translate(context),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+      body: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          const threshold = 300;
+          if (details.primaryVelocity == null) return;
+          if (details.primaryVelocity! > threshold && _selectedTab.value > 0) {
+            _selectedTab.value -= 1;
+          } else if (details.primaryVelocity! < -threshold &&
+              _selectedTab.value < tabs.length - 1) {
+            _selectedTab.value += 1;
+          }
+        },
+        child: ValueListenableBuilder(
+          valueListenable: _selectedTab,
+          builder: (context, selectedTab, _) {
+            return SlideIndexedStack(
+              index: selectedTab,
+              duration: Duration(milliseconds: 200),
+              children: tabs,
+            );
+          },
         ),
       ),
-    );
-  }
-
-  Widget _buildMapWidget(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<LocationServiceCubit>(
-          create: (_) => injector(),
-        ),
-        BlocProvider<PermissionsCubit>(
-          lazy: false,
-          create: (_) {
-            return injector(
-              param1: const PermissionsCubitParams(
-                requestLocation: true,
-                requestNotifications: true,
-              ),
-            )..requestPermissions();
-          },
-        ),
-        BlocProvider<LocationCubit>(
-          lazy: false,
-          create: (providerContext) {
-            return injector(
-              param1: LocationCubitParams(
-                // This should not be necessary here as we do not care about
-                // getting location in the background on this screen, but it is
-                // the first time the app gets the Geolocator location stream,
-                // and it will not be closed immediately when switching screen,
-                // resulting in Android not recreating it with a new
-                // notification when called again. So a notification is added
-                // here as a workaround, even if unnecessary on this screen.
-                notificationConfig: NotificationConfig(
-                  title: LocaleKeys.foreground_notification
-                      .title()
-                      .translate(context),
-                  text: LocaleKeys.foreground_notification
-                      .text()
-                      .translate(context),
-                ),
-                permissionsCubit: providerContext.read<PermissionsCubit>(),
-                locationServiceCubit:
-                    providerContext.read<LocationServiceCubit>(),
-              ),
-            )..listenToLocation();
-          },
-        ),
-      ],
-      child: const ActivityMapView(),
+      bottomNavigationBar: ValueListenableBuilder(
+        valueListenable: _selectedTab,
+        builder: (context, selectedTab, _) {
+          return NavigationBar(
+            labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+            destinations: destinations,
+            selectedIndex: _selectedTab.value,
+            onDestinationSelected: (value) => _selectedTab.value = value,
+            animationDuration: Duration(milliseconds: 200),
+          );
+        },
+      ),
     );
   }
 }
