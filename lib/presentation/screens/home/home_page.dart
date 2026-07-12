@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:movna/assets.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/domain/entities/notification_config.dart';
+import 'package:movna/gen/assets.gen.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/location_cubit.dart';
 import 'package:movna/presentation/blocs/location_service_cubit.dart';
@@ -20,7 +20,9 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(child: SvgThemedWidget(svgAsset: Assets.movnaLogo)),
+        title: Center(
+          child: SvgThemedWidget(svgAsset: Assets.images.movnaLogo),
+        ),
       ),
       body: SafeArea(
         bottom: false,
@@ -34,10 +36,11 @@ class HomePage extends StatelessWidget {
                   Expanded(child: const NoneWidget()),
                   Center(
                     child: ElevatedButton(
-                      onPressed: () => showModalBottomSheet<void>(
-                        context: context,
-                        builder: (context) => const StartActivityPopup(),
-                      ),
+                      onPressed:
+                          () => showModalBottomSheet<void>(
+                            context: context,
+                            builder: (context) => const StartActivityPopup(),
+                          ),
                       child: Text(
                         LocaleKeys.home.startActivity().translate(context),
                       ),
@@ -55,9 +58,7 @@ class HomePage extends StatelessWidget {
   Widget _buildMapWidget(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<LocationServiceCubit>(
-          create: (_) => injector(),
-        ),
+        BlocProvider<LocationServiceCubit>(create: (_) => injector()),
         BlocProvider<PermissionsCubit>(
           lazy: false,
           create: (_) {
@@ -82,12 +83,12 @@ class HomePage extends StatelessWidget {
                 // notification when called again. So a notification is added
                 // here as a workaround, even if unnecessary on this screen.
                 notificationConfig: NotificationConfig(
-                  title: LocaleKeys.foreground_notification
-                      .title()
-                      .translate(context),
-                  text: LocaleKeys.foreground_notification
-                      .text()
-                      .translate(context),
+                  title: LocaleKeys.foreground_notification.title().translate(
+                    context,
+                  ),
+                  text: LocaleKeys.foreground_notification.text().translate(
+                    context,
+                  ),
                 ),
                 permissionsCubit: providerContext.read<PermissionsCubit>(),
                 locationServiceCubit:
