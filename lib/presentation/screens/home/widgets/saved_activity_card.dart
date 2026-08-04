@@ -15,8 +15,9 @@ class SavedActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardTitle = activity.name != null && activity.name!.isNotEmpty
-        ? activity.name!
+    final cardTitle =
+        activity.name.isNotEmpty
+            ? activity.name
         : (activity.sport ?? Sport.other).translatable().translate(context);
     return Card(
       child: Padding(
@@ -82,7 +83,7 @@ class SavedActivityCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(child: Text(DateFormat.yMd().format(activity.startTime))),
+        Expanded(child: Text(DateFormat.yMMMMd().format(activity.startTime))),
         Expanded(child: Text(textAlign: TextAlign.center, durationString)),
         Expanded(child: Text(textAlign: TextAlign.right, distanceString)),
       ],
