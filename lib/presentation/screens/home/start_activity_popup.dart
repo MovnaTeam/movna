@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/jsons.dart';
+import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/extensions/sport_translation_extension.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
-import 'package:movna/presentation/router/router.dart';
-import 'package:movna/presentation/screens/activity/activity_screen.dart';
 
 class StartActivityPopup extends StatefulWidget {
   const StartActivityPopup({super.key});
@@ -30,12 +30,11 @@ class _StartActivityPopupState extends State<StartActivityPopup> {
               _buildSportSelectionRow(context),
               // Start button.
               ElevatedButton(
-                child: Text(
-                  LocaleKeys.home.startActivity().translate(context),
-                ),
-                onPressed: () =>
-                    ActivityRoute(ActivityScreenParams(sport: _sport))
-                        .go(context),
+                child: Text(LocaleKeys.home.startActivity().translate(context)),
+                onPressed: () {
+                  context.read<ActivityCubit>().startActivity(_sport);
+                  Navigator.of(context).pop(); // Close modal sheet
+                },
               ),
             ],
           ),
@@ -54,14 +53,13 @@ class _StartActivityPopupState extends State<StartActivityPopup> {
           _sport = value;
         });
       },
-      items: Sport.values.map<DropdownMenuItem<Sport>>((Sport value) {
-        return DropdownMenuItem(
-          value: value,
-          child: Text(
-            value.translatable().translate(context),
-          ),
-        );
-      }).toList(),
+      items:
+          Sport.values.map<DropdownMenuItem<Sport>>((Sport value) {
+            return DropdownMenuItem(
+              value: value,
+              child: Text(value.translatable().translate(context)),
+            );
+          }).toList(),
     );
   }
 

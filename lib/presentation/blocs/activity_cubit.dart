@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:movna/core/logger.dart';
 import 'package:movna/domain/entities/activity.dart';
 import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/domain/entities/timed_location.dart';
@@ -14,57 +15,35 @@ import 'package:movna/presentation/blocs/location_cubit.dart';
 
 part 'activity_cubit.freezed.dart';
 
-/// Params to configure the [ActivityCubit].
-///
-/// An optional [LocationCubit] may be given in order to push new track points
-/// to the ongoing activity.
-@freezed
-abstract class ActivityCubitParams with _$ActivityCubitParams {
-  const factory ActivityCubitParams({
-    required Sport sport,
-    required LocationCubit? locationCubit,
-  }) = _ActivityCubitParams;
-}
-
 /// A cubit that manages the state of an activity, tracking position and will in
 /// the future update the activity and manage pauses.
 ///
 /// Takes in [ActivityCubitParams].
 @injectable
 class ActivityCubit extends Cubit<ActivityState> {
-  ActivityCubit(
-    @factoryParam this._params,
-    this._saveActivity,
-  ) : super(const ActivityState.initial()) {
+  ActivityCubit(@factoryParam this._locationCubit, this._saveActivity)
+    : super(const ActivityState.idle()) {
     _initLocationCubitSubscription();
-
-    emit(
-      ActivityState.loaded(
-        activity: Activity(
-          startTime: DateTime.now(),
-          sport: _params.sport,
-        ),
-      ),
-    );
   }
 
   final SaveActivity _saveActivity;
-  final ActivityCubitParams _params;
+  final LocationCubit _locationCubit;
 
   late final StreamSubscription<LocationCubitState>? _locationCubitSubscription;
   StreamSubscription<DateTime>? _tickerSubscription;
 
   /// Listens to changes in the [LocationCubit].
   void _initLocationCubitSubscription() {
-    _locationCubitSubscription = _params.locationCubit?.stream.listen(
-      (locationCubitState) {
-        // Called when the service status changes
-        if (locationCubitState
-            case LocationCubitStateLoaded(:final currentLocation)) {
-          _onNewTimedLocation(currentLocation);
-        }
-      },
-    );
+    _locationCubitSubscription = _locationCubit.stream.listen((
+      locationCubitState,
+    ) {
+      // Called when the service status changes
+      if (locationCubitState case LocationCubitStateLoaded(
+        :final currentLocation,
+      )) {
+        _onNewTimedLocation(currentLocation);
+      }
+    });
   }
 
   /// Called when a new [timedLocation] is available.
@@ -74,60 +53,54 @@ class ActivityCubit extends Cubit<ActivityState> {
       location: timedLocation.location,
     );
     switch (state) {
-      case ActivityInitial():
-        emit(
-          ActivityState.loaded(
-            activity: Activity(
-              startTime: timedLocation.timestamp,
-              sport: _params.sport,
-              trackSegments: [
-                TrackSegment(trackPoints: [newTrackPoint]),
-              ],
-            ),
-          ),
-        );
-        break;
-      case ActivityLoaded(:final activity):
-        final newDistanceInMeters = (activity.distanceInMeters ?? 0) +
+      case ActivityOngoing(:final activity):
+        final newDistanceInMeters =
+            (activity.distanceInMeters ?? 0) +
             (activity.trackPoints.lastOrNull == null
                 ? 0
                 : timedLocation.location.gpsCoordinates.distanceToInMeters(
-                    activity.trackPoints.last.location!.gpsCoordinates,
-                  ));
-        final newMaxSpeed = activity.maxSpeedInMetersPerSecond == null
-            ? timedLocation.location.speedInMetersPerSecond
-            : max(
-                activity.maxSpeedInMetersPerSecond!,
-                timedLocation.location.speedInMetersPerSecond,
-              );
-        final newDuration =
-            timedLocation.timestamp.difference(activity.startTime);
-        final newAverageSpeedInMetersPerSecond = newDuration.inSeconds != 0
-            ? newDistanceInMeters / newDuration.inSeconds
-            : timedLocation.location.speedInMetersPerSecond;
+                  activity.trackPoints.last.location!.gpsCoordinates,
+                ));
+        final newMaxSpeed =
+            activity.maxSpeedInMetersPerSecond == null
+                ? timedLocation.location.speedInMetersPerSecond
+                : max(
+                  activity.maxSpeedInMetersPerSecond!,
+                  timedLocation.location.speedInMetersPerSecond,
+                );
+        final newDuration = timedLocation.timestamp.difference(
+          activity.startTime,
+        );
+        final newAverageSpeedInMetersPerSecond =
+            newDuration.inSeconds != 0
+                ? newDistanceInMeters / newDuration.inSeconds
+                : timedLocation.location.speedInMetersPerSecond;
 
         // Create new track segments list by adding the new track point to the
         // last track segment.
-        final newTrackSegments = activity.trackSegments.isEmpty
-            ? [
-                // Should be impossible (first location creates a new segment)
-                TrackSegment(trackPoints: [newTrackPoint]),
-              ]
-            : [
-                ...List<TrackSegment>.from(
-                  activity.trackSegments
-                      .getRange(0, activity.trackSegments.length - 1),
-                ),
-                activity.trackSegments.last.copyWith(
-                  trackPoints: [
-                    ...activity.trackSegments.last.trackPoints,
-                    newTrackPoint,
-                  ],
-                ),
-              ];
+        final newTrackSegments =
+            activity.trackSegments.isEmpty
+                ? [
+                  // Should be impossible (first location creates a new segment)
+                  TrackSegment(trackPoints: [newTrackPoint]),
+                ]
+                : [
+                  ...List<TrackSegment>.from(
+                    activity.trackSegments.getRange(
+                      0,
+                      activity.trackSegments.length - 1,
+                    ),
+                  ),
+                  activity.trackSegments.last.copyWith(
+                    trackPoints: [
+                      ...activity.trackSegments.last.trackPoints,
+                      newTrackPoint,
+                    ],
+                  ),
+                ];
 
         emit(
-          ActivityState.loaded(
+          ActivityState.ongoing(
             activity: activity.copyWith(
               distanceInMeters: newDistanceInMeters,
               maxSpeedInMetersPerSecond: newMaxSpeed,
@@ -138,20 +111,21 @@ class ActivityCubit extends Cubit<ActivityState> {
           ),
         );
         break;
-      case ActivityDone():
+      default:
         break;
     }
   }
 
-  void listenToDateTime() {
+  void _listenToDateTime() {
     _tickerSubscription?.cancel();
-    _tickerSubscription =
-        Stream.periodic(Duration(seconds: 1), (i) => DateTime.now())
-            .listen((now) {
-      if (state case ActivityLoaded(:final activity)) {
+    _tickerSubscription = Stream.periodic(
+      Duration(seconds: 1),
+      (i) => DateTime.now(),
+    ).listen((now) {
+      if (state case ActivityOngoing(:final activity)) {
         // This will need refactor when pause is implemented
         emit(
-          ActivityState.loaded(
+          ActivityState.ongoing(
             activity: activity.copyWith(
               duration: now.difference(activity.startTime),
             ),
@@ -161,19 +135,30 @@ class ActivityCubit extends Cubit<ActivityState> {
     });
   }
 
+  void startActivity(Sport sport) {
+    _listenToDateTime();
+    if (state case ActivityOngoing()) {
+      logger.w('Cannot start activity, there is already one ongoing.');
+      return;
+    }
+    emit(
+      ActivityState.ongoing(
+        activity: Activity(startTime: DateTime.now(), sport: sport),
+      ),
+    );
+  }
+
   void stopActivity() {
     _closeSubscriptions();
-    if (state case ActivityLoaded(:final activity)) {
+    if (state case ActivityOngoing(:final activity)) {
       emit(
-        ActivityState.loaded(
-          activity: activity.copyWith(
-            stopTime: DateTime.now(),
-          ),
+        ActivityState.ongoing(
+          activity: activity.copyWith(stopTime: DateTime.now()),
         ),
       );
       _saveActivity(state.activity!);
     }
-    emit(ActivityState.done());
+    emit(ActivityState.idle());
   }
 
   Future<void> _closeSubscriptions() async {
@@ -192,17 +177,16 @@ class ActivityCubit extends Cubit<ActivityState> {
 sealed class ActivityState with _$ActivityState {
   const ActivityState._();
 
-  const factory ActivityState.loaded({
-    required Activity activity,
-  }) = ActivityLoaded;
+  const factory ActivityState.ongoing({required Activity activity}) =
+      ActivityOngoing;
 
-  const factory ActivityState.initial() = ActivityInitial;
+  const factory ActivityState.idle() = ActivityIdle;
 
   const factory ActivityState.done() = ActivityDone;
 
   Activity? get activity {
     return switch (this) {
-      ActivityLoaded(:final activity) => activity,
+      ActivityOngoing(:final activity) => activity,
       _ => null,
     };
   }

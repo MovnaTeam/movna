@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:movna/gen/assets.gen.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
+import 'package:movna/presentation/screens/activity/activity_screen.dart';
 import 'package:movna/presentation/screens/common/widgets/slide_indexed_stack.dart';
 import 'package:movna/presentation/screens/common/widgets/svg_themed_widget.dart';
-import 'package:movna/presentation/screens/home/home_activity_screen.dart';
 import 'package:movna/presentation/screens/home/home_statistics_screen.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
       ),
     ];
 
-    final tabs = [HomeActivityScreen(), StatisticsScreen()];
+    final tabs = [ActivityScreen(), StatisticsScreen()];
 
     return Scaffold(
       appBar: AppBar(
