@@ -12,6 +12,7 @@ const baseDriftDirectory = Named('driftDirectory');
 abstract class DriftModule {
   /// Factory method that creates an [Drift] instance from the [driftDirectory]
   @baseDrift
+  @lazySingleton
   AppDriftDatabase getBaseDriftInstance(
     @baseDriftDirectory Directory driftDirectory,
   ) {
