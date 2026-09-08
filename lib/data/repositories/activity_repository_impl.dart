@@ -47,4 +47,15 @@ class ActivityRepositoryImpl
       return const Fault.entityNotSourced().toFailure();
     }
   }
+
+  @override
+  Future<ResultDart<Activity, Fault>> getActivity(String activityUuid) async {
+    try {
+      final activity = await _source.getActivity(activityUuid);
+      if (activity == null) return const Fault.notFound().toFailure();
+      return _activityAdapter.modelToEntity(activity).toSuccess();
+    } catch (e) {
+      return const Fault.entityNotSourced().toFailure();
+    }
+  }
 }

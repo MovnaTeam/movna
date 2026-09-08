@@ -11,4 +11,6 @@ abstract class ActivityRepository {
 
   /// Get all activities stored on the device.
   Future<ResultDart<List<Activity>, Fault>> getActivities();
+
+  Future<ResultDart<Activity, Fault>> getActivity(String activityUuid);
 }

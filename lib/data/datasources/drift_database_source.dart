@@ -28,4 +28,10 @@ class DriftDataBaseSource {
           ..where((e) => e.id.equals(id)))
         .go();
   }
+
+  /// Returns requested activity from database, if it exists.
+  Future<ActivityDriftModel?> getActivity(String id) {
+    return (_database.select(_database.activityDriftModels)
+      ..where((e) => e.id.equals(id))).getSingleOrNull();
+  }
 }
