@@ -8,7 +8,7 @@ import 'package:movna/presentation/blocs/location_cubit.dart';
 import 'package:movna/presentation/blocs/location_service_cubit.dart';
 import 'package:movna/presentation/blocs/permissions_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
-import 'package:movna/presentation/screens/activity/activity_screen_content.dart';
+import 'package:movna/presentation/screens/common/activity_screen_content.dart';
 
 
 /// The screen displaying the current activity.

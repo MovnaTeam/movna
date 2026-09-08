@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/jsons.dart';
 import 'package:movna/presentation/blocs/activity_cubit.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
-import 'package:movna/presentation/screens/activity/views/activity_real_time_stats_view.dart';
 import 'package:movna/presentation/screens/common/views/alerts/alerts_view.dart';
 import 'package:movna/presentation/screens/common/views/map/activity_map_view.dart';
 import 'package:movna/presentation/screens/common/widgets/none_widget.dart';
 import 'package:movna/presentation/screens/home/start_activity_popup.dart';
+import 'package:movna/presentation/screens/home/widgets/activity_real_time_stats_view.dart';
 
 /// Displays the content of the activity screen.
 ///
