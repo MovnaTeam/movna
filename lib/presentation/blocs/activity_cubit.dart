@@ -10,6 +10,8 @@ import 'package:movna/domain/entities/sport.dart';
 import 'package:movna/domain/entities/timed_location.dart';
 import 'package:movna/domain/entities/track_point.dart';
 import 'package:movna/domain/entities/track_segment.dart';
+import 'package:movna/domain/faults.dart';
+import 'package:movna/domain/usecases/get_activity.dart';
 import 'package:movna/domain/usecases/save_activity.dart';
 import 'package:movna/presentation/blocs/location_cubit.dart';
 
@@ -21,11 +23,16 @@ part 'activity_cubit.freezed.dart';
 /// Takes in [ActivityCubitParams].
 @injectable
 class ActivityCubit extends Cubit<ActivityState> {
-  ActivityCubit(@factoryParam this._locationCubit, this._saveActivity)
+  ActivityCubit(
+    @factoryParam this._locationCubit,
+    this._saveActivity,
+    this._getActivity,
+  )
     : super(const ActivityState.idle()) {
     _initLocationCubitSubscription();
   }
 
+  final GetActivity _getActivity;
   final SaveActivity _saveActivity;
   final LocationCubit _locationCubit;
 
@@ -161,6 +168,15 @@ class ActivityCubit extends Cubit<ActivityState> {
     emit(ActivityState.idle());
   }
 
+  void loadDone(String activityId) {
+    _getActivity(activityId).then(
+      (res) => res.fold(
+        (activity) => emit(ActivityState.done(activity: activity)),
+        (fault) => emit(ActivityState.loadError(fault: fault)),
+      ),
+    );
+  }
+
   Future<void> _closeSubscriptions() async {
     await _locationCubitSubscription?.cancel();
     await _tickerSubscription?.cancel();
@@ -182,11 +198,14 @@ sealed class ActivityState with _$ActivityState {
 
   const factory ActivityState.idle() = ActivityIdle;
 
-  const factory ActivityState.done() = ActivityDone;
+  const factory ActivityState.done({required Activity activity}) = ActivityDone;
+  const factory ActivityState.loadError({required Fault fault}) =
+      ActivityLoadError;
 
   Activity? get activity {
     return switch (this) {
       ActivityOngoing(:final activity) => activity,
+      ActivityDone(:final activity) => activity,
       _ => null,
     };
   }

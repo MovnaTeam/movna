@@ -6,6 +6,7 @@ import 'package:movna/jsons.dart';
 import 'package:movna/presentation/extensions/sport_icon_extension.dart';
 import 'package:movna/presentation/extensions/sport_translation_extension.dart';
 import 'package:movna/presentation/locale/locales_helper.dart';
+import 'package:movna/presentation/router/router.dart';
 
 /// Widget that represents essential information on a [Activity], to be
 /// displayed in a list.
@@ -19,39 +20,42 @@ class SavedActivityCard extends StatelessWidget {
         activity.name.isNotEmpty
             ? activity.name
         : (activity.sport ?? Sport.other).translatable().translate(context);
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 4, right: 12),
-                child: Icon(
-                  activity.sport?.toIconData() ?? Icons.question_mark,
+    return InkWell(
+      onTap: () => PastActivityRoute(id: activity.id).go(context),
+      child: Card(
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4, right: 12),
+                  child: Icon(
+                    activity.sport?.toIconData() ?? Icons.question_mark,
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      style: DefaultTextStyle.of(context).style.apply(
-                            fontSizeFactor: 1.2,
-                            fontWeightDelta: 2,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                      cardTitle,
+              Expanded(
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        style: DefaultTextStyle.of(context).style.apply(
+                          fontSizeFactor: 1.2,
+                          fontWeightDelta: 2,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        cardTitle,
+                      ),
                     ),
-                  ),
-                  _buildStatsRow(context),
-                ],
+                    _buildStatsRow(context),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
